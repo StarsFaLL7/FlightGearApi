@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using FlightGearApi.DTO;
 using FlightGearApi.Enums;
+using FlightGearApi.records;
 using FlightGearApi.UtilityClasses;
 
 namespace FlightGearApi.FlightGearCore;
@@ -10,15 +12,16 @@ namespace FlightGearApi.FlightGearCore;
 /// </summary>
 public class IoManager
 {
-    public Dictionary<IoType, string> XmlFilenames { get; } = new Dictionary<IoType, string>()
+    private Dictionary<IoType, string> XmlFilenames { get; } = new Dictionary<IoType, string>()
     {
         { IoType.Input, "fg-input" },
         { IoType.Output, "fg-output" }
     };
-    public List<FlightProperties> InputPropertiesList { get; } = new ();
-    public List<FlightProperties> OutputPropertiesList { get; } = new ();
 
-    public string GenerateXmlInputFileContent()
+    private List<FlightPropertyInfo> InputPropertiesList { get; } = new ();
+    private List<FlightPropertyInfo> OutputPropertiesList { get; } = new ();
+
+    private string GenerateXmlInputFileContent()
     {
         var builder = new StringBuilder();
         builder.Append(@"<?xml version=""1.0""?>
@@ -27,22 +30,21 @@ public class IoManager
     <input>
         <binary_mode>true</binary_mode>
         <byte_order>network</byte_order>
+
 ");
         
         foreach (var inProperty in InputPropertiesList)
         {
-            var info = FlightPropertiesInfo.Properties[inProperty];
-            builder.Append($@"      <chunk>
-            <name>{info.Name}</name>
-            <type>{info.TypeName}</type>
-            <node>{info.Path}</node>
+            builder.Append($@"        <chunk>
+            <name>{inProperty.Name}</name>
+            <type>{inProperty.TypeName}</type>
+            <node>{inProperty.Path}</node>
         </chunk>
 
 ");
         }
         
-        builder.Append(@"
-    </input>
+        builder.Append(@"    </input>
 </generic>
 </PropertyList>
 ");
@@ -50,7 +52,7 @@ public class IoManager
         return builder.ToString();
     }
     
-    public string GenerateXmlOutputFileContent()
+    private string GenerateXmlOutputFileContent()
     {
         var builder = new StringBuilder();
         builder.Append(@"<?xml version=""1.0""?>
@@ -60,16 +62,16 @@ public class IoManager
         <line_separator>newline</line_separator>
         <var_separator>newline</var_separator>
         <binary_mode>false</binary_mode>
+
 ");
         
-        foreach (var inProperty in OutputPropertiesList)
+        foreach (var outProperty in OutputPropertiesList)
         {
-            var info = FlightPropertiesInfo.Properties[inProperty];
-            builder.Append($@"      <chunk>
-            <name>{info.Name}</name>
-            <type>{info.TypeName}</type>
-            <node>{info.Path}</node>
-            <format>{info.Name}={info.FormatValue}</format>
+            builder.Append($@"        <chunk>
+            <name>{outProperty.Name}</name>
+            <type>{outProperty.TypeName}</type>
+            <node>{outProperty.Path}</node>
+            <format>{outProperty.FormatValue}</format>
         </chunk>
 
 ");
@@ -83,43 +85,105 @@ public class IoManager
         return builder.ToString();
     }
 
-    public void AddProperty(IoType type, FlightProperties property)
+    public bool AddProperty(IoType type, string path, string name, string typeName)
     {
         var list = type == IoType.Input ? InputPropertiesList : OutputPropertiesList;
-        if (!list.Contains(property))
+        var newProperty = new FlightPropertyInfo(path, name, ParseType(typeName), typeName, GenerateFormatValue(name, typeName));
+        if (!list.Contains(newProperty))
         {
-            list.Add(property);
+            list.Add(newProperty);
+            return true;
         }
-    }
 
-    public void AddProperty(IoType type, string path, string name, string typeName, string formatValue)
-    {
-        // TODO
+        return false;
     }
     
-    public void TryRemoveProperty(IoType type, string name)
-    {
-        // TODO
-    }
-
-    public void TryRemoveProperty(IoType type, FlightProperties property)
+    public bool TryRemoveProperty(IoType type, string name)
     {
         var list = type == IoType.Input ? InputPropertiesList : OutputPropertiesList;
-        if (list.Contains(property))
+        var selectedProperty = list.FirstOrDefault(p => p.Name == name);
+        if (selectedProperty != default)
         {
-            list.Remove(property);
+            list.Remove(selectedProperty);
+            return true;
         }
+
+        return false;
+    }
+
+    public FlightPropertiesResponse GetAllIoParameters()
+    {
+        var result = new FlightPropertiesResponse()
+        {
+            InputProperties = InputPropertiesList.Select(p => p.Name).ToList(),
+            OutputProperties = OutputPropertiesList.Select(p => p.Name).ToList()
+        };
+        
+        return result;
     }
     
-    public string SaveOutputXmlFile()
+    public string SaveOutputXmlFile(string pathToProtocolFolder)
     {
-        // TODO
-        return XmlFilenames[IoType.Output];
+        var path = Path.Combine(pathToProtocolFolder, XmlFilenames[IoType.Output] + ".xml");
+        try
+        {
+            var f = File.Create(path);
+            var content = GenerateXmlOutputFileContent();
+            var bytes = Encoding.UTF8.GetBytes(content);
+            f.Write(bytes);
+            f.Close();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        return path;
     }
     
-    public string SaveInputXmlFile()
+    public string SaveInputXmlFile(string pathToProtocolFolder)
     {
-        // TODO
-        return XmlFilenames[IoType.Input];
+        var path = Path.Combine(pathToProtocolFolder, XmlFilenames[IoType.Input] + ".xml");
+        try
+        {
+            var f = File.Create(path);
+            var content = GenerateXmlInputFileContent();
+            var bytes = Encoding.UTF8.GetBytes(content);
+            f.Write(bytes);
+            f.Close();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        return path;
+    }
+
+    private Type ParseType(string typeString)
+    {
+        return typeString.ToLower() switch
+        {
+            "double" => typeof(double),
+            "float" => typeof(float),
+            "string" => typeof(string),
+            "int" or "integer" => typeof(int),
+            "bool" or "boolean" => typeof(bool),
+            "char" => typeof(char),
+            _ => throw new Exception("Couldn't parse the type.")
+        };
+    }
+
+    private string GenerateFormatValue(string name, string typeString)
+    {
+        return typeString.ToLower() switch
+        {
+            "double" or "float" => $"{name}=%.5f",
+            "string" => $"{name}=%s",
+            "int" or "integer" => $"{name}=%d",
+            "bool" or "boolean" => $"{name}=%d",
+            "char" => $"{name}=%c",
+            _ => throw new Exception("Couldn't parse the type.")
+        };
     }
 }

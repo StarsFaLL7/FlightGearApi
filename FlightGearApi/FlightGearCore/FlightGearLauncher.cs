@@ -10,6 +10,11 @@ namespace FlightGearApi.FlightGearCore;
 public class FlightGearLauncher
 {
     /// <summary>
+    /// Конфигурация из appsettings.json (Оттуда можно взять путь к FlightGear)
+    /// </summary>
+    private IConfiguration _configuration { get; }
+    
+    /// <summary>
     /// Путь к корневой папке FlightGear
     /// </summary>
     public string FlightGearPath { get; }
@@ -29,10 +34,10 @@ public class FlightGearLauncher
     /// <remarks>Решил отделить, но можно поменять вариант реализации</remarks>
     public Dictionary<int, GenericConnectionInfo> GenericConnectionsList = new ();
     
-    public FlightGearLauncher(IoManager ioManager, string flightGearPath)
+    public FlightGearLauncher(IoManager ioManager, IConfiguration configuration)
     {
         IoManager = ioManager;
-        FlightGearPath = flightGearPath;
+        _configuration = configuration;
         
         // Для тестирования
         LaunchSettings["aircraft"] = "c172p";
