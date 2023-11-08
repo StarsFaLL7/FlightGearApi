@@ -25,21 +25,21 @@ public class LaunchController : Controller
         ioManager.SaveInputXmlFile(path);
         ioManager.SaveOutputXmlFile(path);
         
-        return Ok(ioManager.GetAllIoParameters());
+        return Ok(ioManager.GetAllIoParametersAsync());
     }
     
     [HttpGet("get-input-properties")]
     public async Task<IActionResult> GetInputProperties([FromServices] IoManager ioManager)
     {
-        var result = ioManager.GetAllIoParameters().InputProperties;
-        return Ok(result);
+        var result = await ioManager.GetAllIoParametersAsync();
+        return Ok(result.InputProperties);
     }
     
     [HttpGet("get-output-properties")]
     public async Task<IActionResult> GetOutputProperties([FromServices] IoManager ioManager)
     {
-        var result = ioManager.GetAllIoParameters().OutputProperties;
-        return Ok(result);
+        var result = await ioManager.GetAllIoParametersAsync();
+        return Ok(result.OutputProperties);
     }
     
     [HttpPost("add-flight-property")]
@@ -47,7 +47,7 @@ public class LaunchController : Controller
     {
         if (ioManager.AddProperty(dto.IoType, dto.Path, dto.Name, dto.TypeName))
         {
-            var result = ioManager.GetAllIoParameters();
+            var result = ioManager.GetAllIoParametersAsync();
             return Ok(result);
         }
         return BadRequest("This property is already in the list.");
@@ -58,7 +58,7 @@ public class LaunchController : Controller
     {
         if (ioManager.TryRemoveProperty(dto.IoType, dto.Name))
         {
-            var result = ioManager.GetAllIoParameters();
+            var result = await ioManager.GetAllIoParametersAsync();
             return Ok(result);
         }
         return BadRequest("There is no property with the given name in the list.");

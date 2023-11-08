@@ -111,7 +111,7 @@ public class IoManager
         return false;
     }
 
-    public FlightPropertiesResponse GetAllIoParameters()
+    public async Task<FlightPropertiesResponse> GetAllIoParametersAsync()
     {
         var result = new FlightPropertiesResponse()
         {
