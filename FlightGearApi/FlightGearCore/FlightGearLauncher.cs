@@ -1,5 +1,6 @@
 ﻿using FlightGearApi.Enums;
 using FlightGearApi.records;
+using System.Diagnostics;
 
 namespace FlightGearApi.FlightGearCore;
 
@@ -9,8 +10,9 @@ namespace FlightGearApi.FlightGearCore;
 /// </summary>
 public class FlightGearLauncher
 {
+    private Process flightGearProcess;
     /// <summary>
-    /// Конфигурация из appsettings.json (Оттуда можно взять путь к FlightGear)
+    /// Конфигурация из appsettings.json
     /// </summary>
     private IConfiguration _configuration { get; }
     
@@ -18,6 +20,8 @@ public class FlightGearLauncher
     /// Путь к корневой папке FlightGear
     /// </summary>
     public string FlightGearPath { get; }
+    
+    public string FlightGearExectuablePath { get; }
     
     public bool IsRunning { get; private set; }
     public IoManager IoManager { get; }
@@ -38,7 +42,9 @@ public class FlightGearLauncher
     {
         IoManager = ioManager;
         _configuration = configuration;
-        
+        FlightGearExectuablePath = Path.Combine(configuration.GetSection("FlightGear:Path").Value,
+                                   configuration.GetSection("FlightGear:BinarySubPath").Value,
+                                   configuration.GetSection("FlightGear:ExecutableFileName").Value + ".exe");
         // Для тестирования
         LaunchSettings["aircraft"] = "c172p";
         LaunchSettings["disable-clouds"] = null;
@@ -51,14 +57,27 @@ public class FlightGearLauncher
 
     public void LaunchSimulation()
     {
-        // TODO: 1. Запуск Flight Gear
+        flightGearProcess = new Process();
+        
+        // Перемнная окружения, необходимая, для запуска FlightGear
+        flightGearProcess.StartInfo.EnvironmentVariables["FG_ROOT"] = Path.Combine(
+            $"{_configuration.GetSection("FlightGear:Path").Value}", "data");
+        
+        flightGearProcess.StartInfo.FileName = FlightGearExectuablePath; // путь к исполняемому файлу FlightGear
+        flightGearProcess.Start(); // запуск FlightGear без параметров
+        
+        // TODO: Добавить проверку, чтобы нельзя было запустить сразу несколько симуляций, потому что у нас только 1 объект процесса
         // TODO: 2. Запуск с параметрами
         // TODO: 3. Запуск с параметрами GenericConnectionInfo
     }
 
     public void ExitSimulation()
     {
-        // TODO: Досрочный выход из Flight Gear
+        if (flightGearProcess != null && !flightGearProcess.HasExited)
+        {
+            flightGearProcess.Kill(); // завершение процесса
+            flightGearProcess.Dispose(); // очистка ресурсов
+        }
     }
 
     public string GenerateParameterGenericConnection(GenericConnectionInfo connectionInfo)

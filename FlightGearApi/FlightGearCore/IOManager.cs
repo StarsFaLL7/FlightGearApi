@@ -12,6 +12,10 @@ namespace FlightGearApi.FlightGearCore;
 /// </summary>
 public class IoManager
 {
+    private IConfiguration _configuration { get; }
+    
+    private string _pathToProtocolFolder { get; }
+    
     private Dictionary<IoType, string> XmlFilenames { get; } = new Dictionary<IoType, string>()
     {
         { IoType.Input, "fg-input" },
@@ -20,6 +24,14 @@ public class IoManager
 
     private List<FlightPropertyInfo> InputPropertiesList { get; } = new ();
     private List<FlightPropertyInfo> OutputPropertiesList { get; } = new ();
+    
+    public IoManager(IConfiguration configuration)
+    {
+        _configuration = configuration;
+        _pathToProtocolFolder = Path.Combine(
+            _configuration.GetSection("FlightGear:Path").Value,
+            _configuration.GetSection("FlightGear:ProtocolSubPath").Value);
+    }
 
     private string GenerateXmlInputFileContent()
     {
@@ -122,9 +134,9 @@ public class IoManager
         return result;
     }
     
-    public string SaveOutputXmlFile(string pathToProtocolFolder)
+    public void SaveOutputXmlFile()
     {
-        var path = Path.Combine(pathToProtocolFolder, XmlFilenames[IoType.Output] + ".xml");
+        var path = Path.Combine(_pathToProtocolFolder, XmlFilenames[IoType.Output] + ".xml");
         try
         {
             var f = File.Create(path);
@@ -138,12 +150,11 @@ public class IoManager
             Console.WriteLine(e);
             throw;
         }
-        return path;
     }
     
-    public string SaveInputXmlFile(string pathToProtocolFolder)
+    public void SaveInputXmlFile()
     {
-        var path = Path.Combine(pathToProtocolFolder, XmlFilenames[IoType.Input] + ".xml");
+        var path = Path.Combine(_pathToProtocolFolder, XmlFilenames[IoType.Input] + ".xml");
         try
         {
             var f = File.Create(path);
@@ -157,7 +168,6 @@ public class IoManager
             Console.WriteLine(e);
             throw;
         }
-        return path;
     }
 
     private Type ParseType(string typeString)

@@ -1,7 +1,5 @@
 ﻿using FlightGearApi.DTO;
-using FlightGearApi.Enums;
 using FlightGearApi.FlightGearCore;
-using FlightGearApi.UtilityClasses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightGearApi.Controllers;
@@ -20,10 +18,8 @@ public class LaunchController : Controller
     [ProducesResponseType(typeof(FlightPropertiesResponse), 200)]
     public async Task<IActionResult> SaveXmlFiles([FromServices] IoManager ioManager)
     {
-        var path = Path.Combine(_configuration.GetSection("FlightGear:Path").Value,
-            _configuration.GetSection("FlightGear:ProtocolSubPath").Value);
-        ioManager.SaveInputXmlFile(path);
-        ioManager.SaveOutputXmlFile(path);
+        ioManager.SaveInputXmlFile();
+        ioManager.SaveOutputXmlFile();
         
         return Ok(ioManager.GetAllIoParametersAsync());
     }
@@ -82,7 +78,6 @@ public class LaunchController : Controller
     [HttpPost("launch-simulation")]
     public async Task<IActionResult> LaunchSimulation([FromServices] FlightGearLauncher launcher)
     {
-        // TODO
         launcher.LaunchSimulation();
         return Ok();
     }
@@ -90,7 +85,6 @@ public class LaunchController : Controller
     [HttpPost("exit-simulation")]
     public async Task<IActionResult> ExitSimulation([FromServices] FlightGearLauncher launcher)
     {
-        // TODO
         launcher.ExitSimulation();
         return Ok();
     }
