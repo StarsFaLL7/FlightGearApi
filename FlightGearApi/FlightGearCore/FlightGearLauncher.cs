@@ -29,14 +29,14 @@ public class FlightGearLauncher
     /// <summary>
     /// Параметры запуска для --key=value, но если value == null, то --key
     /// </summary>
-    public Dictionary<string, object?> LaunchSettings { get; } = new Dictionary<string, object?>();
+    public Dictionary<string, string?> LaunchArguments { get; } = new Dictionary<string, string?>();
 
     /// <summary>
     /// Список параметров для открытия соединений по UDP.
     /// Ключ = Port, значение = GenericConnectionInfo
     /// </summary>
     /// <remarks>Решил отделить, но можно поменять вариант реализации</remarks>
-    public Dictionary<int, GenericConnectionInfo> GenericConnectionsList = new ();
+    public Dictionary<int, GenericConnectionInfo> GenericConnectionsDict = new ();
     
     public FlightGearLauncher(IoManager ioManager, IConfiguration configuration)
     {
@@ -46,13 +46,13 @@ public class FlightGearLauncher
                                    configuration.GetSection("FlightGear:BinarySubPath").Value,
                                    configuration.GetSection("FlightGear:ExecutableFileName").Value + ".exe");
         // Для тестирования
-        LaunchSettings["aircraft"] = "c172p";
-        LaunchSettings["disable-clouds"] = null;
-        LaunchSettings["disable-sound"] = null;
-        LaunchSettings["in-air"] = null;
-        LaunchSettings["enable-freeze"] = null;
-        LaunchSettings["airport"] = "KSFO";
-        LaunchSettings["altitude"] = 7224;
+        LaunchArguments["aircraft"] = "c172p";
+        LaunchArguments["disable-clouds"] = null;
+        LaunchArguments["disable-sound"] = null;
+        LaunchArguments["in-air"] = null;
+        LaunchArguments["enable-freeze"] = null;
+        LaunchArguments["airport"] = "KSFO";
+        LaunchArguments["altitude"] = "7224";
     }
 
     public void LaunchSimulation()
@@ -67,8 +67,10 @@ public class FlightGearLauncher
         flightGearProcess.Start(); // запуск FlightGear без параметров
         
         // TODO: Добавить проверку, чтобы нельзя было запустить сразу несколько симуляций, потому что у нас только 1 объект процесса
-        // TODO: 2. Запуск с параметрами
-        // TODO: 3. Запуск с параметрами GenericConnectionInfo
+        
+        // TODO: 2. Запуск с параметрами GenericConnectionInfo
+        
+        // TODO: 3. Запуск с другими параметрами
     }
 
     public void ExitSimulation()
@@ -82,28 +84,31 @@ public class FlightGearLauncher
 
     public string GenerateParameterGenericConnection(GenericConnectionInfo connectionInfo)
     {
-        // TODO: генерация параметра открытия соединения по UDP
-        return "fgfs";
+        // TODO: генерация параметра открытия соединения по UDP (строка)
+        return "--generic=socket,in,1,127.0.0.1,6788,udp,testinput";
     }
 
-    public void AddLaunchParameter(string name, string? value = null)
+    public bool TryAddLaunchParameter(string name, string? value = null)
     {
         // TODO: Добавление параметра запуска
+        return false;
     }
     
-    public void RemoveLaunchParameter(string name)
+    public bool TryRemoveLaunchParameter(string name)
     {
         // TODO: Удаления параметра запуска
+        return false;
     }
     
-    public void ChangeLaunchParameter(string name, string newValue)
+    public bool TryChangeLaunchParameter(string name, string newValue)
     {
         // TODO: Изменение значения параметра запуска
+        return false;
     }
 
     public void AddGenericConnection(IoType ioType, int port, int refreshesPerSecond, string protocolFileName, string address="127.0.0.1")
     {
-        // TODO: Добавление UDP соединения
+        // TODO: Добавление UDP соединения в словарь GenericConnectionsDict
     }
     
 }
