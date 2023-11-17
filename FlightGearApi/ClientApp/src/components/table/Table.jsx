@@ -1,17 +1,16 @@
 import plus from '../../assets/img/plus.png'
 import minus from '../../assets/img/minus.png'
 import './Table.module.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function Table() {
     const [dataParams, setDataParams] = useState([]);
-    const [isMinus, setIsMinus] = useState(false)
-
+    const [isMinus, setIsMinus] = useState(false);
     const toggleSrc = () => {
         setIsMinus(!isMinus)
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         fetch('').then(data => console.log(data)).then(d => setDataParams(d))
     }, [])
 
@@ -29,12 +28,6 @@ function Table() {
             count: '138262',
         }
     ]
-
-    const params = {
-        name: 'Тангаж',
-        count: '13862'
-
-    }
     
     return <table>
         <thead>
@@ -43,8 +36,9 @@ function Table() {
                 </tr>
             </thead>
             <tbody>
-            {paramsArray.map((par) => <tr><td><button onClick={toggleSrc}>{par.name}{par.count}{isMinus ? (<img src={plus} width="20" height="20" alt="Плюс" />) : <></>}</button></td></tr>)
+            {paramsArray.map((par) => <tr><td><button onClick={toggleSrc}>{par.name}{par.count}{isMinus ? (<img src={plus} width="20" height="20" alt="Плюс" />) : (<img src={minus} width="20" height="20" alt="Минус" />)}</button></td></tr>)
             }
+            {dataParams}
                 {/* <tr><td onClick={()=>{bool?setBool(false):setBool(true)}}><button>Скорость севера (94533)<img src={bool ? plus:minus} width="20" height="20" alt={bool ? "Плюс":"Минус"} /></button></td></tr>
                 <tr><td onClick={()=>{bool?setBool(false):setBool(true)}}><button>Скорость ветра (32326)<img src={bool ? plus:minus} width="20" height="20" alt={bool ? "Плюс":"Минус"} /></button></td></tr>
                 <tr><td onClick={()=>{bool?setBool(false):setBool(true)}}><button>Скорость Восток (11036)<img src={bool ? plus:minus} width="20" height="20" alt={bool ? "Плюс":"Минус"} /></button></td></tr>

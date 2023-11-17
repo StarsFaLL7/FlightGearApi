@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import Table from './components/table/Table';
+import ChartComponent from './components/chart/chart';
 
 function App() {
   return <>
@@ -23,7 +24,7 @@ function App() {
         <Table />
       </aside>
       <main>
-
+        <ChartComponent />
       </main>
     </div>
   </>;
