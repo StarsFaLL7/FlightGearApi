@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightGearApi", "FlightGearApi\FlightGearApi.csproj", "{EF80E510-649D-46C7-B990-FD585FDD2A52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightGearApi", "FlightGearApi\FlightGearApi.csproj", "{59C75115-E867-4CFC-9CC0-7A5F0DF5E2F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EF80E510-649D-46C7-B990-FD585FDD2A52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF80E510-649D-46C7-B990-FD585FDD2A52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF80E510-649D-46C7-B990-FD585FDD2A52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF80E510-649D-46C7-B990-FD585FDD2A52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59C75115-E867-4CFC-9CC0-7A5F0DF5E2F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59C75115-E867-4CFC-9CC0-7A5F0DF5E2F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59C75115-E867-4CFC-9CC0-7A5F0DF5E2F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59C75115-E867-4CFC-9CC0-7A5F0DF5E2F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -2,6 +2,21 @@
   "version": 3,
   "targets": {
     "net7.0": {
+      "Microsoft.AspNetCore.SpaProxy/7.0.11": {
+        "type": "package",
+        "compile": {
+          "lib/net7.0/Microsoft.AspNetCore.SpaProxy.dll": {}
+        },
+        "runtime": {
+          "lib/net7.0/Microsoft.AspNetCore.SpaProxy.dll": {}
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ],
+        "build": {
+          "build/Microsoft.AspNetCore.SpaProxy.targets": {}
+        }
+      },
       "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
         "type": "package",
         "build": {
@@ -92,6 +107,21 @@
     }
   },
   "libraries": {
+    "Microsoft.AspNetCore.SpaProxy/7.0.11": {
+      "sha512": "GRUIbKCrWzdB732WFWMyOpukk3j+GHcpB+VRxN2BY9uVpSpX0KCI8LbbTQ9qWn4RnhbaJz6hYsnTOlsucqqvWA==",
+      "type": "package",
+      "path": "microsoft.aspnetcore.spaproxy/7.0.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "build/Microsoft.AspNetCore.SpaProxy.targets",
+        "lib/net7.0/Microsoft.AspNetCore.SpaProxy.dll",
+        "microsoft.aspnetcore.spaproxy.7.0.11.nupkg.sha512",
+        "microsoft.aspnetcore.spaproxy.nuspec"
+      ]
+    },
     "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
       "sha512": "Ckb5EDBUNJdFWyajfXzUIMRkhf52fHZOQuuZg/oiu8y7zDCVwD0iHhew6MnThjHmevanpxL3f5ci2TtHQEN6bw==",
       "type": "package",
@@ -433,6 +463,7 @@
   },
   "projectFileDependencyGroups": {
     "net7.0": [
+      "Microsoft.AspNetCore.SpaProxy >= 7.0.11",
       "Swashbuckle.AspNetCore >= 6.5.0"
     ]
   },
@@ -443,11 +474,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi]\\FlightGearApi\\FlightGearApi.csproj",
+      "projectUniqueName": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj",
       "projectName": "FlightGearApi",
-      "projectPath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi]\\FlightGearApi\\FlightGearApi.csproj",
+      "projectPath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj",
       "packagesPath": "C:\\Users\\Григорий\\.nuget\\packages\\",
-      "outputPath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi]\\FlightGearApi\\obj\\",
+      "outputPath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -478,6 +509,10 @@
       "net7.0": {
         "targetAlias": "net7.0",
         "dependencies": {
+          "Microsoft.AspNetCore.SpaProxy": {
+            "target": "Package",
+            "version": "[7.0.11, )"
+          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[6.5.0, )"

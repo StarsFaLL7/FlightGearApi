@@ -8,10 +8,19 @@
     ".NETCoreApp,Version=v7.0": {
       "FlightGearApi/1.0.0": {
         "dependencies": {
+          "Microsoft.AspNetCore.SpaProxy": "7.0.11",
           "Swashbuckle.AspNetCore": "6.5.0"
         },
         "runtime": {
           "FlightGearApi.dll": {}
+        }
+      },
+      "Microsoft.AspNetCore.SpaProxy/7.0.11": {
+        "runtime": {
+          "lib/net7.0/Microsoft.AspNetCore.SpaProxy.dll": {
+            "assemblyVersion": "7.0.11.0",
+            "fileVersion": "7.0.1123.42502"
+          }
         }
       },
       "Microsoft.Extensions.ApiDescription.Server/6.0.5": {},
@@ -68,6 +77,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Microsoft.AspNetCore.SpaProxy/7.0.11": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GRUIbKCrWzdB732WFWMyOpukk3j+GHcpB+VRxN2BY9uVpSpX0KCI8LbbTQ9qWn4RnhbaJz6hYsnTOlsucqqvWA==",
+      "path": "microsoft.aspnetcore.spaproxy/7.0.11",
+      "hashPath": "microsoft.aspnetcore.spaproxy.7.0.11.nupkg.sha512"
     },
     "Microsoft.Extensions.ApiDescription.Server/6.0.5": {
       "type": "package",

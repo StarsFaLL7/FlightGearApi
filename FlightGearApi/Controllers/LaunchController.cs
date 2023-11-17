@@ -1,5 +1,7 @@
 ﻿using FlightGearApi.DTO;
+using FlightGearApi.Enums;
 using FlightGearApi.FlightGearCore;
+using FlightGearApi.records;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightGearApi.Controllers;
@@ -66,6 +68,14 @@ public class LaunchController : Controller
         // TODO
         // var result = launchManager.AddGenericConnectionParameter(connectionRequest);
         return Ok();
+    }
+    
+    [HttpPost("start-listen-test")]
+    public async Task<IActionResult> StartListen([FromServices] ConnectionListener listener, [FromBody] GenericConnectionRequest connectionRequest)
+    {
+        listener.StartListen(new GenericConnectionInfo(IoType.Output,6789,1,"ds"), "test1");
+        
+        return Ok(await listener.GetCurrentValuesAsync("test1"));
     }
         
     [HttpGet("config")]
