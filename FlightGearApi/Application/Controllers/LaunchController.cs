@@ -23,7 +23,6 @@ public class LaunchController : Controller
     /// Сохранить все файлы XML (обязательно перед запуском)
     /// </summary>
     [HttpPost("save-protocol-files")]
-    [ProducesResponseType(typeof(FlightPropertiesResponse), 200)]
     public async Task<IActionResult> SaveXmlFiles([FromServices] IoManager ioManager)
     {
         ioManager.SaveInputXmlFile();
