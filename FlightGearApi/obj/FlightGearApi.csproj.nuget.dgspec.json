@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj": {}
+    "E:\\[Проект 2023] Flight Gear\\Codes\\FlightGearApi\\FlightGearApi\\FlightGearApi\\FlightGearApi.csproj": {}
   },
   "projects": {
-    "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj": {
+    "E:\\[Проект 2023] Flight Gear\\Codes\\FlightGearApi\\FlightGearApi\\FlightGearApi\\FlightGearApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj",
+        "projectUniqueName": "E:\\[Проект 2023] Flight Gear\\Codes\\FlightGearApi\\FlightGearApi\\FlightGearApi\\FlightGearApi.csproj",
         "projectName": "FlightGearApi",
-        "projectPath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj",
+        "projectPath": "E:\\[Проект 2023] Flight Gear\\Codes\\FlightGearApi\\FlightGearApi\\FlightGearApi\\FlightGearApi.csproj",
         "packagesPath": "C:\\Users\\Григорий\\.nuget\\packages\\",
-        "outputPath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\obj\\",
+        "outputPath": "E:\\[Проект 2023] Flight Gear\\Codes\\FlightGearApi\\FlightGearApi\\FlightGearApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

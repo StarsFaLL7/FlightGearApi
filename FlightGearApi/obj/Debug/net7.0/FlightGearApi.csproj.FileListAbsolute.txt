@@ -72,3 +72,5 @@ E:\[Проект 2023] Flight Gear\Codes\[FlightGearApi] OLD\FlightGearApi\obj\D
 E:\[Проект 2023] Flight Gear\Codes\[FlightGearApi] OLD\FlightGearApi\obj\Debug\net7.0\FlightGearApi.pdb
 E:\[Проект 2023] Flight Gear\Codes\[FlightGearApi] OLD\FlightGearApi\obj\Debug\net7.0\FlightGearApi.genruntimeconfig.cache
 E:\[Проект 2023] Flight Gear\Codes\[FlightGearApi] OLD\FlightGearApi\obj\Debug\net7.0\ref\FlightGearApi.dll
+E:\[Проект 2023] Flight Gear\Codes\FlightGearApi\FlightGearApi\FlightGearApi\bin\Debug\net7.0\FlightGearApi.xml
+E:\[Проект 2023] Flight Gear\Codes\FlightGearApi\FlightGearApi\FlightGearApi\obj\Debug\net7.0\FlightGearApi.xml

@@ -10,82 +10,154 @@ namespace FlightGearApi.Domain.FlightGearCore;
 /// </summary>
 public class FlightGearLauncher
 {
-    private Process flightGearProcess;
-    /// <summary>
-    /// Конфигурация из appsettings.json
-    /// </summary>
-    private IConfiguration _configuration { get; }
-    
-    /// <summary>
-    /// Путь к корневой папке FlightGear
-    /// </summary>
-    public string FlightGearPath { get; }
-    
-    public string FlightGearExectuablePath { get; }
-    
+    private Process? _flightGearProcess;
+
     public bool IsRunning { get; private set; }
+
+    public string RunningSessionName { get; private set; }
+    
+    private IConfiguration Configuration { get; }
+    private ConnectionListener Listener { get; }
+    
+    private string FlightGearExecutablePath { get; }
+    
     public IoManager IoManager { get; }
 
     /// <summary>
     /// Параметры запуска для --key=value, но если value == null, то --key
     /// </summary>
-    public Dictionary<string, string?> LaunchArguments { get; } = new Dictionary<string, string?>();
-
-    /// <summary>
-    /// Список параметров для открытия соединений по UDP.
-    /// Ключ = Port, значение = GenericConnectionInfo
-    /// </summary>
-    /// <remarks>Решил отделить, но можно поменять вариант реализации</remarks>
-    public Dictionary<int, GenericConnectionInfo> GenericConnectionsDict = new ();
+    private Dictionary<string, string?> LaunchArguments { get; set; } = new ();
     
-    public FlightGearLauncher(IoManager ioManager, IConfiguration configuration)
+    public FlightGearLauncher(IoManager ioManager, IConfiguration configuration, ConnectionListener listener)
     {
+        Listener = listener;
         IoManager = ioManager;
-        _configuration = configuration;
-        FlightGearExectuablePath = Path.Combine(configuration.GetSection("FlightGear:Path").Value,
+        Configuration = configuration;
+        FlightGearExecutablePath = Path.Combine(configuration.GetSection("FlightGear:Path").Value,
                                    configuration.GetSection("FlightGear:BinarySubPath").Value,
                                    configuration.GetSection("FlightGear:ExecutableFileName").Value + ".exe");
-        // Для тестирования
+        
+        Reset();
+    }
+
+    public async Task<bool> TryLaunchSimulation(string sessionName)
+    {
+        if (_flightGearProcess != null && _flightGearProcess.HasExited == false)
+        {
+            return false;
+        }
+
+        try
+        {
+            IoManager.SaveXmlFiles();
+            Listener.Reset();
+            
+            _flightGearProcess = new Process();
+        
+            _flightGearProcess.StartInfo.EnvironmentVariables["FG_ROOT"] = Path.Combine(
+                $"{Configuration.GetSection("FlightGear:Path").Value}", "data");
+        
+            _flightGearProcess.StartInfo.FileName = FlightGearExecutablePath; // путь к исполняемому файлу FlightGear
+
+            _flightGearProcess.StartInfo.Arguments += GenerateAllParametersString();
+        
+        
+            _flightGearProcess.StartInfo.RedirectStandardOutput = true;
+            _flightGearProcess.StartInfo.RedirectStandardError = true;
+            _flightGearProcess.StartInfo.UseShellExecute = false;
+        
+        
+            _flightGearProcess.Start();
+        
+            _flightGearProcess.BeginOutputReadLine();
+            _flightGearProcess.BeginErrorReadLine();
+            _flightGearProcess.OutputDataReceived += (sender, e) =>
+            {
+                Console.WriteLine(e.Data);
+            
+                if (e.Data != null && e.Data.Contains("Run Count"))
+                {
+                    IsRunning = true;
+                
+                    Console.WriteLine("FlightGear initialization complete.");
+                }
+            };
+        
+            // Ожидание инициализации
+            var timeout = 50000;
+            var time = 0;
+            while (!IsRunning)
+            {
+                await Task.Delay(100);
+                time += 100;
+                if (time > timeout)
+                {
+                    _flightGearProcess = null;
+                    Listener.TryStopListen();
+                    IsRunning = false;
+                    throw new TimeoutException("Не удалось запустить Flight Gear.");
+                }
+            }
+
+            RunningSessionName = sessionName;
+            Listener.TryStartListen(sessionName);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public string GenerateAllParametersString()
+    {
+        var resultString = "";
+        foreach (var launchArgument in LaunchArguments)
+        {
+            if (launchArgument.Value == null)
+            {
+                resultString += $" --{launchArgument.Key}";
+            }
+            else
+            {
+                resultString += $" --{launchArgument.Key}={launchArgument.Value}";
+            }
+        }
+        
+        resultString += IoManager.GenerateParametersGenericConnection();
+
+        return resultString;
+    }
+
+    public bool TryExitSimulation()
+    {
+        try
+        {
+            _flightGearProcess.Kill(); // завершение процесса
+            _flightGearProcess.Dispose(); // очистка ресурсов
+            _flightGearProcess = null;
+            Listener.TryStopListen();
+            IsRunning = false;
+            return true;
+        }
+        catch (NullReferenceException e)
+        {
+            return false;
+        }
+    }
+
+    private void Reset()
+    {
+        LaunchArguments.Clear();
+        TryExitSimulation();
+        RunningSessionName = "empty";
         LaunchArguments["aircraft"] = "c172p";
         LaunchArguments["disable-clouds"] = null;
         LaunchArguments["disable-sound"] = null;
         LaunchArguments["in-air"] = null;
-        LaunchArguments["enable-freeze"] = null;
         LaunchArguments["airport"] = "KSFO";
         LaunchArguments["altitude"] = "7224";
-    }
-
-    public void LaunchSimulation()
-    {
-        flightGearProcess = new Process();
-        
-        // Перемнная окружения, необходимая, для запуска FlightGear
-        flightGearProcess.StartInfo.EnvironmentVariables["FG_ROOT"] = Path.Combine(
-            $"{_configuration.GetSection("FlightGear:Path").Value}", "data");
-        
-        flightGearProcess.StartInfo.FileName = FlightGearExectuablePath; // путь к исполняемому файлу FlightGear
-        flightGearProcess.Start(); // запуск FlightGear без параметров
-        
-        // TODO: Добавить проверку, чтобы нельзя было запустить сразу несколько симуляций, потому что у нас только 1 объект процесса
-        
-        // TODO: 2. Запуск с параметрами GenericConnectionInfo
-        
-        // TODO: 3. Запуск с другими параметрами
-    }
-
-    public void ExitSimulation()
-    {
-        if (flightGearProcess != null && !flightGearProcess.HasExited)
-        {
-            flightGearProcess.Kill(); // завершение процесса
-            flightGearProcess.Dispose(); // очистка ресурсов
-        }
-    }
-
-    public string GenerateParameterGenericConnection(GenericConnectionInfo connectionInfo)
-    {
-        // TODO: генерация параметра открытия соединения по UDP (строка)
-        return "--generic=socket,in,1,127.0.0.1,6788,udp,testinput";
     }
 
     public bool TryAddLaunchParameter(string name, string? value = null)
@@ -105,10 +177,4 @@ public class FlightGearLauncher
         // TODO: Изменение значения параметра запуска
         return false;
     }
-
-    public void AddGenericConnection(IoType ioType, int port, int refreshesPerSecond, string protocolFileName, string address="127.0.0.1")
-    {
-        // TODO: Добавление UDP соединения в словарь GenericConnectionsDict
-    }
-    
 }

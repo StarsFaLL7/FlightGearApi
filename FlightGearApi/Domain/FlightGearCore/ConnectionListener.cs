@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.Records;
 
@@ -7,66 +8,80 @@ namespace FlightGearApi.Domain.FlightGearCore;
 
 public class ConnectionListener
 {
-    private Dictionary<string, (UdpClient Client, GenericConnectionInfo ConnenctionInfo)> _listenSessions = new ();
+    private IoManager IoManager { get; }
 
-    private Dictionary<string, List<FgMessage>> _listenResults = new ();
-    
-    public void StartListen(GenericConnectionInfo connectionInfo, string name)
+    private UdpClient? _client;
+    private GenericConnectionInfo? _connectionInfo;
+
+    private readonly Dictionary<string, List<FgMessage>> _listenResults = new ();
+
+    public ConnectionListener(IoManager ioManager)
     {
-        if (connectionInfo.IoType == IoType.Input)
+        IoManager = ioManager;
+    }
+    
+    public bool TryStartListen(string sessionName)
+    {
+        if (_client != null)
         {
-            return;
+            return false;
         }
-
-        if (_listenSessions.Any(p => p.Value.ConnenctionInfo.Port == connectionInfo.Port))
-        {
-            return;
-        }
-        var udpClient = new UdpClient(connectionInfo.Port);
-        _listenSessions.Add(name, (udpClient, connectionInfo));
-        _listenResults.Add(name, new List<FgMessage>());
-        ListenAsync(name);
+        
+        _connectionInfo = IoManager.GetConnectionInfo(IoType.Output);
+        _client = new UdpClient(_connectionInfo.Port);
+        _listenResults.Add(sessionName, new List<FgMessage>());
+        ListenAsync(sessionName);
+        return true;
     }
     
     private async void ListenAsync(string name)
     {
-        var client = _listenSessions[name].Client;
         while (true)
         {
-            if (client == null)
+            if (_client == null)
             {
                 return;
             }
-            var result = await client.ReceiveAsync();
-            var data = result.Buffer;
-            var message = Encoding.UTF8.GetString(data);
 
-            // Действия
-            var dict = GenerateDictFromMessage(message);
-            _listenResults[name].Add(new FgMessage() {Date = DateTime.Now, Values = dict});
-            Console.WriteLine($"Data from FG:\n{message}");
+            try
+            {
+                var result = await _client.ReceiveAsync();
+                var data = result.Buffer;
+                var message = Encoding.UTF8.GetString(data);
+
+                // Действия
+                var dict = GenerateDictFromMessage(message);
+                _listenResults[name].Add(new FgMessage() {Date = DateTime.Now, Values = dict});
+            }
+            catch (Exception e)
+            {
+                return;
+            }
         }
     }
 
-    public void StopListen(string name)
+    public bool TryStopListen()
     {
-        if (_listenSessions.TryGetValue(name, out var info))
+        if (_client == null)
         {
-            info.Client.Dispose();
-            _listenSessions.Remove(name);
+            return false;
         }
+        _client.Dispose();
+        _client = null;
+        return true;
     }
 
     public async Task<Dictionary<string, string>> GetCurrentValuesAsync(string name)
     {
-        if (_listenSessions.TryGetValue(name, out var info))
+        if (_client == null)
         {
-            var data = await info.Client.ReceiveAsync();
-            var message = Encoding.UTF8.GetString(data.Buffer);
-            var res = GenerateDictFromMessage(message);
-            return res;
+            return new();
         }
-        return new();
+        
+        var data = await _client.ReceiveAsync();
+        var message = Encoding.UTF8.GetString(data.Buffer);
+        var res = GenerateDictFromMessage(message);
+        return res;
     }
 
     private Dictionary<string, string> GenerateDictFromMessage(string message)
@@ -82,14 +97,31 @@ public class ConnectionListener
         return result;
     }
 
-    public void SaveResultsToFile(string filename)
+    public void Reset()
     {
-        // TODO 
+        TryStopListen();
+        _listenResults.Clear();
+    }
+
+    public void SaveResultsToFile(string filename, string listenSessionName)
+    {
+        if (!File.Exists(filename))
+        {
+            File.Create(filename);
+        }
+        using (var f = new StreamWriter(filename))
+        {
+            f.Write($"Results from {_listenResults[listenSessionName][0].Date}\n");
+            foreach (var msg in _listenResults[listenSessionName])
+            {
+                f.Write($"{msg.Date};{JsonSerializer.Serialize(msg.Values)}\n");
+            }
+        }
     }
 }
 
 public class FgMessage
 {
     public DateTime Date { get; init; }
-    public Dictionary<string, string> Values { get; set; } = new ();
+    public Dictionary<string, string> Values { get; init; } = new ();
 }

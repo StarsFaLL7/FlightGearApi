@@ -9,20 +9,20 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = FlightGearApi
 build_property.RootNamespace = FlightGearApi
-build_property.ProjectDir = E:\[Проект 2023] Flight Gear\Codes\[FlightGearApi] OLD\FlightGearApi\
+build_property.ProjectDir = E:\[Проект 2023] Flight Gear\Codes\FlightGearApi\FlightGearApi\FlightGearApi\
 build_property.RazorLangVersion = 7.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = E:\[Проект 2023] Flight Gear\Codes\[FlightGearApi] OLD\FlightGearApi
+build_property.MSBuildProjectDirectory = E:\[Проект 2023] Flight Gear\Codes\FlightGearApi\FlightGearApi\FlightGearApi
 build_property._RazorSourceGeneratorDebug = 
 
-[E:/\[Проект 2023\] Flight Gear/Codes/\[FlightGearApi\] OLD/FlightGearApi/Application/Pages/Error.cshtml]
+[E:/\[Проект 2023\] Flight Gear/Codes/FlightGearApi/FlightGearApi/FlightGearApi/Application/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = 
 build_metadata.AdditionalFiles.TargetPath = QXBwbGljYXRpb25cUGFnZXNcRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/\[Проект 2023\] Flight Gear/Codes/\[FlightGearApi\] OLD/FlightGearApi/Application/Pages/_ViewImports.cshtml]
+[E:/\[Проект 2023\] Flight Gear/Codes/FlightGearApi/FlightGearApi/FlightGearApi/Application/Pages/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = 
 build_metadata.AdditionalFiles.TargetPath = QXBwbGljYXRpb25cUGFnZXNcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

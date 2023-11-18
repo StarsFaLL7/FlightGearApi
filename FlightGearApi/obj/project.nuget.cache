@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "1wcR1dgftDXDrPuO6NnaLhjnaypwq8BeC1W3ApnsbH0wl+5/hkjnFzk23qCUrSR+/JWw/cbaSz05lDQrcvHMdg==",
+  "dgSpecHash": "IY+e/YJEltRfASUWhAGYSK+2hENy0W/CtNrHVD6GaTrbWEzkyqNPL/bzX5D5zBb5WbKKMOkXfx5rm3TbP8S6hQ==",
   "success": true,
-  "projectFilePath": "E:\\[Проект 2023] Flight Gear\\Codes\\[FlightGearApi] OLD\\FlightGearApi\\FlightGearApi.csproj",
+  "projectFilePath": "E:\\[Проект 2023] Flight Gear\\Codes\\FlightGearApi\\FlightGearApi\\FlightGearApi\\FlightGearApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Григорий\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\7.0.11\\microsoft.aspnetcore.spaproxy.7.0.11.nupkg.sha512",
     "C:\\Users\\Григорий\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

@@ -20,87 +20,97 @@ public class LaunchController : Controller
     }
     
     /// <summary>
-    /// Сохранить все файлы XML (обязательно перед запуском)
+    /// Задать новое значение для кол-ва обновления данных в секунду.
     /// </summary>
-    [HttpPost("save-protocol-files")]
-    public async Task<IActionResult> SaveXmlFiles([FromServices] IoManager ioManager)
+    /// <param name="count">Новое значение</param>
+    [ProducesResponseType(typeof(double), 200)]
+    [ProducesResponseType(400)]
+    [HttpPost("flight-properties/refreshes/{count:double}")]
+    public async Task<IActionResult> SetRefreshesPerSecond([FromServices] IoManager ioManager, [FromRoute] double count)
     {
-        ioManager.SaveInputXmlFile();
-        ioManager.SaveOutputXmlFile();
-        
-        return Ok(ioManager.GetAllIoParametersAsync());
+        if (ioManager.TrySetRefreshesPerSecond(count))
+        {
+            return Ok(ioManager.ConnectionRefreshesPerSecond);
+        }
+
+        return BadRequest("Invalid value for refreshes count.");
     }
     
-    [HttpGet("get-input-properties")]
-    public async Task<IActionResult> GetInputProperties([FromServices] IoManager ioManager)
+    /// <summary>
+    /// Получить значение кол-ва обновлений данных в секунду
+    /// </summary>
+    [ProducesResponseType(typeof(double), 200)]
+    [HttpGet("flight-properties/refreshes")]
+    public async Task<IActionResult> GetRefreshesPerSecond([FromServices] IoManager ioManager)
     {
-        var result = await ioManager.GetAllIoParametersAsync();
-        return Ok(result.InputProperties);
+        return Ok(ioManager.ConnectionRefreshesPerSecond);
     }
     
-    [HttpGet("get-output-properties")]
+    /// <summary>
+    /// Получить все свойства полёта, которые будут сохраняться
+    /// </summary>
+    [ProducesResponseType(typeof(List<string>), 200)]
+    [HttpGet("flight-properties")]
     public async Task<IActionResult> GetOutputProperties([FromServices] IoManager ioManager)
     {
-        var result = await ioManager.GetAllIoParametersAsync();
+        var result = ioManager.GetAllIoPropertiesAsync();
         return Ok(result.OutputProperties);
     }
     
-    [HttpPost("add-flight-property")]
-    public async Task<IActionResult> AddFlightProperty([FromServices] IoManager ioManager, [FromBody] FlightPropertyAddRequest dto)
+    /// <summary>
+    /// Добавить параметры, которые будут сохраняться
+    /// </summary>
+    [ProducesResponseType(typeof(FlightPropertiesResponse), 200)]
+    [HttpPost("flight-properties")]
+    public async Task<IActionResult> AddFlightProperty([FromServices] IoManager ioManager, [FromBody] FlightPropertyAddRequest[] propertiesList)
     {
-        if (ioManager.AddProperty(dto.IoType, dto.Path, dto.Name, dto.TypeName))
+        foreach (var property in propertiesList)
         {
-            var result = ioManager.GetAllIoParametersAsync();
-            return Ok(result);
+            ioManager.TryAddProperty(IoType.Output, property.Path, property.Name, property.TypeName);
         }
-        return BadRequest("This property is already in the list.");
+        var result = ioManager.GetAllIoPropertiesAsync();
+        return Ok(result);
     }
     
-    [HttpPost("remove-flight-property")]
-    public async Task<IActionResult> RemoveFlightProperty([FromServices] IoManager ioManager, [FromBody] FlightPropertyRemoveRequest dto)
+    /// <summary>
+    /// Удалить параметр, который будет сохраняться
+    /// </summary>
+    [ProducesResponseType(typeof(FlightPropertiesResponse), 200)]
+    [HttpDelete("flight-properties/{name}")]
+    public async Task<IActionResult> RemoveFlightProperty([FromServices] IoManager ioManager, [FromRoute] string name)
     {
-        if (ioManager.TryRemoveProperty(dto.IoType, dto.Name))
+        if (ioManager.TryRemoveProperty(IoType.Output, name))
         {
-            var result = await ioManager.GetAllIoParametersAsync();
+            var result = ioManager.GetAllIoPropertiesAsync();
             return Ok(result);
         }
         return BadRequest("There is no property with the given name in the list.");
     }
     
-    [HttpPost("add-connection")]
-    public async Task<IActionResult> AddGenericConnection([FromServices] FlightGearLauncher launchManager, [FromBody] GenericConnectionRequest connectionRequest)
-    {
-        // TODO
-        // var result = launchManager.AddGenericConnectionParameter(connectionRequest);
-        return Ok();
-    }
-    
-    [HttpPost("start-listen-test")]
-    public async Task<IActionResult> StartListen([FromServices] ConnectionListener listener, [FromBody] GenericConnectionRequest connectionRequest)
-    {
-        listener.StartListen(new GenericConnectionInfo(IoType.Output,6789,1,"ds"), "test1");
-        
-        return Ok(await listener.GetCurrentValuesAsync("test1"));
-    }
-        
-    [HttpGet("config")]
-    public async Task<IActionResult> GetLaunchConfig([FromServices] FlightGearLauncher launchManager)
-    {
-        // TODO
-        return Ok();
-    }
-    
-    [HttpPost("launch-simulation")]
+    /// <summary>
+    /// Запустить симуляцию
+    /// </summary>
+    [HttpPost("start")]
     public async Task<IActionResult> LaunchSimulation([FromServices] FlightGearLauncher launcher)
     {
-        launcher.LaunchSimulation();
-        return Ok();
+        if (await launcher.TryLaunchSimulation("test"))
+        {
+            return Ok();
+        }
+        return BadRequest("Simulation already started.");
     }
     
-    [HttpPost("exit-simulation")]
+    /// <summary>
+    /// Выйти из симуляции
+    /// </summary>
+    [HttpPost("exit")]
     public async Task<IActionResult> ExitSimulation([FromServices] FlightGearLauncher launcher)
     {
-        launcher.ExitSimulation();
-        return Ok();
+        if (launcher.TryExitSimulation())
+        {
+            return Ok();
+        }
+
+        return BadRequest("Simulation already exited.");
     }
 }

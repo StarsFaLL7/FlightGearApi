@@ -1,11 +1,21 @@
 using FlightGearApi.Domain.FlightGearCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flight Gear API", Version = "v1" });
+
+    // Путь к XML-комментариям
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, "FlightGearApi.xml");
+    c.IncludeXmlComments(xmlPath);
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<IoManager>();
