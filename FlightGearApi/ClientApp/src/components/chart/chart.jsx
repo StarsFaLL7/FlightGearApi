@@ -11,6 +11,19 @@ const ChartComponent = () => {
       .then(data => setData(data));
   }, []);
 
+  const test = [{
+    name: 'dsasha',
+    uv: 400, pv: 2400, amt: 1200
+  },
+  {
+    name: 'dsasDE',
+    uv: 600, pv: 2367, amt: 1240
+  },
+  {
+    name: 'dsDEDha',
+    uv: 800, pv: 3421, amt: 1320
+  }]
+
   const paramsArray = [
     {
         name: 'Тангаж',
@@ -33,7 +46,7 @@ const ChartComponent = () => {
     <LineChart
       width={500}
       height={300}
-      data={paramsArray}
+      data={test}
       margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
     >
       <XAxis dataKey="name" />
@@ -41,8 +54,8 @@ const ChartComponent = () => {
       <CartesianGrid strokeDasharray="3 3" />
       <Tooltip />
       <Legend />
-      <Line type="monotone" dataKey={(paramsArray[0].value).toString()} stroke="#8884d8" activeDot={{ r: 8 }} />
-      {paramsArray.map((par) => {<Line type="monotone" dataKey={par.value.toString} stroke="#8884d8" activeDot={{ r: 8 }} />})}
+      <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
+      <Line type="monotone" dataKey="uv" stroke="#8884d8" activeDot={{ r: 8 }} />
       {data}
     </LineChart>
     </>;

@@ -1,14 +1,9 @@
-import plus from '../../assets/img/plus.png'
-import minus from '../../assets/img/minus.png'
 import './Table.module.css';
 import React, { useState, useEffect } from 'react';
+import Item from '../item/item';
 
 function Table() {
     const [dataParams, setDataParams] = useState([]);
-    const [isMinus, setIsMinus] = useState(false);
-    const toggleSrc = () => {
-        setIsMinus(!isMinus)
-    }
 
     useEffect(() => {
         fetch('').then(data => console.log(data)).then(d => setDataParams(d))
@@ -36,7 +31,7 @@ function Table() {
                 </tr>
             </thead>
             <tbody>
-            {paramsArray.map((par) => <tr><td><button onClick={toggleSrc}>{par.name}{par.count}{isMinus ? (<img src={plus} width="20" height="20" alt="Плюс" />) : (<img src={minus} width="20" height="20" alt="Минус" />)}</button></td></tr>)
+            {paramsArray.map((par) => <Item name={par.name} count={par.count}/>)
             }
             {dataParams}
                 {/* <tr><td onClick={()=>{bool?setBool(false):setBool(true)}}><button>Скорость севера (94533)<img src={bool ? plus:minus} width="20" height="20" alt={bool ? "Плюс":"Минус"} /></button></td></tr>
