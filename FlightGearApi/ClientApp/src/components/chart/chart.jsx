@@ -24,23 +24,23 @@ const ChartComponent = () => {
     uv: 800, pv: 3421, amt: 1320
   }]
 
-  const paramsArray = [
-    {
-        name: 'Тангаж',
-        count: '13962',
-        value: 123
-    },
-    {
-        name: 'Mангаж',
-        count: '13962',
-        value: [12,30,20, 61,79,20]
-    },
-    {
-        name: 'Гараж',
-        count: '13962',
-        value: [12,30,20, 61,79,20]
-    }
-    ]
+//   const paramsArray = [
+//     {
+//         name: 'Тангаж',
+//         count: '13962',
+//         value: 123
+//     },
+//     {
+//         name: 'Mангаж',
+//         count: '13962',
+//         value: [12,30,20, 61,79,20]
+//     },
+//     {
+//         name: 'Гараж',
+//         count: '13962',
+//         value: [12,30,20, 61,79,20]
+//     }
+//     ]
 
   return <>
     <LineChart
