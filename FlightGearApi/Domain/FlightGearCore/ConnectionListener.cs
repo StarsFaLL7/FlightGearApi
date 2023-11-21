@@ -1,8 +1,11 @@
-﻿using System.Net.Sockets;
+﻿using System.Globalization;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.Records;
+using FlightGearApi.Domain.UtilityClasses;
 
 namespace FlightGearApi.Domain.FlightGearCore;
 
@@ -10,81 +13,123 @@ public class ConnectionListener
 {
     private IoManager IoManager { get; }
 
-    private UdpClient? _client;
-    private GenericConnectionInfo? _connectionInfo;
-
     private readonly Dictionary<string, List<FgMessage>> _listenResults = new ();
-
+    private string ListeningSessionName { get; set; } = "test1";
+    
+    public bool IsFlightGearRunning { get; set; }
+    
+    public bool IsListeningForClient { get; set; }
+    
     public ConnectionListener(IoManager ioManager)
     {
         IoManager = ioManager;
     }
     
-    public bool TryStartListen(string sessionName)
+    public void StartListenForClient(string sessionName)
     {
-        if (_client != null)
+        if (IsListeningForClient)
         {
-            return false;
+            return;
         }
+
+        ListeningSessionName = sessionName;
+        _listenResults.Add(ListeningSessionName, new List<FgMessage>());
         
-        _connectionInfo = IoManager.GetConnectionInfo(IoType.Output);
-        _client = new UdpClient(_connectionInfo.Port);
-        _listenResults.Add(sessionName, new List<FgMessage>());
-        ListenAsync(sessionName);
-        return true;
+        IsListeningForClient = true;
+        
+        ListenCycleForClient(ListeningSessionName);
     }
     
-    private async void ListenAsync(string name)
+    private async void ListenCycleForClient(string name)
     {
         while (true)
         {
-            if (_client == null)
+            if (!IsListeningForClient || IoManager.OutputPropertiesList.Count == 0)
             {
+                IsListeningForClient = false;
                 return;
             }
-
+            
             try
             {
-                var result = await _client.ReceiveAsync();
-                var data = result.Buffer;
-                var message = Encoding.UTF8.GetString(data);
-
-                // Действия
-                var dict = GenerateDictFromMessage(message);
-                _listenResults[name].Add(new FgMessage() {Date = DateTime.Now, Values = dict});
+                var result = await GetCurrentValuesAsync();
+                _listenResults[name].Add(new FgMessage() {Date = DateTime.Now, Values = result});
+                
+                await Task.Delay((int)(1000 / IoManager.ConnectionRefreshesPerSecond));
             }
             catch (Exception e)
             {
+                IsListeningForClient = false;
                 return;
             }
         }
     }
 
-    public bool TryStopListen()
+    public void StopListenForClient()
     {
-        if (_client == null)
-        {
-            return false;
-        }
-        _client.Dispose();
-        _client = null;
-        return true;
+        IsListeningForClient = false;
+        // SAVE TO DB
     }
 
-    public async Task<Dictionary<string, string>> GetCurrentValuesAsync(string name)
+    public async Task<Dictionary<string, double>> GetCurrentValuesAsync(bool utility = false)
     {
-        if (_client == null)
+        if (!utility && IoManager.OutputPropertiesList.Count == 0)
         {
             return new();
         }
         
-        var data = await _client.ReceiveAsync();
-        var message = Encoding.UTF8.GetString(data.Buffer);
-        var res = GenerateDictFromMessage(message);
-        return res;
+        var result = new Dictionary<string, double>();
+        
+        var propertiesList = utility 
+            ? FlightPropertiesHelper.AllUtilityProperties() 
+            : IoManager.OutputPropertiesList;
+        
+        using (var client = new TcpClient("127.0.0.1", IoManager.TelnetPort))
+        using (var stream = client.GetStream())
+        using (var writer = new StreamWriter(stream, Encoding.ASCII))
+        using (var reader = new StreamReader(stream, Encoding.ASCII))
+        {
+            foreach (var property in propertiesList)
+            {
+                await writer.WriteLineAsync($"get {property.Path}");
+                await writer.FlushAsync();
+                var response = await reader.ReadLineAsync();
+                var value = ParseDoubleFromResponse(response);
+                result[property.Name] = value;
+            }
+        }
+        return result;
     }
 
-    private Dictionary<string, string> GenerateDictFromMessage(string message)
+    private double ParseDoubleFromResponse(string response)
+    {
+        if (string.IsNullOrWhiteSpace(response))
+        {
+            throw new ArgumentException("Invalid response provided.");
+        }
+        
+        var match = Regex.Match(response, @"'-?([\d.]+)'");
+
+        if (match.Success)
+        {
+            var valueString = match.Groups[1].Value;
+
+            if (double.TryParse(valueString, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
+            {
+                return result;
+            }
+        }
+        throw new ArgumentException("Invalid response provided.");
+    }
+    
+    public void ClearResults()
+    {
+        _listenResults.Clear();
+    }
+    
+    // Использовался при получения данных по UDP
+    /*
+    private Dictionary<string, string> GenerateDictFromMessageOld(string message)
     {
         var result = new Dictionary<string, string>();
         var lines = message.Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -96,32 +141,11 @@ public class ConnectionListener
 
         return result;
     }
-
-    public void Reset()
-    {
-        TryStopListen();
-        _listenResults.Clear();
-    }
-
-    public void SaveResultsToFile(string filename, string listenSessionName)
-    {
-        if (!File.Exists(filename))
-        {
-            File.Create(filename);
-        }
-        using (var f = new StreamWriter(filename))
-        {
-            f.Write($"Results from {_listenResults[listenSessionName][0].Date}\n");
-            foreach (var msg in _listenResults[listenSessionName])
-            {
-                f.Write($"{msg.Date};{JsonSerializer.Serialize(msg.Values)}\n");
-            }
-        }
-    }
+*/
 }
 
 public class FgMessage
 {
     public DateTime Date { get; init; }
-    public Dictionary<string, string> Values { get; init; } = new ();
+    public Dictionary<string, double> Values { get; init; } = new ();
 }

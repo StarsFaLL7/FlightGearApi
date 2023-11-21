@@ -25,7 +25,7 @@ public class TestController : Controller
     [HttpGet("get-launch-string")]
     public async Task<IActionResult> GetLaunchString()
     {
-        var result = _launcher.GenerateAllParametersString();
+        var result = _launcher.GenerateLaunchArguments();
         
         return Ok(result);
     }
@@ -33,7 +33,15 @@ public class TestController : Controller
     [HttpGet("current-properties")]
     public async Task<IActionResult> GetCurrentProperties()
     {
-        var result = await _listener.GetCurrentValuesAsync("test1");
+        var result = await _listener.GetCurrentValuesAsync();
+        
+        return Ok(result);
+    }
+    
+    [HttpGet("current-utility-properties")]
+    public async Task<IActionResult> GetCurrentUtilityProperties()
+    {
+        var result = await _listener.GetCurrentValuesAsync(true);
         
         return Ok(result);
     }
@@ -41,21 +49,7 @@ public class TestController : Controller
     [HttpPost("xml-file")]
     public async Task<IActionResult> GetXmlFileContent([FromBody] IoType type)
     {
-        var result = type == IoType.Input
-            ? _ioManager.GenerateXmlInputFileContent()
-            : _ioManager.GenerateXmlOutputFileContent();
-        
+        var result = _ioManager.GenerateXmlInputFileContent();
         return Ok(result);
-    }
-    
-    [HttpPost("set-connection-refreshes-per-second")]
-    public async Task<IActionResult> SetConnectionRefreshes([FromBody] int refreshes)
-    {
-        if (_ioManager.TrySetRefreshesPerSecond(refreshes))
-        {
-            return Ok();
-        }
-
-        return BadRequest("Invalid value for refreshes count.");
     }
 }

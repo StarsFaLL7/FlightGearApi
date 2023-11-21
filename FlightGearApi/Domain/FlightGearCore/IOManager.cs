@@ -2,6 +2,7 @@
 using FlightGearApi.Application.DTO;
 using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.Records;
+using FlightGearApi.Domain.UtilityClasses;
 
 namespace FlightGearApi.Domain.FlightGearCore;
 
@@ -13,14 +14,13 @@ public class IoManager
 {
     public double ConnectionRefreshesPerSecond { get; private set; } = 1;
     public readonly int InputPort = 6788;
-    public readonly int OutputPort = 6789;
+    public readonly int TelnetPort = 5501;
     
     private IConfiguration Configuration { get; }
     
     private string PathToProtocolFolder { get; }
-
-    private List<FlightPropertyInfo> InputPropertiesList { get; } = new ();
-    private List<FlightPropertyInfo> OutputPropertiesList { get; } = new ();
+    
+    public List<FlightPropertyInfo> OutputPropertiesList { get; } = new ();
     
     public IoManager(IConfiguration configuration)
     {
@@ -30,97 +30,68 @@ public class IoManager
             Configuration.GetSection("FlightGear:ProtocolSubPath").Value);
     }
 
-    public FlightPropertiesResponse GetAllIoPropertiesAsync()
+    public FlightPropertiesResponse GetListenPropertiesNames()
     {
         var result = new FlightPropertiesResponse()
         {
-            // InputProperties = InputPropertiesList.Select(p => p.Name).ToList(),
             OutputProperties = OutputPropertiesList.Select(p => p.Name).ToList()
         };
         
         return result;
     }
 
-    public GenericConnectionInfo GetConnectionInfo(IoType type)
+    public GenericConnectionInfo GetInputConnectionInfo()
     {
-        if (type == IoType.Input)
-        {
-            return new GenericConnectionInfo(IoType.Input, InputPort, ConnectionRefreshesPerSecond, 
+        return new GenericConnectionInfo(IoType.Input, InputPort, ConnectionRefreshesPerSecond, 
                 Configuration.GetSection("FlightGear:XmlInputFilename").Value);
-        }
         
-        return new GenericConnectionInfo(IoType.Output, OutputPort, ConnectionRefreshesPerSecond, 
-            Configuration.GetSection("FlightGear:XmlOutputFilename").Value);
+        //return new GenericConnectionInfo(IoType.Output, OutputPort, ConnectionRefreshesPerSecond, 
+        //    Configuration.GetSection("FlightGear:XmlOutputFilename").Value);
     }
     
-    public string GenerateParametersGenericConnection()
+    public string ConvertGenericConnectionToArgument(GenericConnectionInfo connectionInfo)
     {
-        var resultString = "";
-        var connectionsList = new List<GenericConnectionInfo>()
-        {
-            GetConnectionInfo(IoType.Input),
-            GetConnectionInfo(IoType.Output)
-        };
-        
-        foreach (var connectionInfo in connectionsList)
-        {
-            var argument = " --generic=socket,";
-            argument += connectionInfo.IoType == IoType.Input ? "in," : "out,";
-            argument += $"{connectionInfo.RefreshesPerSecond},{connectionInfo.Address},{connectionInfo.Port},udp,{connectionInfo.ProtocolFileName}";
-            
-            resultString += argument;
-        }
-
-        return resultString;
+        var argument = " --generic=socket,";
+        argument += connectionInfo.IoType == IoType.Input ? "in," : "out,";
+        argument += $"{connectionInfo.RefreshesPerSecond},{connectionInfo.Address},{connectionInfo.Port},udp,{connectionInfo.ProtocolFileName}";
+        return argument;
     }
 
-    public bool TrySetRefreshesPerSecond(double value)
+    public void SetRefreshesPerSecond(double value)
     {
         if (value <= 0)
         {
-            return false;
+            throw new ArgumentException("Incorrect refreshes value.");
         }
         
         ConnectionRefreshesPerSecond = value;
-        return true;
     }
     
-    public bool TryAddProperty(IoType type, string path, string name, string typeName)
+    public void TryAddProperty(string path, string name, string typeName)
     {
-        var list = type == IoType.Input ? InputPropertiesList : OutputPropertiesList;
         var newProperty = new FlightPropertyInfo(path, name, ParseType(typeName), typeName, GenerateFormatValue(name, typeName));
-        if (!list.Contains(newProperty))
+        if (OutputPropertiesList.All(p => p.Path != newProperty.Path))
         {
-            list.Add(newProperty);
-            return true;
+            OutputPropertiesList.Add(newProperty);
         }
-
-        return false;
     }
     
-    public bool TryRemoveProperty(IoType type, string name)
+    public bool TryRemoveListenProperty(string name)
     {
-        var list = type == IoType.Input ? InputPropertiesList : OutputPropertiesList;
-        var selectedProperty = list.FirstOrDefault(p => p.Name == name);
+        var selectedProperty = OutputPropertiesList.FirstOrDefault(p => p.Name == name);
         if (selectedProperty != default)
         {
-            list.Remove(selectedProperty);
+            OutputPropertiesList.Remove(selectedProperty);
             return true;
         }
         return false;
     }
-
-    public void Reset()
-    {
-        OutputPropertiesList.Clear();
-        ConnectionRefreshesPerSecond = 1;
-    }
     
-    public void SaveXmlFiles()
+    public void SaveXmlFile()
     {
         var files = new Dictionary<string, string>()
         {
-            {Configuration.GetSection("FlightGear:XmlOutputFilename").Value + ".xml", GenerateXmlOutputFileContent()},
+            //{Configuration.GetSection("FlightGear:XmlOutputFilename").Value + ".xml", GenerateXmlOutputFileContent()},
             {Configuration.GetSection("FlightGear:XmlInputFilename").Value + ".xml", GenerateXmlInputFileContent()}
         };
         foreach (var fileInfoPair in files)
@@ -154,7 +125,7 @@ public class IoManager
 
 ");
         
-        foreach (var inProperty in InputPropertiesList)
+        foreach (var inProperty in FlightPropertiesHelper.InputProperties.Select(p => p.Value.Property))
         {
             builder.Append($@"        <chunk>
             <name>{inProperty.Name}</name>
@@ -173,6 +144,8 @@ public class IoManager
         return builder.ToString();
     }
     
+    // Теперь на получение идёт по Telnet
+    /*
     public string GenerateXmlOutputFileContent()
     {
         var builder = new StringBuilder();
@@ -204,6 +177,7 @@ public class IoManager
 ");
         return builder.ToString();
     }
+    */
 
     private Type ParseType(string typeString)
     {

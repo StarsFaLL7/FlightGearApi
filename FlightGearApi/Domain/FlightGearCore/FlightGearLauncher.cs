@@ -37,36 +37,37 @@ public class FlightGearLauncher
                                    configuration.GetSection("FlightGear:BinarySubPath").Value,
                                    configuration.GetSection("FlightGear:ExecutableFileName").Value + ".exe");
         
-        Reset();
+        LaunchArguments["aircraft"] = "c172p";
+        LaunchArguments["disable-clouds"] = null;
+        LaunchArguments["disable-sound"] = null;
+        LaunchArguments["in-air"] = null;
+        LaunchArguments["airport"] = "KSFO";
+        LaunchArguments["altitude"] = "7224";
     }
 
-    public async Task<bool> TryLaunchSimulation(string sessionName)
+    public async Task<bool> TryLaunchSimulation(string sessionName, double refreshes)
     {
         if (_flightGearProcess != null && _flightGearProcess.HasExited == false)
         {
             return false;
         }
-
         try
         {
-            IoManager.SaveXmlFiles();
-            Listener.Reset();
+            IoManager.SetRefreshesPerSecond(refreshes);
+            IoManager.SaveXmlFile();
+            Listener.ClearResults();
             
             _flightGearProcess = new Process();
         
             _flightGearProcess.StartInfo.EnvironmentVariables["FG_ROOT"] = Path.Combine(
                 $"{Configuration.GetSection("FlightGear:Path").Value}", "data");
-        
             _flightGearProcess.StartInfo.FileName = FlightGearExecutablePath; // путь к исполняемому файлу FlightGear
-
-            _flightGearProcess.StartInfo.Arguments += GenerateAllParametersString();
-        
-        
+            _flightGearProcess.StartInfo.Arguments += GenerateLaunchArguments();
+            
             _flightGearProcess.StartInfo.RedirectStandardOutput = true;
             _flightGearProcess.StartInfo.RedirectStandardError = true;
             _flightGearProcess.StartInfo.UseShellExecute = false;
-        
-        
+            
             _flightGearProcess.Start();
         
             _flightGearProcess.BeginOutputReadLine();
@@ -78,7 +79,7 @@ public class FlightGearLauncher
                 if (e.Data != null && e.Data.Contains("Run Count"))
                 {
                     IsRunning = true;
-                
+                    Listener.IsFlightGearRunning = true;
                     Console.WriteLine("FlightGear initialization complete.");
                 }
             };
@@ -93,14 +94,14 @@ public class FlightGearLauncher
                 if (time > timeout)
                 {
                     _flightGearProcess = null;
-                    Listener.TryStopListen();
                     IsRunning = false;
+                    Listener.IsFlightGearRunning = false;
                     throw new TimeoutException("Не удалось запустить Flight Gear.");
                 }
             }
 
             RunningSessionName = sessionName;
-            Listener.TryStartListen(sessionName);
+            Listener.StartListenForClient(sessionName);
             return true;
         }
         catch (Exception e)
@@ -110,9 +111,9 @@ public class FlightGearLauncher
         }
     }
 
-    public string GenerateAllParametersString()
+    public string GenerateLaunchArguments()
     {
-        var resultString = "";
+        var resultString = $" --telnet=socket,in,10,127.0.0.1,{IoManager.TelnetPort},tcp";
         foreach (var launchArgument in LaunchArguments)
         {
             if (launchArgument.Value == null)
@@ -125,39 +126,19 @@ public class FlightGearLauncher
             }
         }
         
-        resultString += IoManager.GenerateParametersGenericConnection();
+        resultString += IoManager.ConvertGenericConnectionToArgument(IoManager.GetInputConnectionInfo());
 
         return resultString;
     }
 
-    public bool TryExitSimulation()
+    public void Exit()
     {
-        try
-        {
-            _flightGearProcess.Kill(); // завершение процесса
-            _flightGearProcess.Dispose(); // очистка ресурсов
-            _flightGearProcess = null;
-            Listener.TryStopListen();
-            IsRunning = false;
-            return true;
-        }
-        catch (NullReferenceException e)
-        {
-            return false;
-        }
-    }
-
-    private void Reset()
-    {
-        LaunchArguments.Clear();
-        TryExitSimulation();
-        RunningSessionName = "empty";
-        LaunchArguments["aircraft"] = "c172p";
-        LaunchArguments["disable-clouds"] = null;
-        LaunchArguments["disable-sound"] = null;
-        LaunchArguments["in-air"] = null;
-        LaunchArguments["airport"] = "KSFO";
-        LaunchArguments["altitude"] = "7224";
+        _flightGearProcess?.Kill(); // завершение процесса
+        _flightGearProcess?.Dispose(); // очистка ресурсов
+        _flightGearProcess = null;
+        Listener.StopListenForClient();
+        IsRunning = false;
+        Listener.IsFlightGearRunning = false;
     }
 
     public bool TryAddLaunchParameter(string name, string? value = null)
