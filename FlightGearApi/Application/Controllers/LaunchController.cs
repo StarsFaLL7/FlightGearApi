@@ -16,13 +16,15 @@ public class LaunchController : Controller
     private readonly IoManager _ioManager;
     private readonly FlightGearLauncher _launcher;
     private readonly ConnectionListener _listener;
+    private readonly FlightGearManipulator _manipulator;
     
-    public LaunchController(IConfiguration configuration, IoManager ioManager, FlightGearLauncher launcher, ConnectionListener listener)
+    public LaunchController(IConfiguration configuration, IoManager ioManager, FlightGearLauncher launcher, ConnectionListener listener, FlightGearManipulator manipulator)
     {
         _configuration = configuration;
         _ioManager = ioManager;
         _launcher = launcher;
         _listener = listener;
+        _manipulator = manipulator;
     }
     
     /// <summary>

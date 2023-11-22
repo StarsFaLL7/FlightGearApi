@@ -84,11 +84,35 @@ public static class FlightPropertiesHelper
             0, 1)}
     };
 
-    public static List<FlightPropertyInfo> AllUtilityProperties()
+    public static List<FlightPropertyInfo> AllUtilityPropertiesList()
     {
         return InputProperties
             .Select(p => p.Value.Property)
             .Concat(OutputProperties.Values)
             .ToList();
+    }
+
+    public static Dictionary<UtilityProperty, FlightPropertyInfo> AllUtilityPropertiesDict
+    {
+        get
+        {
+            var result = new Dictionary<UtilityProperty, FlightPropertyInfo>(OutputProperties);
+            foreach (var pairValue in InputProperties)
+            {
+                result[pairValue.Key] = pairValue.Value.Property;
+            }
+            return result;
+        }
+    }
+    
+    public static UtilityProperty ConvertNameToUtilityProperty(string name)
+    {
+        var stringValue = name.Split('-')[0];
+        if (Enum.TryParse<UtilityProperty>(stringValue, true, out var result))
+        {
+            return result;
+        }
+
+        throw new Exception("Convert from string to enum UtilityProperty failed.");
     }
 }

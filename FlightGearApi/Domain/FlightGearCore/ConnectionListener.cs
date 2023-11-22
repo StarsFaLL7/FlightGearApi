@@ -71,8 +71,9 @@ public class ConnectionListener
         // SAVE TO DB
     }
 
-    public async Task<Dictionary<string, double>> GetCurrentValuesAsync(bool utility = false)
+    public async Task<Dictionary<string, double>> GetCurrentValuesAsync(bool utility = false, params UtilityProperty[] onlyProperties)
     {
+        // TODO: Завернуть все попытки подключения в try {} except
         if (!utility && IoManager.OutputPropertiesList.Count == 0)
         {
             return new();
@@ -81,8 +82,13 @@ public class ConnectionListener
         var result = new Dictionary<string, double>();
         
         var propertiesList = utility 
-            ? FlightPropertiesHelper.AllUtilityProperties() 
+            ? FlightPropertiesHelper.AllUtilityPropertiesList() 
             : IoManager.OutputPropertiesList;
+
+        if (onlyProperties.Length != 0)
+        {
+            propertiesList = GetFlightPropertyInfos(onlyProperties);
+        }
         
         using (var client = new TcpClient("127.0.0.1", IoManager.TelnetPort))
         using (var stream = client.GetStream())
@@ -101,24 +107,43 @@ public class ConnectionListener
         return result;
     }
 
+    private List<FlightPropertyInfo> GetFlightPropertyInfos(UtilityProperty[] utilityProperties)
+    {
+        var result = new List<FlightPropertyInfo>();
+        foreach (var utilityProperty in utilityProperties)
+        {
+            FlightPropertiesHelper.OutputProperties.TryGetValue(utilityProperty, out var property);
+            if (FlightPropertiesHelper.InputProperties.TryGetValue(utilityProperty, out var propertyTuple))
+            {
+                property = propertyTuple.Property;
+            }
+                
+            if (property != null && !result.Contains(property))
+            {
+                result.Add(property);
+            }
+        }
+
+        return result;
+    }
+
     private double ParseDoubleFromResponse(string response)
     {
         if (string.IsNullOrWhiteSpace(response))
         {
             throw new ArgumentException("Invalid response provided.");
         }
-        
-        var match = Regex.Match(response, @"'-?([\d.]+)'");
 
-        if (match.Success)
-        {
-            var valueString = match.Groups[1].Value;
+        var commaIndex = response.IndexOf('\'')+1;
+
+        var valueString =
+            response.Substring(commaIndex, response.LastIndexOf('\'') - commaIndex);
 
             if (double.TryParse(valueString, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
             {
-                return result;
+                return Math.Round(result, 5);
             }
-        }
+        
         throw new ArgumentException("Invalid response provided.");
     }
     

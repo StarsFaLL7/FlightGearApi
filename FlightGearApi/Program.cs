@@ -21,6 +21,7 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<IoManager>();
 builder.Services.AddSingleton<FlightGearLauncher>();
 builder.Services.AddSingleton<ConnectionListener>();
+builder.Services.AddSingleton<FlightGearManipulator>();
 
 builder.Services.AddControllersWithViews();
 

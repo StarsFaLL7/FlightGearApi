@@ -113,7 +113,7 @@ public class FlightGearLauncher
 
     public string GenerateLaunchArguments()
     {
-        var resultString = $" --telnet=socket,in,10,127.0.0.1,{IoManager.TelnetPort},tcp";
+        var resultString = $" --telnet=socket,in,10,127.0.0.1,{IoManager.TelnetPort},tcp --httpd=5400";
         foreach (var launchArgument in LaunchArguments)
         {
             if (launchArgument.Value == null)
