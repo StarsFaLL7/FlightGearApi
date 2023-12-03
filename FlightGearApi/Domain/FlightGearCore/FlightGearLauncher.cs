@@ -40,9 +40,11 @@ public class FlightGearLauncher
         LaunchArguments["aircraft"] = "c172p";
         LaunchArguments["disable-clouds"] = null;
         LaunchArguments["disable-sound"] = null;
-        LaunchArguments["in-air"] = null;
         LaunchArguments["airport"] = "KSFO";
-        LaunchArguments["altitude"] = "7224";
+        LaunchArguments["timeofday"] = "morning";
+        
+        LaunchArguments["altitude"] = "1";
+        LaunchArguments["vc"] = "150";
     }
 
     public async Task<bool> TryLaunchSimulation(string sessionName, double refreshes)
@@ -76,7 +78,7 @@ public class FlightGearLauncher
             {
                 Console.WriteLine(e.Data);
             
-                if (e.Data != null && e.Data.Contains("Run Count"))
+                if (e.Data != null && e.Data.Contains("Now checking"))
                 {
                     IsRunning = true;
                     Listener.IsFlightGearRunning = true;
@@ -85,7 +87,7 @@ public class FlightGearLauncher
             };
         
             // Ожидание инициализации
-            var timeout = 50000;
+            var timeout = 120000;
             var time = 0;
             while (!IsRunning)
             {
@@ -93,15 +95,17 @@ public class FlightGearLauncher
                 time += 100;
                 if (time > timeout)
                 {
+                    _flightGearProcess?.Kill();
                     _flightGearProcess = null;
                     IsRunning = false;
                     Listener.IsFlightGearRunning = false;
                     throw new TimeoutException("Не удалось запустить Flight Gear.");
                 }
             }
-
+            
             RunningSessionName = sessionName;
             Listener.StartListenForClient(sessionName);
+            await Task.Delay(20000); // Допольнительно время на ициализацию
             return true;
         }
         catch (Exception e)
@@ -113,7 +117,7 @@ public class FlightGearLauncher
 
     public string GenerateLaunchArguments()
     {
-        var resultString = $" --telnet=socket,in,10,127.0.0.1,{IoManager.TelnetPort},tcp --httpd=5400";
+        var resultString = $"--telnet=socket,in,10,127.0.0.1,{IoManager.TelnetPort},tcp --httpd=5400";
         foreach (var launchArgument in LaunchArguments)
         {
             if (launchArgument.Value == null)

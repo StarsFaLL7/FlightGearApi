@@ -9,10 +9,13 @@ public enum UtilityProperty
     Elevator, // Положение штурвала (на/от себя)
     Rudder, // Прокрутка самолёта для управления рысканием
     SpeedBrake, // Воздушные тормозы
+    ParkingBrake,
     Altitude, // Высота в метрах
     Roll, // Крен
     Pitch, // Тангаж
-    Heading // Рыскание
+    Heading, // Курс
+    VerticalSpeed,
+    IndicatedSpeed
 }
 
 public static class FlightPropertiesHelper
@@ -20,8 +23,8 @@ public static class FlightPropertiesHelper
     public static Dictionary<UtilityProperty, FlightPropertyInfo> OutputProperties { get; } = new ()
     {
         { UtilityProperty.Altitude, new FlightPropertyInfo(
-            "/position/altitude-agl-m", 
-            "altitude-agl-m", 
+            "/position/altitude-agl-ft", 
+            "altitude-agl-ft", 
             typeof(double),
             "double",
             "%.5f") },
@@ -40,6 +43,18 @@ public static class FlightPropertiesHelper
         { UtilityProperty.Heading, new FlightPropertyInfo(
             "/orientation/heading-deg", 
             "heading-deg", 
+            typeof(double),
+            "double",
+            "%.5f") },
+        { UtilityProperty.VerticalSpeed , new FlightPropertyInfo(
+            "/velocities/vertical-speed-fps",
+            "vertical-speed-fps",
+            typeof(double),
+            "double",
+            "%.5f") },
+        { UtilityProperty.IndicatedSpeed , new FlightPropertyInfo(
+            "/instrumentation/airspeed-indicator/indicated-speed-kt",
+            "indicated-speed-kt",
             typeof(double),
             "double",
             "%.5f") },
@@ -81,6 +96,13 @@ public static class FlightPropertiesHelper
                 typeof(double),
                 "double",
                 "%.5f"), 
+            0, 1)},
+        { UtilityProperty.ParkingBrake, (new FlightPropertyInfo(
+                "/controls/gear/brake-parking",
+                "brake-parking", 
+                typeof(double),
+                "double",
+                "%.5f"), 
             0, 1)}
     };
 
@@ -114,5 +136,12 @@ public static class FlightPropertiesHelper
         }
 
         throw new Exception("Convert from string to enum UtilityProperty failed.");
+    }
+
+    public static string GetName(this UtilityProperty property)
+    {
+        return OutputProperties.TryGetValue(property, out var outputProperty) ? 
+            outputProperty.Name : 
+            InputProperties[property].Property.Name;
     }
 }

@@ -13,7 +13,7 @@ public class ConnectionListener
 {
     private IoManager IoManager { get; }
 
-    private readonly Dictionary<string, List<FgMessage>> _listenResults = new ();
+    public readonly Dictionary<string, List<FgMessage>> ListenResults = new ();
     private string ListeningSessionName { get; set; } = "test1";
     
     public bool IsFlightGearRunning { get; set; }
@@ -33,7 +33,7 @@ public class ConnectionListener
         }
 
         ListeningSessionName = sessionName;
-        _listenResults.Add(ListeningSessionName, new List<FgMessage>());
+        ListenResults.Add(ListeningSessionName, new List<FgMessage>());
         
         IsListeningForClient = true;
         
@@ -49,11 +49,11 @@ public class ConnectionListener
                 IsListeningForClient = false;
                 return;
             }
-            
+            IsListeningForClient = false;
             try
             {
                 var result = await GetCurrentValuesAsync();
-                _listenResults[name].Add(new FgMessage() {Date = DateTime.Now, Values = result});
+                ListenResults[name].Add(new FgMessage() {Date = DateTime.Now, Values = result});
                 
                 await Task.Delay((int)(1000 / IoManager.ConnectionRefreshesPerSecond));
             }
@@ -149,7 +149,7 @@ public class ConnectionListener
     
     public void ClearResults()
     {
-        _listenResults.Clear();
+        ListenResults.Clear();
     }
     
     // Использовался при получения данных по UDP

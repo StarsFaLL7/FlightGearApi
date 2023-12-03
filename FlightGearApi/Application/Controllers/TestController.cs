@@ -62,7 +62,7 @@ public class TestController : Controller
     {
         await _manipulator.SendParametersAsync(new Dictionary<UtilityProperty, double>()
         {
-            { UtilityProperty.Throttle, 0.8},
+            { UtilityProperty.ParkingBrake, 0},
             { UtilityProperty.Aileron, 0.1}
         });
         return Ok();
@@ -72,7 +72,32 @@ public class TestController : Controller
     public async Task<IActionResult> FlyForwardTest()
     {
         _manipulator.ShouldFlyForward = true;
-        _manipulator.FlyForwardCycle();
+        _manipulator.FlyCycle();
         return Ok();
+    }
+    
+    [HttpPost("Get-results-for-analytics")]
+    public async Task<IActionResult> GetResultsTest([FromBody] GetResultRequest request)
+    {
+        var result = new List<FlightResultResponse>();
+        if (!_listener.ListenResults.TryGetValue(request.SessionName, out var list))
+        {
+            return BadRequest("No results for that session");
+        }
+        
+        foreach (var msg in list)
+        {
+            foreach (var pairNameValue in msg.Values)
+            {
+                var item = result.FirstOrDefault(r => r.Name == pairNameValue.Key);
+                if (item == null)
+                {
+                    item = new FlightResultResponse() { Name = pairNameValue.Key };
+                    result.Add(item);
+                }
+                item.Data.Add(new PropertyValue(pairNameValue.Value));
+            }
+        }
+        return Ok(result);
     }
 }
