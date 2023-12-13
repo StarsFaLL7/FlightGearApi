@@ -60,6 +60,6 @@ app.MapFallbackToFile("index.html");
 
 StaticLogger.StartNewLog();
 
-app.UseMiddleware<LoggingMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 
 app.Run();

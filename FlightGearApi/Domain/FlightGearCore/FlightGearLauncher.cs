@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using FlightGearApi.Domain.Enums;
+using FlightGearApi.Domain.Logging;
 using FlightGearApi.Domain.Records;
 
 namespace FlightGearApi.Domain.FlightGearCore;
@@ -57,6 +58,7 @@ public class FlightGearLauncher
         }
         try
         {
+            await StaticLogger.LogAsync(LogLevel.Information, "Trying to launch Flight Gear...");
             IoManager.SetRefreshesPerSecond(refreshes);
             IoManager.SaveXmlFile();
             Listener.ClearResults();
@@ -112,7 +114,7 @@ public class FlightGearLauncher
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            await StaticLogger.LogAsync(LogLevel.Error, $"Error while launching Flight Gear: {e}");
             throw;
         }
     }

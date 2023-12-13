@@ -2,11 +2,11 @@ using System.Text;
 
 namespace FlightGearApi.Domain.Logging;
 
-public class LoggingMiddleware
+public class RequestResponseLoggingMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public LoggingMiddleware(RequestDelegate next)
+    public RequestResponseLoggingMiddleware(RequestDelegate next)
     {
         _next = next;
     }

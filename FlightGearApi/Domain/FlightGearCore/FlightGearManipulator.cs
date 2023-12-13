@@ -13,45 +13,57 @@ namespace FlightGearApi.Domain.FlightGearCore;
 
 public class FlightGearManipulator
 {
-    private UdpClient ClientSender { get; set; }
+    private const int AltitudeError = 30;
+    private const int SpeedError = 5;
+    private const int HeadingError = 15;
+
+    
+    private readonly UdpClient _clientSender;
     private readonly ConnectionListener _listener;
     private readonly FlightGearLauncher _launcher;
     private readonly IPEndPoint _fgEndpoint;
+    
+    private bool _islLowSpeed;
+    private int _currentStageIndex;
+    
     public bool ShouldFlyForward { get; set; }
-
-    private bool _setAileronToZero;
-    private bool _setElevatorToZero;
-    private bool _isAltitudeAchieved;
-    private bool _LowSpeed;
-
-    public List<FlightStageModel> Stages = new ();
-
-    public int CurrentStepIndex;
+    public List<FlightStageModel> Stages { get; }
+    
     
     public FlightGearManipulator(ConnectionListener listener, IoManager ioManger, FlightGearLauncher launcher)
     {
         _listener = listener;
         _launcher = launcher;
-        ClientSender = new UdpClient();
+        _clientSender = new UdpClient();
         _fgEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), ioManger.InputPort);
+        Stages = new List<FlightStageModel>();
     }
 
     public void AddStage(FlightStageModel stage)
     {
-        Stages.Insert(stage.Index, stage);
-        if (Stages.Count == 1)
+        if (Stages.Count == 0)
         {
+            Stages.Add(stage);
+            stage.Index = 0;
             return;
         }
+        if (stage.Index > Stages.Count)
+        {
+            stage.Index = Stages.Count;
+        }
+        Stages.Insert(stage.Index, stage);
+        
+        
         for (var i = stage.Index + 1; i < Stages.Count-1; i++)
         {
             Stages[i].Index++;
         }
     }
 
-    public async void FlyCycle() // TODO: Завернуть все попытки подключения в try {} except
+    public async void FlyCycle()
     {
         await StaticLogger.LogAsync(LogLevel.Information, $"Fly Cycle Started in {this.GetType()}");
+        
         var initialProperties = new Dictionary<UtilityProperty, double>()
         {
             { UtilityProperty.ApPitchSwitch, 1},
@@ -60,11 +72,12 @@ public class FlightGearManipulator
             { UtilityProperty.Flaps, 0}
         };
         await SendParametersAsync(initialProperties);
+        
         while (true)
         {
             try
             {
-                if (!_listener.IsFlightGearRunning)
+                if (!_listener.IsFlightGearRunning || !ShouldFlyForward)
                 {
                     return;
                 }
@@ -83,11 +96,11 @@ public class FlightGearManipulator
                 var headingValue = currentProperties[UtilityProperty.Heading.GetName()];
                 var indicatedSpeed = currentProperties[UtilityProperty.IndicatedSpeed.GetName()];
                 
-                _LowSpeed = indicatedSpeed < 80;
+                _islLowSpeed = indicatedSpeed < 80;
                 
                 var verticalRate = GetTargetVerticalPressureRate(altitudeFt, indicatedSpeed);
                 propertiesToChange[UtilityProperty.ApTargetVerticalPressureRate] = verticalRate;
-                if (_LowSpeed)
+                if (_islLowSpeed)
                 {
                     Console.WriteLine("Emergency! LOW SPEED!");
                     propertiesToChange[UtilityProperty.ApHeadingSwitch] = 0;
@@ -97,13 +110,14 @@ public class FlightGearManipulator
                     propertiesToChange[UtilityProperty.ApHeadingSwitch] = 1;
                 }
 
-                var headingBug = Stages[CurrentStepIndex].Heading;
+                var headingBug = Stages[_currentStageIndex].Heading;
                 propertiesToChange[UtilityProperty.ApHeadingHeadingDeg] = headingBug;
 
                 var throttle = GetThrottleValue(indicatedSpeed, verticalRate);
                 propertiesToChange[UtilityProperty.Throttle] = throttle;
 
                 await SendParametersAsync(propertiesToChange);
+                Console.WriteLine($"Current values:\n\talt: {altitudeFt}\n\theading: {headingValue}\n\tspeed: {indicatedSpeed}");
                 Console.WriteLine("---------------");
             }
             catch (SocketException se)
@@ -117,22 +131,20 @@ public class FlightGearManipulator
         }
     }
 
-    private double GetTargetVerticalPressureRate(double altitude, double indicatedSpeed)
+    private double GetTargetVerticalPressureRate(double altitude, double indicatedSpeed) // TODO Поработать с множителями, медленно набирает/снижается
     {
-        var goalAltitude = Stages[CurrentStepIndex].Altitude;
+        var goalAltitude = Stages[_currentStageIndex].Altitude;
         var goalVerticalSpeed = 0d;
-        if (Math.Abs(altitude - goalAltitude) < 10)
+        if (Math.Abs(altitude - goalAltitude) < AltitudeError)
         {
             Console.WriteLine("ALT: Goal altitude achieved!");
-            _isAltitudeAchieved = true;
             goalVerticalSpeed = 0;
         }
         else
         {
-            _isAltitudeAchieved = false;
             Console.WriteLine("ALT: Goal altitude != altitude");
             goalVerticalSpeed = Math.Clamp(goalAltitude - altitude, -1000, 1000);
-            if (_LowSpeed && goalVerticalSpeed > 0)
+            if (_islLowSpeed && goalVerticalSpeed > 0)
             {
                 goalVerticalSpeed = -(1000 - indicatedSpeed/80*500);
             }
@@ -142,16 +154,24 @@ public class FlightGearManipulator
         return result;
     }
 
-    private double GetThrottleValue(double indicatedSpeed, double targetVerticalRate)
+    private double GetThrottleValue(double indicatedSpeed, double targetVerticalRate) // TODO Поработать с величинами throttle, при 0.6 (default) падает скорость
     {
-        var goalSpeed = Stages[CurrentStepIndex].Speed;
-        if (_LowSpeed)
+        var goalSpeed = Stages[_currentStageIndex].Speed;
+        if (_islLowSpeed)
         {
             return 1;
         }
         if (targetVerticalRate == 0)
         {
-            return 0.8;
+            if (Math.Abs(goalSpeed - indicatedSpeed) < SpeedError)
+            {
+                return 0.8;
+            }
+            if (goalSpeed < indicatedSpeed)
+            {
+                return 0.6;
+            }
+            return 1;
         }
         if (targetVerticalRate < 0)
         {
@@ -163,19 +183,21 @@ public class FlightGearManipulator
 
     public void CheckIsGoalAchieved(double heading, double speed, double altitude)
     {
-        var currentStepGoal = Stages[CurrentStepIndex];
-        if (Math.Abs(heading - currentStepGoal.Heading) < 5 &&
-            Math.Abs(speed - currentStepGoal.Speed) < 5 &&
-            Math.Abs(altitude - currentStepGoal.Altitude) < 5)
+        var currentStepGoal = Stages[_currentStageIndex];
+        if (Math.Abs(heading - currentStepGoal.Heading) < HeadingError &&
+            Math.Abs(speed - currentStepGoal.Speed) < SpeedError &&
+            Math.Abs(altitude - currentStepGoal.Altitude) < AltitudeError)
         {
-            if (Stages.Count > CurrentStepIndex + 1)
+            if (Stages.Count > _currentStageIndex + 1)
             {
-                CurrentStepIndex++;
+                _currentStageIndex++;
+                StaticLogger.Log(LogLevel.Information, $"Simulation stage {_currentStageIndex-1} completed, left: {Stages.Count - _currentStageIndex}");
             }
             else
             {
                 _launcher.Exit();
                 Console.WriteLine("--- Mission completed! ---");
+                StaticLogger.Log(LogLevel.Information, "All simulation stages successfully completed!");
                 // TODO SAVE RESULTS TO BD
             }
         }
@@ -216,7 +238,7 @@ public class FlightGearManipulator
         }
         var byteData = ConvertDoublesToBigEndianBytes(sendValues);
         
-        await ClientSender.SendAsync(byteData, byteData.Length, _fgEndpoint);
+        await _clientSender.SendAsync(byteData, byteData.Length, _fgEndpoint);
     }
     
     public async Task SendParameterAsync(UtilityProperty propertyToChange, double newValue)

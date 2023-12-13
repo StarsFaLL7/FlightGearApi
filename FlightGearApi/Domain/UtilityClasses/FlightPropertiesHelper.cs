@@ -29,8 +29,8 @@ public static class FlightPropertiesHelper
     public static Dictionary<UtilityProperty, FlightPropertyInfo> OutputProperties { get; } = new ()
     {
         { UtilityProperty.Altitude, new FlightPropertyInfo(
-            "/position/altitude-agl-ft", 
-            "altitude-agl-ft", 
+            "/position/altitude-ft", 
+            "altitude-ft", 
             typeof(double),
             "double",
             "%.5f") },
