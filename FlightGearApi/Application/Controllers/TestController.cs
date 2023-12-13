@@ -92,10 +92,10 @@ public class TestController : Controller
                 var item = result.FirstOrDefault(r => r.Name == pairNameValue.Key);
                 if (item == null)
                 {
-                    item = new FlightResultResponse() { Name = pairNameValue.Key };
+                    item = new FlightResultResponse() { Name = pairNameValue.Key, Data = new List<PropertyValue>()};
                     result.Add(item);
                 }
-                item.Data.Add(new PropertyValue(pairNameValue.Value));
+                item.Data.Add(new PropertyValue(item.Data.Count, pairNameValue.Value));
             }
         }
         return Ok(result);

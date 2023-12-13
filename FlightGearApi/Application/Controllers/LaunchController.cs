@@ -78,7 +78,7 @@ public class LaunchController : Controller
         {
             return Ok();
         }
-        return BadRequest("Simulation already started.");
+        return Conflict("Simulation already started.");
     }
     
     /// <summary>
@@ -93,6 +93,50 @@ public class LaunchController : Controller
             return Ok();
         }
         
-        return BadRequest("Simulation already exited.");
+        return Conflict("Simulation already exited.");
+    }
+    
+    /// <summary>
+    /// Добавить этап для полёта с заданными характеристиками.
+    /// </summary>
+    /// <param name="stage">Новый этап полёта с индексом вставки</param>
+    /// <returns></returns>
+    [HttpPost("stages")]
+    public async Task<IActionResult> AddFlightStage([FromBody] FlightStageModel stage)
+    {
+        if (_launcher.IsRunning)
+        {
+            return Conflict("Simulation is in progress.");
+        }
+        _manipulator.AddStage(stage);
+        return Ok();
+    }
+    
+    /// <summary>
+    /// Получить все заданные этапы полёта.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("stages")]
+    public async Task<IActionResult> GetFlightStages()
+    {
+        return Ok(_manipulator.Stages);
+    }
+    
+    /// <summary>
+    /// Удалить этап полёта по указанному индексу.
+    /// </summary>
+    /// <param name="index">Индекс, с которого удалить этап полёта.</param>
+    /// <returns></returns>
+    [HttpDelete("stages/{index:int}")]
+    public async Task<IActionResult> RemoveFlightStages([FromRoute] int index)
+    {
+        if (index > _manipulator.Stages.Count - 1 || index < 0)
+        {
+            return BadRequest("Index is invalid");
+        }
+
+        var stage = _manipulator.Stages[index];
+        _manipulator.Stages.RemoveAt(index);
+        return Ok(stage);
     }
 }

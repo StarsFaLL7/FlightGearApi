@@ -37,14 +37,16 @@ public class FlightGearLauncher
                                    configuration.GetSection("FlightGear:BinarySubPath").Value,
                                    configuration.GetSection("FlightGear:ExecutableFileName").Value + ".exe");
         
+        LaunchArguments["disable-ai-traffic"] = null;
         LaunchArguments["aircraft"] = "c172p";
+        LaunchArguments["timeofday"] = "morning";
         LaunchArguments["disable-clouds"] = null;
         LaunchArguments["disable-sound"] = null;
         LaunchArguments["airport"] = "KSFO";
-        LaunchArguments["timeofday"] = "morning";
+        //LaunchArguments["state"] = "auto";
+        LaunchArguments["altitude"] = "3000";
+        //LaunchArguments["vc"] = "150";
         
-        LaunchArguments["altitude"] = "1";
-        LaunchArguments["vc"] = "150";
     }
 
     public async Task<bool> TryLaunchSimulation(string sessionName, double refreshes)

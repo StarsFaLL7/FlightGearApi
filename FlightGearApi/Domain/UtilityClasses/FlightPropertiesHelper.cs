@@ -14,8 +14,14 @@ public enum UtilityProperty
     Roll, // Крен
     Pitch, // Тангаж
     Heading, // Курс
+    Flaps, // Закрылки
     VerticalSpeed,
-    IndicatedSpeed
+    IndicatedSpeed,
+    ApPitchSwitch,
+    ApRollSwitch,
+    ApHeadingSwitch,
+    ApTargetVerticalPressureRate,
+    ApHeadingHeadingDeg
 }
 
 public static class FlightPropertiesHelper
@@ -100,6 +106,48 @@ public static class FlightPropertiesHelper
         { UtilityProperty.ParkingBrake, (new FlightPropertyInfo(
                 "/controls/gear/brake-parking",
                 "brake-parking", 
+                typeof(double),
+                "double",
+                "%.5f"), 
+            0, 1)},
+        { UtilityProperty.ApPitchSwitch, (new FlightPropertyInfo(
+                "/autopilot/KAP140/locks/pitch-axis",
+                "pitch-axis", 
+                typeof(bool),
+                "double",
+                "%.1f"), 
+            0, 1)},
+        { UtilityProperty.ApHeadingSwitch, (new FlightPropertyInfo(
+                "/autopilot/KAP140/locks/hdg-hold",
+                "hdg-hold", 
+                typeof(bool),
+                "double",
+                "%.1f"), 
+            0, 1)},
+        { UtilityProperty.ApRollSwitch, (new FlightPropertyInfo(
+                "/autopilot/KAP140/locks/roll-axis",
+                "roll-axis", 
+                typeof(bool),
+                "double",
+                "%.1f"), 
+            0, 1)},
+        { UtilityProperty.ApTargetVerticalPressureRate, (new FlightPropertyInfo(
+                "/autopilot/KAP140/settings/target-pressure-rate",
+                "target-pressure-rate", 
+                typeof(double),
+                "double",
+                "%.5f"), 
+            -1, 1)},
+        { UtilityProperty.ApHeadingHeadingDeg, (new FlightPropertyInfo(
+                "/autopilot/settings/heading-bug-deg",
+                "heading-bug-deg", 
+                typeof(double),
+                "double",
+                "%.5f"), 
+            0, 360)},
+        { UtilityProperty.Flaps, (new FlightPropertyInfo(
+                "/controls/flight/flaps",
+                "flaps", 
                 typeof(double),
                 "double",
                 "%.5f"), 

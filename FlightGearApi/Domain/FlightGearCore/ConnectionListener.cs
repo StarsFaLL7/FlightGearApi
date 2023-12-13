@@ -1,8 +1,12 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.Records;
 using FlightGearApi.Domain.UtilityClasses;
@@ -42,14 +46,20 @@ public class ConnectionListener
     
     private async void ListenCycleForClient(string name)
     {
+        var exceptionsCount = 0;
         while (true)
         {
+            if (exceptionsCount > 10)
+            {
+                IsListeningForClient = false;
+                return;
+            }
             if (!IsListeningForClient || IoManager.OutputPropertiesList.Count == 0)
             {
                 IsListeningForClient = false;
                 return;
             }
-            IsListeningForClient = false;
+            IsListeningForClient = true;
             try
             {
                 var result = await GetCurrentValuesAsync();
@@ -59,8 +69,8 @@ public class ConnectionListener
             }
             catch (Exception e)
             {
-                IsListeningForClient = false;
-                return;
+                Console.WriteLine(e);
+                exceptionsCount++;
             }
         }
     }
@@ -142,6 +152,11 @@ public class ConnectionListener
             if (double.TryParse(valueString, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
             {
                 return Math.Round(result, 5);
+            }
+
+            if (bool.TryParse(valueString, out var resultBool))
+            {
+                return resultBool ? 1 : 0;
             }
         
         throw new ArgumentException("Invalid response provided.");

@@ -1,4 +1,5 @@
 using FlightGearApi.Domain.FlightGearCore;
+using FlightGearApi.Domain.Logging;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,5 +57,9 @@ app.MapControllerRoute(
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("index.html");
+
+StaticLogger.StartNewLog();
+
+app.UseMiddleware<LoggingMiddleware>();
 
 app.Run();

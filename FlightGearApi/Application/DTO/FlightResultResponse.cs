@@ -7,4 +7,4 @@ public class FlightResultResponse
     public List<PropertyValue> Data { get; set; }
 }
 
-public record PropertyValue(double Value);
+public record PropertyValue(int Id, double Value);

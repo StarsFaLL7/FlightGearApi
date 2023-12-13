@@ -1,6 +1,11 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using FlightGearApi.Application.DTO;
 using FlightGearApi.Domain.Enums;
+using FlightGearApi.Domain.Logging;
 using FlightGearApi.Domain.Records;
 using FlightGearApi.Domain.UtilityClasses;
 
@@ -16,12 +21,10 @@ public class FlightGearManipulator
 
     private bool _setAileronToZero;
     private bool _setElevatorToZero;
+    private bool _isAltitudeAchieved;
+    private bool _LowSpeed;
 
-    public List<FlightStepGoal> StepsToAchieve = new List<FlightStepGoal>()
-    {
-        new FlightStepGoal(1000, 180, 54),
-        new FlightStepGoal(1500, 90, 54)
-    };
+    public List<FlightStageModel> Stages = new ();
 
     public int CurrentStepIndex;
     
@@ -33,8 +36,30 @@ public class FlightGearManipulator
         _fgEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), ioManger.InputPort);
     }
 
+    public void AddStage(FlightStageModel stage)
+    {
+        Stages.Insert(stage.Index, stage);
+        if (Stages.Count == 1)
+        {
+            return;
+        }
+        for (var i = stage.Index + 1; i < Stages.Count-1; i++)
+        {
+            Stages[i].Index++;
+        }
+    }
+
     public async void FlyCycle() // TODO: Завернуть все попытки подключения в try {} except
     {
+        await StaticLogger.LogAsync(LogLevel.Information, $"Fly Cycle Started in {this.GetType()}");
+        var initialProperties = new Dictionary<UtilityProperty, double>()
+        {
+            { UtilityProperty.ApPitchSwitch, 1},
+            { UtilityProperty.ApRollSwitch, 1},
+            { UtilityProperty.ApHeadingSwitch, 1},
+            { UtilityProperty.Flaps, 0}
+        };
+        await SendParametersAsync(initialProperties);
         while (true)
         {
             try
@@ -53,32 +78,30 @@ public class FlightGearManipulator
                 CheckIsGoalAchieved(currentProperties[UtilityProperty.Heading.GetName()],
                     currentProperties[UtilityProperty.IndicatedSpeed.GetName()],
                     currentProperties[UtilityProperty.Altitude.GetName()]);
-
-                var rollValue = currentProperties[UtilityProperty.Roll.GetName()];
-                if (IsAileronShouldBeChanged(rollValue, out var aileronValue))
-                {
-                    propertiesToChange[UtilityProperty.Aileron] = aileronValue;
-                }
-
+                
                 var altitudeFt = currentProperties[UtilityProperty.Altitude.GetName()];
-                var currElevatorValue = currentProperties[UtilityProperty.Elevator.GetName()];
-                var verticalSpeedValue = currentProperties[UtilityProperty.VerticalSpeed.GetName()];
-                var throttleValue = currentProperties[UtilityProperty.Throttle.GetName()];
-                if (IsElevatorShouldBeChanged(altitudeFt, StepsToAchieve[CurrentStepIndex].Altitude, currElevatorValue,
-                        verticalSpeedValue,
-                        throttleValue, rollValue, out var newElevatorValue, out var newThrottleValue))
+                var headingValue = currentProperties[UtilityProperty.Heading.GetName()];
+                var indicatedSpeed = currentProperties[UtilityProperty.IndicatedSpeed.GetName()];
+                
+                _LowSpeed = indicatedSpeed < 80;
+                
+                var verticalRate = GetTargetVerticalPressureRate(altitudeFt, indicatedSpeed);
+                propertiesToChange[UtilityProperty.ApTargetVerticalPressureRate] = verticalRate;
+                if (_LowSpeed)
                 {
-                    propertiesToChange[UtilityProperty.Elevator] = newElevatorValue;
-                    propertiesToChange[UtilityProperty.Throttle] = newThrottleValue;
+                    Console.WriteLine("Emergency! LOW SPEED!");
+                    propertiesToChange[UtilityProperty.ApHeadingSwitch] = 0;
+                }
+                else
+                {
+                    propertiesToChange[UtilityProperty.ApHeadingSwitch] = 1;
                 }
 
-                var headingValue = currentProperties[UtilityProperty.Heading.GetName()];
-                var rudderValue = currentProperties[UtilityProperty.Rudder.GetName()];
-                if (IsRudderShouldBeChanged(headingValue, StepsToAchieve[CurrentStepIndex].Heading, rudderValue,
-                        out var newRudderValue))
-                {
-                    propertiesToChange[UtilityProperty.Rudder] = newRudderValue;
-                }
+                var headingBug = Stages[CurrentStepIndex].Heading;
+                propertiesToChange[UtilityProperty.ApHeadingHeadingDeg] = headingBug;
+
+                var throttle = GetThrottleValue(indicatedSpeed, verticalRate);
+                propertiesToChange[UtilityProperty.Throttle] = throttle;
 
                 await SendParametersAsync(propertiesToChange);
                 Console.WriteLine("---------------");
@@ -94,14 +117,58 @@ public class FlightGearManipulator
         }
     }
 
+    private double GetTargetVerticalPressureRate(double altitude, double indicatedSpeed)
+    {
+        var goalAltitude = Stages[CurrentStepIndex].Altitude;
+        var goalVerticalSpeed = 0d;
+        if (Math.Abs(altitude - goalAltitude) < 10)
+        {
+            Console.WriteLine("ALT: Goal altitude achieved!");
+            _isAltitudeAchieved = true;
+            goalVerticalSpeed = 0;
+        }
+        else
+        {
+            _isAltitudeAchieved = false;
+            Console.WriteLine("ALT: Goal altitude != altitude");
+            goalVerticalSpeed = Math.Clamp(goalAltitude - altitude, -1000, 1000);
+            if (_LowSpeed && goalVerticalSpeed > 0)
+            {
+                goalVerticalSpeed = -(1000 - indicatedSpeed/80*500);
+            }
+        }
+        var result = goalVerticalSpeed / -58000;
+        Console.WriteLine($"ALT: set to {result}");
+        return result;
+    }
+
+    private double GetThrottleValue(double indicatedSpeed, double targetVerticalRate)
+    {
+        var goalSpeed = Stages[CurrentStepIndex].Speed;
+        if (_LowSpeed)
+        {
+            return 1;
+        }
+        if (targetVerticalRate == 0)
+        {
+            return 0.8;
+        }
+        if (targetVerticalRate < 0)
+        {
+            return 1;
+        }
+
+        return 0.6;
+    }
+
     public void CheckIsGoalAchieved(double heading, double speed, double altitude)
     {
-        var currentStepGoal = StepsToAchieve[CurrentStepIndex];
+        var currentStepGoal = Stages[CurrentStepIndex];
         if (Math.Abs(heading - currentStepGoal.Heading) < 5 &&
             Math.Abs(speed - currentStepGoal.Speed) < 5 &&
             Math.Abs(altitude - currentStepGoal.Altitude) < 5)
         {
-            if (StepsToAchieve.Count > CurrentStepIndex + 1)
+            if (Stages.Count > CurrentStepIndex + 1)
             {
                 CurrentStepIndex++;
             }
@@ -112,87 +179,6 @@ public class FlightGearManipulator
                 // TODO SAVE RESULTS TO BD
             }
         }
-    }
-    
-    public bool IsAileronShouldBeChanged(double rollValue, out double aileronValue) 
-    {
-        if (_setAileronToZero)
-        {
-            Console.WriteLine("Aileron: set 0");
-            _setAileronToZero = false;
-            aileronValue = 0.06;
-            return true;
-        }
-        if (rollValue > 1 || rollValue < -1)
-        {
-            _setAileronToZero = true;
-            Console.WriteLine($"Aileron: Roll = {rollValue}, set aileron to {Math.Clamp(-rollValue/50 + 0.1, -0.5, 0.5)}");
-            aileronValue = Math.Clamp(-rollValue/50 + 0.1, -0.5, 0.5);
-            return true;
-        }
-        Console.WriteLine("Aileron: Roll is OK");
-        aileronValue = -1;
-        return false;
-    }
-    
-    public bool IsElevatorShouldBeChanged(double altitude, double goalAltitude, double currElevatorValue, 
-        double verticalSpeed, double throttleValue, double rollValue, out double newElevatorValue, out double newThrottleValue)
-    {
-        if (_setElevatorToZero || (rollValue > 10 || rollValue < -10))
-        {
-            newElevatorValue = 0;
-            newThrottleValue = throttleValue;
-            _setElevatorToZero = false;
-            return true;
-        }
-        
-        if (Math.Abs(goalAltitude - altitude) < 50)
-        {
-            _setElevatorToZero = true;
-        }
-
-        if (goalAltitude > altitude && verticalSpeed < 5)
-        {
-            Console.WriteLine("Elevator: Trying to go upper");
-            newElevatorValue = -0.1;
-            newThrottleValue = throttleValue;
-            _setElevatorToZero = true;
-            return true;
-        }
-
-        if (goalAltitude < altitude && verticalSpeed > -5)
-        {
-            Console.WriteLine("Elevator: Trying to go down");
-            newElevatorValue = 0.1;
-            _setElevatorToZero = true;
-            newThrottleValue = Math.Clamp(throttleValue+0.1, 0, 1);
-            return true;
-        }
-        Console.WriteLine("Elevator: In progress to goal");
-        newElevatorValue = currElevatorValue;
-        newThrottleValue = throttleValue;
-        return false;
-    }
-
-    public bool IsRudderShouldBeChanged(double currentHeading, double goalHeading, double rudderValue, out double newRudderValue)
-    {
-        if (Math.Abs(currentHeading - goalHeading) < 5)
-        {
-            Console.WriteLine("Rudder: goal achieved");
-            newRudderValue = 0;
-            return true;
-        }
-
-        if (currentHeading < goalHeading && 360 - goalHeading + currentHeading < goalHeading - currentHeading || 
-            currentHeading > goalHeading && currentHeading - goalHeading < 36 - currentHeading + goalHeading)
-        {
-            Console.WriteLine("Rudder: set to -0.1 (left)");
-            newRudderValue = -0.1;
-            return true;
-        }
-        Console.WriteLine("Rudder: set to 0.1 (right)");
-        newRudderValue = 0.1;
-        return true;
     }
     
     public async Task SendParametersAsync(Dictionary<UtilityProperty, double> propertiesToChange)
