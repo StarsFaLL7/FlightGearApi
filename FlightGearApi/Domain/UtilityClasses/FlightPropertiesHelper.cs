@@ -33,7 +33,7 @@ public static class FlightPropertiesHelper
             "altitude-ft", 
             typeof(double),
             "double",
-            "%.5f") },
+            "%.5f", 0.304785) },
         { UtilityProperty.Roll, new FlightPropertyInfo(
             "/orientation/roll-deg", 
             "roll-deg", 
@@ -57,13 +57,13 @@ public static class FlightPropertiesHelper
             "vertical-speed-fps",
             typeof(double),
             "double",
-            "%.5f") },
+            "%.5f", 0.304785) },
         { UtilityProperty.IndicatedSpeed , new FlightPropertyInfo(
             "/instrumentation/airspeed-indicator/indicated-speed-kt",
             "indicated-speed-kt",
             typeof(double),
             "double",
-            "%.5f") },
+            "%.5f", 0.514444) },
     };
 
     public static Dictionary<UtilityProperty, (FlightPropertyInfo Property, double MinValue, double MaxValue)> InputProperties { get; } = new()

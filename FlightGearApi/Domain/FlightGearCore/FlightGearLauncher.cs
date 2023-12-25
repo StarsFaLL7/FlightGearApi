@@ -12,27 +12,24 @@ namespace FlightGearApi.Domain.FlightGearCore;
 public class FlightGearLauncher
 {
     private Process? _flightGearProcess;
-
-    public bool IsRunning { get; private set; }
-
-    public string RunningSessionName { get; private set; }
-    
+    private Dictionary<string, string?> LaunchArguments { get; set; } = new ();
     private IConfiguration Configuration { get; }
     private ConnectionListener Listener { get; }
-    
+    private IoManager IoManager { get; }
+    private FlightGearManipulator Manipulator { get; }
     private string FlightGearExecutablePath { get; }
-    
-    public IoManager IoManager { get; }
 
-    /// <summary>
-    /// Параметры запуска для --key=value, но если value == null, то --key
-    /// </summary>
-    private Dictionary<string, string?> LaunchArguments { get; set; } = new ();
     
-    public FlightGearLauncher(IoManager ioManager, IConfiguration configuration, ConnectionListener listener)
+    public bool IsRunning { get; private set; }
+    public string? RunningSessionName { get; private set; }
+    
+    
+    public FlightGearLauncher(IoManager ioManager, IConfiguration configuration, ConnectionListener listener, 
+        FlightGearManipulator manipulator)
     {
         Listener = listener;
         IoManager = ioManager;
+        Manipulator = manipulator;
         Configuration = configuration;
         FlightGearExecutablePath = Path.Combine(configuration.GetSection("FlightGear:Path").Value,
                                    configuration.GetSection("FlightGear:BinarySubPath").Value,
@@ -46,7 +43,7 @@ public class FlightGearLauncher
         LaunchArguments["airport"] = "KSFO";
         //LaunchArguments["state"] = "auto";
         LaunchArguments["altitude"] = "3000";
-        //LaunchArguments["vc"] = "150";
+        
         
     }
 
@@ -110,12 +107,30 @@ public class FlightGearLauncher
             RunningSessionName = sessionName;
             Listener.StartListenForClient(sessionName);
             await Task.Delay(20000); // Допольнительно время на ициализацию
+
+            Manipulator.ShouldFlyForward = true;
+            Manipulator.FlyCycle();
+            ReloadCycle();
+            
             return true;
         }
         catch (Exception e)
         {
             await StaticLogger.LogAsync(LogLevel.Error, $"Error while launching Flight Gear: {e}");
             throw;
+        }
+    }
+
+    private async void ReloadCycle()
+    {
+        while (IsRunning)
+        {
+            if (Manipulator.AllStagesCompleted)
+            {
+                Exit();
+            }
+
+            await Task.Delay(1000);
         }
     }
 
@@ -147,23 +162,5 @@ public class FlightGearLauncher
         Listener.StopListenForClient();
         IsRunning = false;
         Listener.IsFlightGearRunning = false;
-    }
-
-    public bool TryAddLaunchParameter(string name, string? value = null)
-    {
-        // TODO: Добавление параметра запуска
-        return false;
-    }
-    
-    public bool TryRemoveLaunchParameter(string name)
-    {
-        // TODO: Удаления параметра запуска
-        return false;
-    }
-    
-    public bool TryChangeLaunchParameter(string name, string newValue)
-    {
-        // TODO: Изменение значения параметра запуска
-        return false;
     }
 }

@@ -16,11 +16,10 @@ public class FlightGearManipulator
     private const int AltitudeError = 30;
     private const int SpeedError = 5;
     private const int HeadingError = 15;
-
+    private const int LowSpeedLevel = 41;
     
     private readonly UdpClient _clientSender;
     private readonly ConnectionListener _listener;
-    private readonly FlightGearLauncher _launcher;
     private readonly IPEndPoint _fgEndpoint;
     
     private bool _islLowSpeed;
@@ -28,12 +27,11 @@ public class FlightGearManipulator
     
     public bool ShouldFlyForward { get; set; }
     public List<FlightStageModel> Stages { get; }
+    public bool AllStagesCompleted { get; private set; }
     
-    
-    public FlightGearManipulator(ConnectionListener listener, IoManager ioManger, FlightGearLauncher launcher)
+    public FlightGearManipulator(ConnectionListener listener, IoManager ioManger)
     {
         _listener = listener;
-        _launcher = launcher;
         _clientSender = new UdpClient();
         _fgEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), ioManger.InputPort);
         Stages = new List<FlightStageModel>();
@@ -62,6 +60,9 @@ public class FlightGearManipulator
 
     public async void FlyCycle()
     {
+        _currentStageIndex = 0;
+        AllStagesCompleted = false;
+        
         await StaticLogger.LogAsync(LogLevel.Information, $"Fly Cycle Started in {this.GetType()}");
         
         var initialProperties = new Dictionary<UtilityProperty, double>()
@@ -96,7 +97,7 @@ public class FlightGearManipulator
                 var headingValue = currentProperties[UtilityProperty.Heading.GetName()];
                 var indicatedSpeed = currentProperties[UtilityProperty.IndicatedSpeed.GetName()];
                 
-                _islLowSpeed = indicatedSpeed < 80;
+                _islLowSpeed = indicatedSpeed < LowSpeedLevel;
                 
                 var verticalRate = GetTargetVerticalPressureRate(altitudeFt, indicatedSpeed);
                 propertiesToChange[UtilityProperty.ApTargetVerticalPressureRate] = verticalRate;
@@ -126,6 +127,7 @@ public class FlightGearManipulator
             }
             catch (Exception e)
             {
+                await StaticLogger.LogAsync(LogLevel.Error, $"Error in FlyCycle() of Manipulator: {e}");
                 Console.WriteLine(e);
             }
         }
@@ -143,7 +145,7 @@ public class FlightGearManipulator
         else
         {
             Console.WriteLine("ALT: Goal altitude != altitude");
-            goalVerticalSpeed = Math.Clamp(goalAltitude - altitude, -1000, 1000);
+            goalVerticalSpeed = Math.Clamp((goalAltitude - altitude)*2, -1000, 1000);
             if (_islLowSpeed && goalVerticalSpeed > 0)
             {
                 goalVerticalSpeed = -(1000 - indicatedSpeed/80*500);
@@ -169,7 +171,7 @@ public class FlightGearManipulator
             }
             if (goalSpeed < indicatedSpeed)
             {
-                return 0.6;
+                return 0.7;
             }
             return 1;
         }
@@ -178,7 +180,7 @@ public class FlightGearManipulator
             return 1;
         }
 
-        return 0.6;
+        return 0.7;
     }
 
     public void CheckIsGoalAchieved(double heading, double speed, double altitude)
@@ -195,9 +197,10 @@ public class FlightGearManipulator
             }
             else
             {
-                _launcher.Exit();
+                AllStagesCompleted = true;
                 Console.WriteLine("--- Mission completed! ---");
                 StaticLogger.Log(LogLevel.Information, "All simulation stages successfully completed!");
+                
                 // TODO SAVE RESULTS TO BD
             }
         }

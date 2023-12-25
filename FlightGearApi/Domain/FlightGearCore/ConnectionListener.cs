@@ -110,7 +110,7 @@ public class ConnectionListener
                 await writer.WriteLineAsync($"get {property.Path}");
                 await writer.FlushAsync();
                 var response = await reader.ReadLineAsync();
-                var value = ParseDoubleFromResponse(response);
+                var value = ParseDoubleFromResponse(response) * property.Multifier;
                 result[property.Name] = value;
             }
         }
@@ -158,8 +158,8 @@ public class ConnectionListener
             {
                 return resultBool ? 1 : 0;
             }
-        
-        throw new ArgumentException("Invalid response provided.");
+
+            return 0;
     }
     
     public void ClearResults()
