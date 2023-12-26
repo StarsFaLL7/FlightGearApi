@@ -2,6 +2,8 @@
 using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.Logging;
 using FlightGearApi.Domain.Records;
+using FlightGearApi.Infrastructure.Interfaces;
+using FlightGearApi.Infrastructure.ModelsDal;
 
 namespace FlightGearApi.Domain.FlightGearCore;
 
@@ -22,7 +24,7 @@ public class FlightGearLauncher
     
     public bool IsRunning { get; private set; }
     public string? RunningSessionName { get; private set; }
-    
+    public int? RunningSessionId { get; private set; } = null;
     
     public FlightGearLauncher(IoManager ioManager, IConfiguration configuration, ConnectionListener listener, 
         FlightGearManipulator manipulator)
@@ -47,7 +49,7 @@ public class FlightGearLauncher
         
     }
 
-    public async Task<bool> TryLaunchSimulation(string sessionName, double refreshes)
+    public async Task<bool> TryLaunchSimulation(string sessionName, double refreshes, IPostgresDatabase database)
     {
         if (_flightGearProcess != null && _flightGearProcess.HasExited == false)
         {
@@ -56,7 +58,7 @@ public class FlightGearLauncher
         try
         {
             await StaticLogger.LogAsync(LogLevel.Information, "Trying to launch Flight Gear...");
-            IoManager.SetRefreshesPerSecond(refreshes);
+            IoManager.ConnectionRefreshesPerSecond = refreshes;
             IoManager.SaveXmlFile();
             Listener.ClearResults();
             
@@ -105,13 +107,15 @@ public class FlightGearLauncher
             }
             
             RunningSessionName = sessionName;
-            Listener.StartListenForClient(sessionName);
-            await Task.Delay(20000); // Допольнительно время на ициализацию
-
+            await Task.Delay(30000); // Дополнительно время на ициализацию
+            
+            RunningSessionId = database.CreateSession(new FlightSessionDal() { Date = DateTime.Now, Title = sessionName } );
+            Manipulator.SessionId = RunningSessionId;
+            
             Manipulator.ShouldFlyForward = true;
             Manipulator.FlyCycle();
-            ReloadCycle();
             
+            ReloadCycle();
             return true;
         }
         catch (Exception e)
@@ -149,8 +153,26 @@ public class FlightGearLauncher
             }
         }
         
-        resultString += IoManager.ConvertGenericConnectionToArgument(IoManager.GetInputConnectionInfo());
+        resultString += IoManager.GetUdpInputConnectionString();
 
+        var exportFileName = $"{Configuration.GetSection("FlightGear:ExportPropertiesFilePath").Value}";
+        var xmlExportFileName = $"{Configuration.GetSection("FlightGear:XmlExportFilename").Value}";
+        if (!File.Exists(exportFileName))
+        {
+            try
+            {
+                using (var fileStream = File.Create(exportFileName)) { }
+            }
+            catch (Exception e)
+            {
+                StaticLogger.Log(LogLevel.Error, e.Message);
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        resultString += $" --generic=file,out,{IoManager.ConnectionRefreshesPerSecond},{exportFileName},{xmlExportFileName}";
+        
         return resultString;
     }
 
@@ -159,8 +181,8 @@ public class FlightGearLauncher
         _flightGearProcess?.Kill(); // завершение процесса
         _flightGearProcess?.Dispose(); // очистка ресурсов
         _flightGearProcess = null;
-        Listener.StopListenForClient();
         IsRunning = false;
+        RunningSessionId = null;
         Listener.IsFlightGearRunning = false;
     }
 }

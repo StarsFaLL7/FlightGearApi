@@ -154,6 +154,8 @@ public static class FlightPropertiesHelper
             0, 1)}
     };
 
+    
+
     public static List<FlightPropertyInfo> AllUtilityPropertiesList()
     {
         return InputProperties

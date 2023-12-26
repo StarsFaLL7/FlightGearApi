@@ -1,5 +1,7 @@
 using FlightGearApi.Domain.FlightGearCore;
 using FlightGearApi.Domain.Logging;
+using FlightGearApi.Infrastructure;
+using FlightGearApi.Infrastructure.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,8 @@ builder.Services.AddSingleton<IoManager>();
 builder.Services.AddSingleton<FlightGearLauncher>();
 builder.Services.AddSingleton<ConnectionListener>();
 builder.Services.AddSingleton<FlightGearManipulator>();
+builder.Services.AddSingleton<ExportParametersManager>();
+builder.Services.AddSingleton<IPostgresDatabase, PostgresDatabase>();
 
 builder.Services.AddControllersWithViews();
 

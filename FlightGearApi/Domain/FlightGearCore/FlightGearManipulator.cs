@@ -8,6 +8,8 @@ using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.Logging;
 using FlightGearApi.Domain.Records;
 using FlightGearApi.Domain.UtilityClasses;
+using FlightGearApi.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlightGearApi.Domain.FlightGearCore;
 
@@ -21,20 +23,25 @@ public class FlightGearManipulator
     private readonly UdpClient _clientSender;
     private readonly ConnectionListener _listener;
     private readonly IPEndPoint _fgEndpoint;
+    private readonly IPostgresDatabase _database;
+    private readonly ExportParametersManager _exportManager;
     
     private bool _islLowSpeed;
     private int _currentStageIndex;
-    
+
+    public int? SessionId { get; set; } = null;
     public bool ShouldFlyForward { get; set; }
     public List<FlightStageModel> Stages { get; }
     public bool AllStagesCompleted { get; private set; }
     
-    public FlightGearManipulator(ConnectionListener listener, IoManager ioManger)
+    public FlightGearManipulator(ConnectionListener listener, [FromServices] IPostgresDatabase database, [FromServices] ExportParametersManager exportManager)
     {
         _listener = listener;
         _clientSender = new UdpClient();
-        _fgEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), ioManger.InputPort);
+        _fgEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), IoManager.InputPort);
         Stages = new List<FlightStageModel>();
+        _database = database;
+        _exportManager = exportManager;
     }
 
     public void AddStage(FlightStageModel stage)
@@ -84,12 +91,12 @@ public class FlightGearManipulator
                 }
 
                 var propertiesToChange = new Dictionary<UtilityProperty, double>();
-                var currentProperties = await _listener.GetCurrentValuesAsync(true,
+                var currentProperties = await _listener.GetCurrentValuesTelnetAsync(true,
                     UtilityProperty.Roll, UtilityProperty.Altitude, UtilityProperty.Elevator,
                     UtilityProperty.VerticalSpeed, UtilityProperty.Throttle, UtilityProperty.Heading,
                     UtilityProperty.IndicatedSpeed, UtilityProperty.Rudder);
 
-                CheckIsGoalAchieved(currentProperties[UtilityProperty.Heading.GetName()],
+                await CheckIsGoalAchievedAsync(currentProperties[UtilityProperty.Heading.GetName()],
                     currentProperties[UtilityProperty.IndicatedSpeed.GetName()],
                     currentProperties[UtilityProperty.Altitude.GetName()]);
                 
@@ -145,7 +152,7 @@ public class FlightGearManipulator
         else
         {
             Console.WriteLine("ALT: Goal altitude != altitude");
-            goalVerticalSpeed = Math.Clamp((goalAltitude - altitude)*2, -1000, 1000);
+            goalVerticalSpeed = Math.Clamp((goalAltitude - altitude)*4, -1000, 1000);
             if (_islLowSpeed && goalVerticalSpeed > 0)
             {
                 goalVerticalSpeed = -(1000 - indicatedSpeed/80*500);
@@ -171,7 +178,7 @@ public class FlightGearManipulator
             }
             if (goalSpeed < indicatedSpeed)
             {
-                return 0.7;
+                return 0.6;
             }
             return 1;
         }
@@ -183,7 +190,7 @@ public class FlightGearManipulator
         return 0.7;
     }
 
-    public void CheckIsGoalAchieved(double heading, double speed, double altitude)
+    public async Task CheckIsGoalAchievedAsync(double heading, double speed, double altitude)
     {
         var currentStepGoal = Stages[_currentStageIndex];
         if (Math.Abs(heading - currentStepGoal.Heading) < HeadingError &&
@@ -200,8 +207,14 @@ public class FlightGearManipulator
                 AllStagesCompleted = true;
                 Console.WriteLine("--- Mission completed! ---");
                 StaticLogger.Log(LogLevel.Information, "All simulation stages successfully completed!");
-                
-                // TODO SAVE RESULTS TO BD
+                await Task.Delay(2000); // Дожидаемся выхода из FG, чтобы прочитать файл
+                // SAVING RESULTS TO BD
+                if (SessionId != null)
+                {
+                    var properties = _exportManager.GetExportedProperties(SessionId.Value);
+                    _database.CreatePropertiesFromRange(properties, SessionId.Value);
+                    Console.WriteLine(properties);
+                }
             }
         }
     }
@@ -214,7 +227,7 @@ public class FlightGearManipulator
         }
         var sendValues = new List<double>();
         
-        var currentValues = await _listener.GetCurrentValuesAsync(true);
+        var currentValues = await _listener.GetCurrentValuesTelnetAsync(true);
         
         foreach (var pairValue in FlightPropertiesHelper.InputProperties)
         {

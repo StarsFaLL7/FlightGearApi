@@ -3,6 +3,7 @@ using FlightGearApi.Domain.Enums;
 using FlightGearApi.Domain.FlightGearCore;
 using FlightGearApi.Domain.Records;
 using FlightGearApi.Domain.UtilityClasses;
+using FlightGearApi.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightGearApi.Application.Controllers;
@@ -15,15 +16,20 @@ public class TestController : Controller
     private readonly FlightGearLauncher _launcher;
     private readonly ConnectionListener _listener;
     private readonly FlightGearManipulator _manipulator;
+    private readonly ExportParametersManager _exportManager;
+    private readonly IPostgresDatabase _database;
     
     public TestController(IConfiguration configuration, IoManager ioManager, FlightGearLauncher launcher, 
-        ConnectionListener listener, FlightGearManipulator manipulator)
+        ConnectionListener listener, FlightGearManipulator manipulator, ExportParametersManager exportManager,
+        IPostgresDatabase database)
     {
         _configuration = configuration;
         _ioManager = ioManager;
         _launcher = launcher;
         _listener = listener;
         _manipulator = manipulator;
+        _exportManager = exportManager;
+        _database = database;
     }
     
     [HttpGet("get-launch-string")]
@@ -37,7 +43,7 @@ public class TestController : Controller
     [HttpGet("current-properties")]
     public async Task<IActionResult> GetCurrentProperties()
     {
-        var result = await _listener.GetCurrentValuesAsync();
+        var result = await _listener.GetCurrentValuesTelnetAsync();
         
         return Ok(result);
     }
@@ -45,7 +51,7 @@ public class TestController : Controller
     [HttpGet("current-utility-properties")]
     public async Task<IActionResult> GetCurrentUtilityProperties()
     {
-        var result = await _listener.GetCurrentValuesAsync(true);
+        var result = await _listener.GetCurrentValuesTelnetAsync(true);
         
         return Ok(result);
     }
@@ -76,28 +82,11 @@ public class TestController : Controller
         return Ok();
     }
     
-    [HttpPost("Get-results-for-analytics")]
-    public async Task<IActionResult> GetResultsTest([FromBody] GetResultRequest request)
+    [HttpPost("export-to-bd")]
+    public async Task<IActionResult> ExportToBd()
     {
-        var result = new List<FlightResultResponse>();
-        if (!_listener.ListenResults.TryGetValue(request.SessionName, out var list))
-        {
-            return BadRequest("No results for that session");
-        }
-        
-        foreach (var msg in list)
-        {
-            foreach (var pairNameValue in msg.Values)
-            {
-                var item = result.FirstOrDefault(r => r.Name == pairNameValue.Key);
-                if (item == null)
-                {
-                    item = new FlightResultResponse() { Name = pairNameValue.Key, Data = new List<PropertyValue>()};
-                    result.Add(item);
-                }
-                item.Data.Add(new PropertyValue(item.Data.Count, pairNameValue.Value));
-            }
-        }
-        return Ok(result);
+        var properties = _exportManager.GetExportedProperties(10);
+        _database.CreatePropertiesFromRange(properties, 10);
+        return Ok();
     }
 }

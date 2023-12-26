@@ -12,15 +12,14 @@ namespace FlightGearApi.Domain.FlightGearCore;
 /// </summary>
 public class IoManager
 {
-    public double ConnectionRefreshesPerSecond { get; private set; } = 1;
-    public readonly int InputPort = 6788;
-    public readonly int TelnetPort = 5501;
-    
+    public const int InputPort = 6788;
+    public const int TelnetPort = 5501;
     private IConfiguration Configuration { get; }
-    
     private string PathToProtocolFolder { get; }
     
+    public double ConnectionRefreshesPerSecond { get; set; } = 1;
     public List<FlightPropertyInfo> OutputPropertiesList { get; } = new ();
+    
     
     public IoManager(IConfiguration configuration)
     {
@@ -30,23 +29,12 @@ public class IoManager
             Configuration.GetSection("FlightGear:ProtocolSubPath").Value);
     }
 
-    public FlightPropertiesResponse GetListenPropertiesNames()
+    public string GetUdpInputConnectionString()
     {
-        var result = new FlightPropertiesResponse()
-        {
-            OutputProperties = OutputPropertiesList.Select(p => p.Name).ToList()
-        };
-        
-        return result;
-    }
-
-    public GenericConnectionInfo GetInputConnectionInfo()
-    {
-        return new GenericConnectionInfo(IoType.Input, InputPort, ConnectionRefreshesPerSecond, 
-                Configuration.GetSection("FlightGear:XmlInputFilename").Value);
-        
-        //return new GenericConnectionInfo(IoType.Output, OutputPort, ConnectionRefreshesPerSecond, 
-        //    Configuration.GetSection("FlightGear:XmlOutputFilename").Value);
+        var argument = " --generic=socket,in,";
+        var filename = Configuration.GetSection("FlightGear:XmlInputFilename").Value;
+        argument += $"{ConnectionRefreshesPerSecond},127.0.0.1,{InputPort},udp,{filename}";
+        return argument;
     }
     
     public string ConvertGenericConnectionToArgument(GenericConnectionInfo connectionInfo)
@@ -55,36 +43,6 @@ public class IoManager
         argument += connectionInfo.IoType == IoType.Input ? "in," : "out,";
         argument += $"{connectionInfo.RefreshesPerSecond},{connectionInfo.Address},{connectionInfo.Port},udp,{connectionInfo.ProtocolFileName}";
         return argument;
-    }
-
-    public void SetRefreshesPerSecond(double value)
-    {
-        if (value <= 0)
-        {
-            throw new ArgumentException("Incorrect refreshes value.");
-        }
-        
-        ConnectionRefreshesPerSecond = value;
-    }
-    
-    public void TryAddProperty(string path, string name, string typeName)
-    {
-        var newProperty = new FlightPropertyInfo(path, name, ParseType(typeName), typeName, GenerateFormatValue(name, typeName));
-        if (OutputPropertiesList.All(p => p.Path != newProperty.Path))
-        {
-            OutputPropertiesList.Add(newProperty);
-        }
-    }
-    
-    public bool TryRemoveListenProperty(string name)
-    {
-        var selectedProperty = OutputPropertiesList.FirstOrDefault(p => p.Name == name);
-        if (selectedProperty != default)
-        {
-            OutputPropertiesList.Remove(selectedProperty);
-            return true;
-        }
-        return false;
     }
     
     public void SaveXmlFile()
@@ -143,41 +101,7 @@ public class IoManager
         
         return builder.ToString();
     }
-    
-    // Теперь на получение идёт по Telnet
-    /*
-    public string GenerateXmlOutputFileContent()
-    {
-        var builder = new StringBuilder();
-        builder.Append(@"<?xml version=""1.0""?>
-<PropertyList>
-<generic>
-    <output>
-        <line_separator>newline</line_separator>
-        <var_separator>newline</var_separator>
-        <binary_mode>false</binary_mode>
 
-");
-        
-        foreach (var outProperty in OutputPropertiesList)
-        {
-            builder.Append($@"        <chunk>
-            <name>{outProperty.Name}</name>
-            <type>{outProperty.TypeName}</type>
-            <node>{outProperty.Path}</node>
-            <format>{outProperty.FormatValue}</format>
-        </chunk>
-
-");
-        }
-        
-        builder.Append(@"   </output>
-</generic>
-</PropertyList>
-");
-        return builder.ToString();
-    }
-    */
 
     private Type ParseType(string typeString)
     {
