@@ -57,16 +57,24 @@ public class PostgresDatabase : IPostgresDatabase
         }
     }
 
-    public FlightSessionDal? GetSession(int id)
+    public FlightSessionDal? GetSessionWithProperties(int id)
     {
         using (var dbContext = new PostgresDbContext(_connectionString))
         {
-            var session = dbContext.FlightSessions.FirstOrDefault(s => s.Id == id);
+            var session = dbContext.FlightSessions.Include(s => s.PropertiesCollection).FirstOrDefault(s => s.Id == id);
             return session;
         }
     }
 
     public List<FlightSessionDal> GetAllSessions()
+    {
+        using (var dbContext = new PostgresDbContext(_connectionString))
+        {
+            return dbContext.FlightSessions.ToList();
+        }
+    }
+    
+    public List<FlightSessionDal> GetAllSessionsWithProperties()
     {
         using (var dbContext = new PostgresDbContext(_connectionString))
         {

@@ -10,7 +10,7 @@ public interface IPostgresDatabase
     
     void UpdateSession(FlightSessionDal user);
     
-    FlightSessionDal? GetSession(int id);
+    FlightSessionDal? GetSessionWithProperties(int id);
     
     List<FlightSessionDal> GetAllSessions();
 

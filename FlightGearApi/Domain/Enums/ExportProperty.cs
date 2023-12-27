@@ -30,7 +30,7 @@ public enum ExportProperty
 
 public static class ExportPropertyExtensions
 {
-    private static readonly Dictionary<ExportProperty, (string RussianString, string Path, double Multiplier)> PropertiesInfoDict = new()
+    public static readonly Dictionary<ExportProperty, (string RussianString, string Path, double Multiplier)> PropertiesInfoDict = new()
     {
         { ExportProperty.Longitude, ("Долгота", "/position/longitude-deg", 1)},
         { ExportProperty.Latitude, ("Широта", "/position/latitude-deg", 1)},

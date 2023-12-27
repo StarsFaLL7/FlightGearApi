@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FlightGearApi.Application.Controllers;
 
 /// <summary>
-/// Контроллер настройки запуска полёта
+/// Контроллер для ПМ Планирования
 /// </summary>
 [Route("api/launch")]
 public class LaunchController : Controller
@@ -29,26 +29,33 @@ public class LaunchController : Controller
     }
     
     /// <summary>
-    /// Запустить симуляцию
+    /// Запустить симуляцию с ранее сохраннёными этапами полёта
     /// </summary>
+    /// <param name="parameters">Модель с указанием названия сессии (sessionName) и кол-вом считываний параметров в секунду (refreshesPerSecond)</param>
+    /// <returns></returns>
     [HttpPost("start")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status409Conflict)]
     public async Task<IActionResult> LaunchSimulation([FromServices] IPostgresDatabase database,[FromBody] LaunchSessionRequestDto parameters)
     {
         if (_manipulator.Stages.Count < 1)
         {
-            return BadRequest("No stages added");
+            return BadRequest("No flight stages have been added.");
         }
         if (await _launcher.TryLaunchSimulation(parameters.SessionName, parameters.RefreshesPerSecond, database))
         {
             return Ok();
         }
-        return Conflict("Simulation already started.");
+        return Conflict("The simulator is currently running.");
     }
     
     /// <summary>
-    /// Выйти из симуляции
+    /// Ручной выход из симуляции (использовать только в крит. случаях)
     /// </summary>
     [HttpPost("exit")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ExitSimulation()
     {
         if (_launcher.IsRunning)
@@ -57,30 +64,32 @@ public class LaunchController : Controller
             return Ok();
         }
         
-        return Conflict("Simulation already exited.");
+        return Conflict("The simulator is not currently running..");
     }
     
     /// <summary>
-    /// Добавить этап для полёта с заданными характеристиками.
+    /// Добавить этап для полёта с заданными характеристиками
     /// </summary>
     /// <param name="stage">Новый этап полёта с индексом вставки</param>
-    /// <returns></returns>
     [HttpPost("stages")]
-    public async Task<IActionResult> AddFlightStage([FromBody] FlightStageModel stage)
+    [ProducesResponseType(typeof(FlightStageDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> AddFlightStage([FromBody] FlightStageDto stage)
     {
         if (_launcher.IsRunning)
         {
-            return Conflict("Simulation is in progress.");
+            return Conflict("The simulator is currently running, so stages cannot be edited.");
         }
         _manipulator.AddStage(stage);
-        return Ok();
+        return Ok(stage);
     }
     
     /// <summary>
-    /// Получить все заданные этапы полёта.
+    /// Получить все сохранённые этапы полёта.
     /// </summary>
     /// <returns></returns>
     [HttpGet("stages")]
+    [ProducesResponseType(typeof(List<FlightStageDto>),StatusCodes.Status200OK)]
     public async Task<IActionResult> GetFlightStages()
     {
         return Ok(_manipulator.Stages);
@@ -89,18 +98,57 @@ public class LaunchController : Controller
     /// <summary>
     /// Удалить этап полёта по указанному индексу.
     /// </summary>
-    /// <param name="index">Индекс, с которого удалить этап полёта.</param>
+    /// <param name="index">Индекс этапа полёта, который нужно удалить.</param>
     /// <returns></returns>
     [HttpDelete("stages/{index:int}")]
-    public async Task<IActionResult> RemoveFlightStages([FromRoute] int index)
+    [ProducesResponseType(typeof(FlightStageDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RemoveFlightStage([FromRoute] int index)
     {
         if (index > _manipulator.Stages.Count - 1 || index < 0)
         {
-            return BadRequest("Index is invalid");
+            if (_manipulator.Stages.Count == 0)
+            {
+                return BadRequest($"Index is invalid. Stages sequence has 0 items.");
+            }
+            return BadRequest($"Index is invalid. Index must be between 0 and {_manipulator.Stages.Count-1}");
         }
-
+        if (_launcher.IsRunning)
+        {
+            return Conflict("The simulator is currently running, so stages cannot be edited.");
+        }
         var stage = _manipulator.Stages[index];
         _manipulator.Stages.RemoveAt(index);
         return Ok(stage);
+    }
+    
+    /// <summary>
+    /// Изменить параметры этапа полёта на указанном индексе.
+    /// </summary>
+    /// <param name="index">Индекс этапа полёта, который нужно обновить.</param>
+    /// <param name="updatedStage">Новые значения параметров этапа полёта.</param>
+    /// <returns></returns>
+    [HttpPut("stages/{index:int}")]
+    [ProducesResponseType(typeof(FlightStageDto),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(string),StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> EditFlightStage([FromRoute] int index, [FromBody] FlightStageDto updatedStage)
+    {
+        if (index > _manipulator.Stages.Count - 1 || index < 0)
+        {
+            if (_manipulator.Stages.Count == 0)
+            {
+                return BadRequest($"Index is invalid. Stages sequence has 0 items.");
+            }
+            return BadRequest($"Index is invalid. Index must be between 0 and {_manipulator.Stages.Count-1}");
+        }
+        if (_launcher.IsRunning)
+        {
+            return Conflict("The simulator is currently running, so stages cannot be edited.");
+        }
+
+        _manipulator.Stages[index] = updatedStage;
+        return Ok(index);
     }
 }

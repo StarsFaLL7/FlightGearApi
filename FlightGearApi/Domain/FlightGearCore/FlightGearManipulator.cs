@@ -31,7 +31,7 @@ public class FlightGearManipulator
 
     public int? SessionId { get; set; } = null;
     public bool ShouldFlyForward { get; set; }
-    public List<FlightStageModel> Stages { get; }
+    public List<FlightStageDto> Stages { get; }
     public bool AllStagesCompleted { get; private set; }
     
     public FlightGearManipulator(ConnectionListener listener, [FromServices] IPostgresDatabase database, [FromServices] ExportParametersManager exportManager)
@@ -39,12 +39,12 @@ public class FlightGearManipulator
         _listener = listener;
         _clientSender = new UdpClient();
         _fgEndpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), IoManager.InputPort);
-        Stages = new List<FlightStageModel>();
+        Stages = new List<FlightStageDto>();
         _database = database;
         _exportManager = exportManager;
     }
 
-    public void AddStage(FlightStageModel stage)
+    public void AddStage(FlightStageDto stage)
     {
         if (Stages.Count == 0)
         {
@@ -59,7 +59,7 @@ public class FlightGearManipulator
         Stages.Insert(stage.Index, stage);
         
         
-        for (var i = stage.Index + 1; i < Stages.Count-1; i++)
+        for (var i = stage.Index + 1; i < Stages.Count; i++)
         {
             Stages[i].Index++;
         }

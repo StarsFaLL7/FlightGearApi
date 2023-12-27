@@ -56,22 +56,11 @@ public class TestController : Controller
         return Ok(result);
     }
     
-    [HttpPost("xml-file")]
-    public async Task<IActionResult> GetXmlFileContent([FromBody] IoType type)
+    [HttpGet("xml-file")]
+    public async Task<IActionResult> GetXmlFileContent()
     {
         var result = _ioManager.GenerateXmlInputFileContent();
         return Ok(result);
-    }
-    
-    [HttpPost("set-parameter")]
-    public async Task<IActionResult> SetParameterTest()
-    {
-        await _manipulator.SendParametersAsync(new Dictionary<UtilityProperty, double>()
-        {
-            { UtilityProperty.ParkingBrake, 0},
-            { UtilityProperty.Aileron, 0.1}
-        });
-        return Ok();
     }
     
     [HttpPost("fly-forward")]

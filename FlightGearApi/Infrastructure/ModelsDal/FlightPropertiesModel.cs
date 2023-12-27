@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FlightGearApi.Domain.Enums;
 using FlightGearApi.Infrastructure.Attributes;
 
 namespace FlightGearApi.Infrastructure.ModelsDal;
@@ -20,75 +21,75 @@ public class FlightPropertiesModel
     [ForeignKey("FlightSessionId")] 
     public FlightSessionDal FlightSession { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Longitude)]
     public double Longitude { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Latitude)]
     public double Latitude { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.AltitudeAgl, 0.3048)]
     public double AltitudeAgl { get; set; } // Истинная
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.Altitude,0.3048)]
     public double Altitude { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.AltitudeIndicatedBaro, 0.3048)]
     public double AltitudeIndicatedBaro { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.AltitudeAbsoluteBaro,0.3048)]
     public double AltitudeAbsoluteBaro { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Roll)]
     public double Roll { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Pitch)]
     public double Pitch { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Heading)]
     public double Heading { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.HeadingMagnetic)]
     public double HeadingMagnetic { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.HeadingMagneticIndicated)]
     public double HeadingMagneticIndicated { get; set; }
     
-    [PropertyValue(0.514444)]
+    [PropertyValue(ExportProperty.IndicatedSpeed, 0.514444)]
     public double IndicatedSpeed { get; set; } // Приборная скорость
     
-    [PropertyValue(0.514444)]
+    [PropertyValue(ExportProperty.Airspeed, 0.514444)]
     public double Airspeed { get; set; }
     
-    [PropertyValue(0.514444)]
+    [PropertyValue(ExportProperty.VerticalBaroSpeed, 0.514444)]
     public double VerticalBaroSpeed { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Mach)]
     public double Mach { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.UBodyMps, 0.3048)]
     public double UBodyMps { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.VBodyMps, 0.3048)]
     public double VBodyMps { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.WBodyMps, 0.3048)]
     public double WBodyMps { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.SideOverload)]
     public double SideOverload { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.PilotOverload, 0.3048)]
     public double PilotOverload { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.AccelerationY, 0.3048)]
     public double AccelerationY { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.AccelerationX, 0.3048)]
     public double AccelerationX { get; set; }
     
-    [PropertyValue(0.3048)]
+    [PropertyValue(ExportProperty.AccelerationNormal, 0.3048)]
     public double AccelerationNormal { get; set; }
     
-    [PropertyValue]
+    [PropertyValue(ExportProperty.Temperature)]
     public double Temperature { get; set; }
 }
