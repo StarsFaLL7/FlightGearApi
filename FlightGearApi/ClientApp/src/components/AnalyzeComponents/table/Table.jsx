@@ -11,9 +11,7 @@ function Table() {
     const route = `https://localhost:7110/api/analytics/sessions/${currentSession}`;
     console.log(route);
     useEffect(() => {
-        fetch(route, {
-            mode: 'no-cors',
-        })
+        fetch(route)
             .then(data => console.log(data))
             .then(d => setDataParams(d))
     }, [route]);

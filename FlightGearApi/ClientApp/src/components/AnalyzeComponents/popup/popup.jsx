@@ -9,9 +9,7 @@ const PopupLoad = () => {
     const ROUTE = "https://localhost:7110/api/analytics/sessions/"
 
     useEffect(() => {
-        fetch(ROUTE, {
-            mode: 'no-cors',
-        })
+        fetch(ROUTE)
             .then(data => console.log(data))
             .then(s => setSessionList(s));
     }, []);
