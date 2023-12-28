@@ -152,7 +152,7 @@ public class FlightGearManipulator
         else
         {
             Console.WriteLine("ALT: Goal altitude != altitude");
-            goalVerticalSpeed = Math.Clamp((goalAltitude - altitude)*4, -1000, 1000);
+            goalVerticalSpeed = Math.Clamp((goalAltitude - altitude)*5, -1000, 1000);
             if (_islLowSpeed && goalVerticalSpeed > 0)
             {
                 goalVerticalSpeed = -(1000 - indicatedSpeed/80*500);
@@ -204,13 +204,18 @@ public class FlightGearManipulator
             }
             else
             {
+                var endTime = DateTime.Now;
                 AllStagesCompleted = true;
                 Console.WriteLine("--- Mission completed! ---");
-                StaticLogger.Log(LogLevel.Information, "All simulation stages successfully completed!");
+                await StaticLogger.LogAsync(LogLevel.Information, "All simulation stages successfully completed!");
                 await Task.Delay(2000); // Дожидаемся выхода из FG, чтобы прочитать файл
                 // SAVING RESULTS TO BD
                 if (SessionId != null)
                 {
+                    var session = _database.GetSessionWithoutProperties(SessionId.Value);
+                    session.DurationSec = (int)(endTime - session.Date).TotalSeconds;
+                    _database.UpdateSession(session);
+                    
                     var properties = _exportManager.GetExportedProperties(SessionId.Value);
                     _database.CreatePropertiesFromRange(properties, SessionId.Value);
                     Console.WriteLine(properties);

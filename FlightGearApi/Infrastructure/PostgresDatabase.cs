@@ -1,8 +1,11 @@
-﻿using System.Data;
+﻿using System.Reflection;
+using FlightGearApi.Application.DTO;
+using FlightGearApi.Domain.Enums;
+using FlightGearApi.Infrastructure.Attributes;
 using FlightGearApi.Infrastructure.Interfaces;
 using FlightGearApi.Infrastructure.ModelsDal;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
+using Microsoft.Extensions.Configuration;
 
 namespace FlightGearApi.Infrastructure;
 
@@ -20,7 +23,7 @@ public class PostgresDatabase : IPostgresDatabase
     public int CreateSession(FlightSessionDal session)
     {
         session.Date = TimeZoneInfo.ConvertTimeToUtc(session.Date);
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             dbContext.FlightSessions.Add(session);
             dbContext.SaveChanges();
@@ -31,7 +34,7 @@ public class PostgresDatabase : IPostgresDatabase
 
     public void DeleteSession(int id)
     {
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             var session = dbContext.FlightSessions.FirstOrDefault(s => s.Id == id);
             if (session != null)
@@ -44,7 +47,7 @@ public class PostgresDatabase : IPostgresDatabase
 
     public void UpdateSession(FlightSessionDal session)
     {
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             var sessionToUpdate = dbContext.FlightSessions.FirstOrDefault(s => s.Id == session.Id);
             if (sessionToUpdate != null)
@@ -59,16 +62,25 @@ public class PostgresDatabase : IPostgresDatabase
 
     public FlightSessionDal? GetSessionWithProperties(int id)
     {
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             var session = dbContext.FlightSessions.Include(s => s.PropertiesCollection).FirstOrDefault(s => s.Id == id);
+            return session;
+        }
+    }
+    
+    public FlightSessionDal? GetSessionWithoutProperties(int id)
+    {
+        using (var dbContext = new PostgresDbContext(_configuration))
+        {
+            var session = dbContext.FlightSessions.FirstOrDefault(s => s.Id == id);
             return session;
         }
     }
 
     public List<FlightSessionDal> GetAllSessions()
     {
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             return dbContext.FlightSessions.ToList();
         }
@@ -76,7 +88,7 @@ public class PostgresDatabase : IPostgresDatabase
     
     public List<FlightSessionDal> GetAllSessionsWithProperties()
     {
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             return dbContext.FlightSessions.Include(s => s.PropertiesCollection).ToList();
         }
@@ -85,7 +97,7 @@ public class PostgresDatabase : IPostgresDatabase
     public int CreateProperties(FlightPropertiesModel properties, int sessionId)
     {
         properties.Id = sessionId;
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             dbContext.FlightProperties.Add(properties);
             dbContext.SaveChanges();
@@ -95,7 +107,7 @@ public class PostgresDatabase : IPostgresDatabase
 
     public void CreatePropertiesFromRange(ICollection<FlightPropertiesModel> propertiesList, int sessionId)
     {
-        using (var dbContext = new PostgresDbContext(_connectionString))
+        using (var dbContext = new PostgresDbContext(_configuration))
         {
             foreach (var properties in propertiesList)
             {
@@ -103,5 +115,34 @@ public class PostgresDatabase : IPostgresDatabase
             }
             dbContext.SaveChanges();
         }
+    }
+
+    public List<PropertiesValuesResponseDto> GetPropertiesValuesResponseList(FlightSessionDal sessionWithProperties)
+    {
+        var result = new List<PropertiesValuesResponseDto>();
+        if (sessionWithProperties.PropertiesCollection.Count == 0)
+        {
+            return result;
+        }
+        
+        var propertiesInfos = typeof(FlightPropertiesModel).GetProperties()
+            .Where(p => Attribute.IsDefined(p, typeof(PropertyValueAttribute)))
+            .ToArray();
+        foreach (var propertyModel in sessionWithProperties.PropertiesCollection)
+        {
+            foreach (var property in propertiesInfos)
+            {
+                var attribute = property.GetCustomAttribute<PropertyValueAttribute>();
+                var russianName = ExportPropertyExtensions.PropertiesInfoDict[attribute.PropertyEnum].RussianString;
+                var dto = result.FirstOrDefault(m => m.Name == russianName);
+                if (dto == null)
+                {
+                    dto = new PropertiesValuesResponseDto() { Name = russianName, Data = new List<PropertyValueDto>() };
+                    result.Add(dto);
+                }
+                dto.Data.Add(new PropertyValueDto() { Id = propertyModel.Order, Value = (double)property.GetValue(propertyModel)});
+            }
+        }
+        return result;
     }
 }

@@ -11,9 +11,9 @@ public class PostgresDbContext : DbContext
     
     public DbSet<FlightPropertiesModel> FlightProperties { get; set; }
 
-    public PostgresDbContext(string connectionString)
+    public PostgresDbContext(IConfiguration configuration)
     {
-        _connectionString = connectionString;
+        _connectionString = configuration.GetConnectionString("DefaultConnection");
     }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
