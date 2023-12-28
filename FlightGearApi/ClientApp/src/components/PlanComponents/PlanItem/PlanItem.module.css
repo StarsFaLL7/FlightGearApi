@@ -1,0 +1,49 @@
+.minus{
+    border: 1px solid #000;
+    border-radius: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 36px;
+    height: 36px;
+    background: #2a65a1;
+}
+.added_flight{
+    display: flex;
+    background-color: #ecf0f1;
+    border: 1px solid;
+    border-color: #000000;
+    border-radius: 30px;
+    min-height: 40px;
+    width: 100%;
+    margin-top: 1%;
+    align-items: center;
+}
+.table_element{
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+.table_element_item_2{
+    text-align: center;
+    word-wrap:break-word;
+    display: block;
+    width: 10%;
+    margin: auto;
+    justify-items: center;
+}
+.table_element_item_3{
+    text-align: center;
+    word-wrap:break-word;
+    display: block;
+    width: 11%;
+    justify-items: center;
+    margin: auto;
+}
+.table_element_item_4{
+    text-align: center;
+    word-wrap:break-word;
+    display: block;
+    width: 12%;
+    justify-items: center;
+    margin: auto;
+}
