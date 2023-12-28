@@ -19,7 +19,9 @@ const ChartComponent = () => {
   const route = `https://localhost:7110/api/analytics/sessions/${currentSession}/values`;
   // Загрузка данных из API
   useEffect(() => {
-    fetch(route)
+    fetch(route, {
+      mode: 'no-cors',
+    })
        .then(response => response.json())
        .then(data => setData(data));
   }, [isReloading, route]);

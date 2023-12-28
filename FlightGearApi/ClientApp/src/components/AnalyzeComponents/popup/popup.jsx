@@ -9,7 +9,11 @@ const PopupLoad = () => {
     const ROUTE = "https://localhost:7110/api/analytics/sessions/"
 
     useEffect(() => {
-        fetch(ROUTE).then(data => console.log(data)).then(s => setSessionList(s));
+        fetch(ROUTE, {
+            mode: 'no-cors',
+        })
+            .then(data => console.log(data))
+            .then(s => setSessionList(s));
     }, []);
 
     // Здесь должен получаться json в формате:
