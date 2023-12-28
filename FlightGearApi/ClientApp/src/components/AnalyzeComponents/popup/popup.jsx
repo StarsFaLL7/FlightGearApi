@@ -5,6 +5,7 @@ import { setSession } from '../../../redux/ChartSlice/ChartSlice';
 
 const PopupLoad = () => {
     const [sessionList, setSessionList] = useState([]);
+    console.log(sessionList);
     const dispatch = useDispatch();
     const ROUTE = "https://localhost:7110/api/analytics/sessions/"
 
@@ -32,7 +33,7 @@ const PopupLoad = () => {
         <h1 className={styles.popup__title}>Выберите сессию</h1>
         {/* <button onClick={() => onClickHandler(1)}>Сессия 1</button>
         <button onClick={() => onClickHandler(2)}>Сессия 2</button> */}
-        {sessionList.map((s) => <button onClick={() => onClickHandler(s.id)}>{s.name}</button>)};
+        {sessionList.map((s) => <button onClick={() => onClickHandler(s.id)}>ессия {s.id}</button>)};
         {/* {sessionList} */}
     </div>
 };
