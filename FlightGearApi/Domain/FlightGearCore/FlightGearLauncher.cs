@@ -43,9 +43,7 @@ public class FlightGearLauncher
         LaunchArguments["disable-clouds"] = null;
         LaunchArguments["disable-sound"] = null;
         LaunchArguments["airport"] = "KSFO";
-        //LaunchArguments["state"] = "auto";
-        LaunchArguments["altitude"] = "3000";
-        
+        LaunchArguments["altitude"] = "3281"; // 1000 метров
         
     }
 
