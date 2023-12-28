@@ -1,8 +1,8 @@
 import './Table.module.css';
 import React, { useState, useEffect } from 'react';
 import Item from '../tableItem/item';
-import dataTable1 from '../../../assets/response1';
-import dataTable2 from '../../../assets/response2';
+// import dataTable1 from '../../../assets/response1';
+// import dataTable2 from '../../../assets/response2';
 import { useSelector } from 'react-redux';
 
 function Table() {
@@ -15,7 +15,7 @@ function Table() {
     }, [route]);
 
     //Test
-    const dataTable = currentSession===1 ? dataTable1: dataTable2;
+    // const dataTable = currentSession===1 ? dataTable1: dataTable2;
     
     return <table>
         <thead>
@@ -24,9 +24,9 @@ function Table() {
             </tr>
         </thead>
         <tbody>
-        {dataTable.map((par) => <Item name={par.name} count={par.count}/>)
+        {dataParams.map((par) => <Item name={par.name} count={par.count}/>)
         }
-        {dataParams}
+        {/* {dataParams} */}
         </tbody>
     </table>
 };

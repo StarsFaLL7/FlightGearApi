@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import dataChart1 from '../../../assets/response11.json';
-import dataChart2 from '../../../assets/response22.json';
+// import dataChart1 from '../../../assets/response11.json';
+// import dataChart2 from '../../../assets/response22.json';
 import { useSelector } from 'react-redux';
 
 // Компонент-график
@@ -13,9 +13,9 @@ const ChartComponent = () => {
   const currentSession = useSelector((state) => state.chart.currentSession);
   
   //Тест
-  const dataChart = currentSession === 1 ? dataChart1: dataChart2;
+  // const dataChart = currentSession === 1 ? dataChart1: dataChart2;
 
-  const filteredDataChart = dataChart.filter((s) => datasChart.includes(s.name));
+  const filteredDataChart = data.filter((s) => datasChart.includes(s.name));
   const route = `https://localhost:7110/api/analytics/sessions/${currentSession}/values`;
   // Загрузка данных из API
   useEffect(() => {
@@ -55,7 +55,7 @@ const ChartComponent = () => {
   return <>
        <ResponsiveContainer width="100%" height="100%">
          <LineChart
-           data={dataChart}
+           data={data}
            margin={{ top: 10, right: 30, left: 20, bottom: 55 }}
          >
            {/* Ось X */}
@@ -93,7 +93,6 @@ const ChartComponent = () => {
            }
  
            {/* Отрисовка дополнительных данных */}
-           {data}
          </LineChart>
        </ResponsiveContainer>
      </>

@@ -28,10 +28,10 @@ const PopupLoad = () => {
 
     return <div className={styles.popup}>
         <h1 className={styles.popup__title}>Выберите сессию</h1>
-        <button onClick={() => onClickHandler(1)}>Сессия 1</button>
-        <button onClick={() => onClickHandler(2)}>Сессия 2</button>
-        {/* {sessionList.map((s) => <button onClick={() => onClickHandler(s.id)}>{s.name}</button>)}; */}
-        {sessionList}
+        {/* <button onClick={() => onClickHandler(1)}>Сессия 1</button>
+        <button onClick={() => onClickHandler(2)}>Сессия 2</button> */}
+        {sessionList.map((s) => <button onClick={() => onClickHandler(s.id)}>{s.name}</button>)};
+        {/* {sessionList} */}
     </div>
 };
 
