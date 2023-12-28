@@ -12,7 +12,7 @@ const PopupLoad = () => {
     useEffect(() => {
         fetch(ROUTE)
             .then(data => console.log(data))
-            .then(s => setSessionList(s));
+            .then(s => setSessionList(s.json()));
     }, []);
 
     // Здесь должен получаться json в формате:

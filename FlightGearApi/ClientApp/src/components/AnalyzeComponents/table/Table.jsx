@@ -13,7 +13,7 @@ function Table() {
     useEffect(() => {
         fetch(route)
             .then(data => console.log(data))
-            .then(d => setDataParams(d))
+            .then(d => setDataParams(d.json()))
     }, [route]);
 
     //Test
