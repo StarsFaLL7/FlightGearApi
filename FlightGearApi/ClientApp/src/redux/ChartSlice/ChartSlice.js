@@ -5,7 +5,7 @@ const chartSlice = createSlice({
   initialState: {
     data: [],
     isReloading: 0,
-    currentSession: 1
+    currentSession: null
   },
   reducers: {
     setData(state, action) {
