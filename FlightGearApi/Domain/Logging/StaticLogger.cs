@@ -4,7 +4,7 @@ public static class StaticLogger
 {
     private static string? _logFile;
     private static bool _logStarted;
-    
+    private static Semaphore semaphore = new Semaphore(initialCount: 1, maximumCount: 1);
     public static void StartNewLog()
     {
         _logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @$"logs\log-{DateTime.Now.ToString("dd/MM/yyyy_HH-mm")}.log");
@@ -23,10 +23,13 @@ public static class StaticLogger
         }
 
         var str = $"[{DateTime.Now.ToString("HH:mm:ss:fff")}] [{logLevel.ToString()}] {message}\n";
+        semaphore.WaitOne();
         await using (var writer = new StreamWriter(_logFile, true))
         {
             await writer.WriteAsync(str);
         }
+
+        semaphore.Release();
         Console.Write(str);
     }
 

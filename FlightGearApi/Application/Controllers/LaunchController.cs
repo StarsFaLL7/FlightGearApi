@@ -118,9 +118,8 @@ public class LaunchController : Controller
         {
             return Conflict("The simulator is currently running, so stages cannot be edited.");
         }
-        var stage = _manipulator.Stages[index];
-        _manipulator.Stages.RemoveAt(index);
-        return Ok(stage);
+        var removedStage = _manipulator.RemoveStage(index);
+        return Ok(removedStage);
     }
     
     /// <summary>
@@ -148,7 +147,7 @@ public class LaunchController : Controller
             return Conflict("The simulator is currently running, so stages cannot be edited.");
         }
 
-        _manipulator.Stages[index] = updatedStage;
+        _manipulator.UpdateStage(updatedStage, index);
         return Ok(index);
     }
 }
