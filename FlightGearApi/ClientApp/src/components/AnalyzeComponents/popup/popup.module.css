@@ -1,4 +1,5 @@
 .popup {
+    overflow: hidden;
     font-family: "Constantia", sans-serif;
     border-radius: 1em;
     padding: 1%;

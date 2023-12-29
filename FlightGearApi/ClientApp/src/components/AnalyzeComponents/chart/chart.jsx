@@ -3,6 +3,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 // import dataChart1 from '../../../assets/response11.json';
 // import dataChart2 from '../../../assets/response22.json';
 import { useSelector } from 'react-redux';
+import axios from "axios";
 
 // Компонент-график
 const ChartComponent = () => {
@@ -19,13 +20,13 @@ const ChartComponent = () => {
   const route = `https://localhost:7110/api/analytics/sessions/${currentSession}/values`;
   // Загрузка данных из API
   useEffect(() => {
-    const fetchData = async() => {
-      await fetch(route)
-          .then(data => console.log(data))
-          .then(d => d.json())
+    async function fetchData() {
+      // You can await here
+      const result =  await axios(route);
+      console.log("Chart result.Data = ", result.data);
+      setData(result.data);
     }
-    const getData = fetchData()
-    getData().then((data) => setData(data))
+    fetchData();
   }, [isReloading, route]);
  
   // Массив цветов
