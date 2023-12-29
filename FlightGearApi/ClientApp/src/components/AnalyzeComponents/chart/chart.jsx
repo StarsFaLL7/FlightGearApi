@@ -19,9 +19,13 @@ const ChartComponent = () => {
   const route = `https://localhost:7110/api/analytics/sessions/${currentSession}/values`;
   // Загрузка данных из API
   useEffect(() => {
-    fetch(route)
-       .then(response => response.json())
-       .then(data => setData(data));
+    const fetchData = async() => {
+      await fetch(route)
+          .then(data => console.log(data))
+          .then(d => d.json())
+    }
+    const getData = fetchData()
+    getData().then((data) => setData(data))
   }, [isReloading, route]);
  
   // Массив цветов

@@ -11,9 +11,13 @@ function Table() {
     const route = `https://localhost:7110/api/analytics/sessions/${currentSession}`;
     console.log(route);
     useEffect(() => {
-        fetch(route)
-            .then(data => console.log(data))
-            .then(d => setDataParams(d.json()))
+        const fetchData = async() => {
+            await fetch(route)
+                .then(data => console.log(data))
+                .then(d => d.json())
+        }
+        const getData = fetchData()
+        getData().then((data) => setDataParams(data))
     }, [route]);
 
     //Test
