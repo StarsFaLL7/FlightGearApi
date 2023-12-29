@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-// import dataChart1 from '../../../assets/response11.json';
-// import dataChart2 from '../../../assets/response22.json';
 import { useSelector } from 'react-redux';
 import axios from "axios";
 
@@ -12,9 +10,7 @@ const ChartComponent = () => {
   const datasChart = useSelector((state) => state.chart.data);
   const isReloading = useSelector((state) => state.chart.isReloading);
   const currentSession = useSelector((state) => state.chart.currentSession);
-  
-  //Тест
-  // const dataChart = currentSession === 1 ? dataChart1: dataChart2;
+
 
   const filteredDataChart = data.filter((s) => datasChart.includes(s.name));
   const route = `https://localhost:7110/api/analytics/sessions/${currentSession}/values`;
@@ -53,8 +49,6 @@ const ChartComponent = () => {
      let rand = min + Math.random() * (max + 1 - min);
      return Math.floor(rand);
   }
-
-  // console.log('datachart', filteredDataChart)
  
   // Отрисовка
   return <>

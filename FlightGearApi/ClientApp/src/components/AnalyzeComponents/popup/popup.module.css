@@ -33,8 +33,24 @@
     color: #fff; 
     border: none; 
     padding: 0.5rem 1rem; 
-    margin-bottom: 1rem; 
+    margin-bottom: 1rem;
 }
+
+.popup::-webkit-scrollbar{
+    width: 10px;
+}
+
+.popup::-webkit-scrollbar-track {
+    -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
+    background-color: #f9f9fd;
+  }
+  
+.popup::-webkit-scrollbar-thumb {
+    background-color: #293f90d3;
+    background-image: -webkit-gradient(linear, 0 0, 0 100%,
+                      color-stop(.5, rgba(83, 119, 188, 0.708)),
+                      color-stop(.5, transparent), to(transparent));
+  }
 
 .popup button:hover {
     transform: translate(0,-3px);
