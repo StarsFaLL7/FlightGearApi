@@ -34,7 +34,8 @@ builder.Services.AddCors(c =>
 {
     c.AddPolicy("AllowReactApp",
         b => b
-            .WithOrigins("http://localhost:44409", "http://localhost:5109", "http://localhost:7110")
+            .WithOrigins("http://localhost:44409", "http://localhost:5109", "http://localhost:7110",
+                "https://localhost:44409", "https://localhost:5109", "https://localhost:7110")
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials());
@@ -49,6 +50,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseCors("AllowReactApp");
 app.UseSwagger();
 app.UseSwaggerUI();
 

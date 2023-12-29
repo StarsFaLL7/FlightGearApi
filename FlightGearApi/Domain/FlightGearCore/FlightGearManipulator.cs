@@ -46,23 +46,46 @@ public class FlightGearManipulator
 
     public void AddStage(FlightStageDto stage)
     {
-        if (Stages.Count == 0)
+        if (stage.Index > 0 && stage.Index < Stages.Count)
+        {
+            Stages.Insert(stage.Index, stage);
+        }
+        else if (stage.Index < 0)
+        {
+            Stages.Insert(0, stage);
+        }
+        else
         {
             Stages.Add(stage);
-            stage.Index = 0;
-            return;
         }
-        if (stage.Index > Stages.Count)
-        {
-            stage.Index = Stages.Count;
-        }
-        Stages.Insert(stage.Index, stage);
         
-        
-        for (var i = stage.Index + 1; i < Stages.Count; i++)
+        for (var i = 0; i < Stages.Count; i++)
         {
-            Stages[i].Index++;
+            Stages[i].Index = i;
         }
+    }
+    
+    public FlightStageDto RemoveStage(int index)
+    {
+        var stage = Stages[index];
+        Stages.RemoveAt(index);
+        
+        for (var i = 0; i < Stages.Count; i++)
+        {
+            Stages[i].Index = i;
+        }
+
+        return stage;
+    }
+    
+    public FlightStageDto UpdateStage(FlightStageDto stage, int index)
+    {
+        var oldStage = Stages[index];
+
+        RemoveStage(oldStage.Index);
+        AddStage(stage);
+        
+        return stage;
     }
 
     public async void FlyCycle()
