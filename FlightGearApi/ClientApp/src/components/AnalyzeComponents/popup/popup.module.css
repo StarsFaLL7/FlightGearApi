@@ -17,12 +17,18 @@
     background-color: rgb(107, 168, 217);   
 }
 
+.sessionList {
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
 .popup__title {
     margin-bottom: 10%;
     margin-top: 5%;
 }
 
-.popup button {
+.sessionList button {
     margin-left:6%;
     margin-right:6%;
     font-size: 20px;
@@ -36,23 +42,24 @@
     margin-bottom: 1rem;
 }
 
-.popup::-webkit-scrollbar{
+.sessionList::-webkit-scrollbar{
     width: 10px;
 }
 
-.popup::-webkit-scrollbar-track {
+.sessionList::-webkit-scrollbar-track {
     -webkit-box-shadow: 5px 5px 5px -5px rgba(34, 60, 80, 0.2) inset;
     background-color: #f9f9fd;
   }
-  
-.popup::-webkit-scrollbar-thumb {
+
+.sessionList::-webkit-scrollbar-thumb {
     background-color: #293f90d3;
     background-image: -webkit-gradient(linear, 0 0, 0 100%,
                       color-stop(.5, rgba(83, 119, 188, 0.708)),
                       color-stop(.5, transparent), to(transparent));
   }
 
-.popup button:hover {
+.sessionList button:hover {
     transform: translate(0,-3px);
     box-shadow: 0 20px 40px 0 rgba(11, 99, 246, 1);
 }
+

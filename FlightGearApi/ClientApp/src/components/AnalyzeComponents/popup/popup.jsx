@@ -29,7 +29,9 @@ const PopupLoad = () => {
 
     return <div className={styles.popup}>
         <h1 className={styles.popup__title}>Выберите сессию</h1>
-        {sessionList.map((s) => <button key={s.id} onClick={() => onClickHandler(s.id)}>Сессия {s.id}</button>)};
+        <div className={styles.sessionList}>
+        {sessionList.map((s) => <button key={s.id} onClick={() => onClickHandler(s.id)}>Сессия {s.title} ({s.id})</button>)}
+        </div>
     </div>
 };
 
