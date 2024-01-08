@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import PlanItem from "../PlanItem/PlanItem";
 import plus from '../../../assets/img/Union.png'
 import styles from './PlanTable.module.css';
+import axios from "axios";
 
 
 const MainApp = () => {
@@ -64,38 +65,58 @@ const MainApp = () => {
     console.log(updatedPlan);
   };
 
-  const sendDataToServer = async (data) => {
-    await fetch(SERVER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+  const sendDataToServer = async (body) => {
+    // Параметр функции - data
+    // await fetch(SERVER_URL, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(data)
+    // })
+    //   .then((response) => {
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     }
+    //   })
+    //   .then((response) => setSendingData(response.json()));
+
+      await axios({
+        method: 'post',
+        url: SERVER_URL,
+        data: body
       })
-      .then((response) => setSendingData(response.json()));
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        })
+        .then((response) => setSendingData(response.json()));
 
     return sendingData;
   };
 
   const fetchPlanData = async () => {
-    await fetch(SERVER_URL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-      })
-      .then((response) => setPlan(response.json()))
-      .catch((err) => console.error('There was an error fetching the data:', err));
+    // await fetch(SERVER_URL, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    // })
+    //   .then((response) => {
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     }
+    //   })
+    //   .then((response) => setPlan(response.json()))
+    //   .catch((err) => console.error('There was an error fetching the data:', err));
+    try {
+      const result = await axios.get(SERVER_URL);
+      console.log('Plan result.data = ', result.data)
+      setPlan(result.data)
+    } catch (err) {
+      console.error('There was an error fetching the data:', err)
+    }
   };
   const onRemoveData = async () => {
     await fetchPlanData();
@@ -142,6 +163,8 @@ const MainApp = () => {
             <div className={styles.scroll}>
             {plan && plan.map((element, index) =>
               <PlanItem
+                key={element.id}
+                id={element.id}
                 index={index}
                 heading={element.heading}
                 speed={element.speed}

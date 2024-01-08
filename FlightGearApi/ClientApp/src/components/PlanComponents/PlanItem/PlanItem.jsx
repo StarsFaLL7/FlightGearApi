@@ -14,8 +14,22 @@ const PlanItem = (props) => {
     }, []);
 
     const handleClick = async () => {
-        await fetch(`https://localhost:7110/api/launch/stages/${props.index}`, {
-            method: 'DELETE'
+        // await fetch(`https://localhost:7110/api/launch/stages/${props.index}`, {
+        //     method: 'DELETE'
+        // })
+        //     .then((response) => {
+        //         if (response.ok) {
+        //             setShowComponent(false);
+        //             props.onRemoveData();
+        //         } else {
+        //             console.error('Failed to delete the plan item with id:', props.id);
+        //         }
+        //     })
+        //     .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
+        
+        await axios ({
+            method: 'delete',
+            url: `https://localhost:7110/api/launch/stages/${props.index}`,
         })
             .then((response) => {
                 if (response.ok) {
