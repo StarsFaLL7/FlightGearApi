@@ -14,18 +14,16 @@
 *.userprefs
 
 # Build results
-FlightGearApi/[Dd]ebug/
-FlightGearApi/[Dd]ebugPublic/
-FlightGearApi/[Rr]elease/
-FlightGearApi/[Rr]eleases/
-FlightGearApi/x64/
-FlightGearApi/x86/
-FlightGearApi/build/
-FlightGearApi/bld/
-FlightGearApi/bin/
-FlightGearApi/Bin/
-FlightGearApi/obj/
-FlightGearApi/Obj/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
 
 # Visual Studio 2015 cache/options directory
 .vs/
