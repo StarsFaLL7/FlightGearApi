@@ -40,6 +40,6 @@ public static class FlightExportPropertyExtensions
             return result.RussianString;
         }
 
-        return "Unknown";
+        return "Неизвестно";
     }
 }

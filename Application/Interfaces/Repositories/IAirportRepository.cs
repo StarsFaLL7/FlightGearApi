@@ -1,6 +1,6 @@
 ﻿namespace Application.Interfaces.Repositories;
 
-public interface IAircraftRepository
+public interface IAirportRepository
 {
     
 }

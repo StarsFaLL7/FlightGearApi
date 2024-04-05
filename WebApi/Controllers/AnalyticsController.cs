@@ -7,11 +7,11 @@ namespace WebApi.Controllers;
 [Route("api/analytics")]
 public class AnalyticsController : Controller
 {
-    private readonly IFlightExportParametersManager _flightExportParametersManager;
+    private readonly IFlightExportedParametersReader _flightExportedParametersReader;
 
-    public AnalyticsController(IFlightExportParametersManager flightExportParametersManager) // Инжектируем сервис через DI
+    public AnalyticsController(IFlightExportedParametersReader flightExportedParametersReader) // Инжектируем сервис через DI
     {
-        _flightExportParametersManager = flightExportParametersManager;
+        _flightExportedParametersReader = flightExportedParametersReader;
     }
     
     /// <summary>
