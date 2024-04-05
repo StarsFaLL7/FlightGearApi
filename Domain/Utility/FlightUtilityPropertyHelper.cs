@@ -109,10 +109,10 @@ public static class FlightUtilityPropertiesHelper
             .ToList();
     }
 
-    public static string GetName(this FlightUtilityProperty property)
+    public static FlightPropertyInfo GetInfo(this FlightUtilityProperty property)
     {
         return OutputProperties.TryGetValue(property, out var outputProperty) ? 
-            outputProperty.Name : 
-            InputProperties[property].Property.Name;
+            outputProperty : 
+            InputProperties[property].Property;
     }
 }

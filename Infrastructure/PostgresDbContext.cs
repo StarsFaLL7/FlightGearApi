@@ -9,11 +9,12 @@ internal class PostgresDbContext : DbContext
     
     public PostgresDbContext(IConfiguration configuration)
     {
-        _connectionString = configuration.GetConnectionString("DefaultConnection");
-        if (_connectionString is null)
+        var readedConnString = configuration.GetConnectionString("DefaultConnection");
+        if (readedConnString is null)
         {
             throw new Exception("Connection string 'DefaultConnection' wasn't found in appsettings.json");
         }
+        _connectionString = readedConnString;
     }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

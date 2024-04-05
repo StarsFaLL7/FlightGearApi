@@ -9,7 +9,6 @@ public static class FlightExportPropertyExtensions
         { FlightExportProperty.AltitudeAgl, ("Истинная высота", "/position/altitude-agl-ft", 0.3048)},
         { FlightExportProperty.Altitude, ("Высота", "/position/altitude-ft", 0.3048)},
         { FlightExportProperty.AltitudeIndicatedBaro, ("Относительная барометрическая высота", "/instrumentation/altimeter/indicated-altitude-ft", 0.3048)},
-        { FlightExportProperty.AltitudeAbsoluteBaro, ("Абсолютная барометрическая высота", "/instrumentation/altimeter/pressure-alt-ft", 0.3048) },
         
         { FlightExportProperty.Mach, ("Число маха", "/velocities/mach", 1)},
         { FlightExportProperty.UBodyMps, ("Продольная составляющая земной скорости", "/velocities/uBody-fps", 0.3048)},
@@ -26,8 +25,7 @@ public static class FlightExportPropertyExtensions
         
         { FlightExportProperty.IndicatedSpeed, ("Приборная скорость", "/instrumentation/indicated-speed-kt", 0.514444)},
 
-        { FlightExportProperty.SideOverload, ("Боковая перегрузка", "/accelerations/pilot-g", 1)},
-        { FlightExportProperty.PilotOverload, ("Перегрузка пилота", "/accelerations/pilot/z-accel-fps_sec", 0.3048)},
+        { FlightExportProperty.PilotOverload, ("Перегрузка пилота", "/accelerations/pilot-g", 1)},
         { FlightExportProperty.AccelerationY, ("Боковое ускороение", "/accelerations/pilot/y-accel-fps_sec", 0.3048)},
         { FlightExportProperty.AccelerationX, ("Продольное ускороение", "/accelerations/pilot/x-accel-fps_sec", 0.3048)},
         { FlightExportProperty.AccelerationNormal, ("Нормальное ускороение", "/accelerations/nlf", 0.3048)},

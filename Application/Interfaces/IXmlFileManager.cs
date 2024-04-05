@@ -2,5 +2,5 @@
 
 public interface IXmlFileManager
 {
-    
+    Task CreateOrUpdateExportXmlFile();
 }

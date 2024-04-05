@@ -2,7 +2,5 @@
 
 public interface IFlightGearLauncher
 {
-    Task<bool> TryLaunchSimulationAsync();
-    
-    
+    Task<bool> TryLaunchFlightGearAsync();
 }
