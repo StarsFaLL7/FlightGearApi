@@ -8,6 +8,8 @@ public enum FlightUtilityProperty
     Rudder, // Прокрутка самолёта для управления рысканием
     SpeedBrake, // Воздушные тормозы
     ParkingBrake,
+    Longitude,
+    Latitude,
     Altitude, // Высота в метрах
     Roll, // Крен
     Pitch, // Тангаж
@@ -19,5 +21,6 @@ public enum FlightUtilityProperty
     ApRollSwitch,
     ApHeadingSwitch,
     ApTargetVerticalPressureRate,
-    ApHeadingHeadingDeg
+    ApHeadingHeadingDeg,
+    
 }

@@ -12,6 +12,14 @@ public static class FlightUtilityPropertiesHelper
             "altitude-ft",
             "double", 
             0.304785) },
+        { FlightUtilityProperty.Latitude, new FlightPropertyInfo(
+            "/position/latitude-deg", 
+            "latitude-deg",
+            "double") },
+        { FlightUtilityProperty.Longitude, new FlightPropertyInfo(
+            "/position/longitude-deg", 
+            "longitude-deg",
+            "double") },
         { FlightUtilityProperty.Roll, new FlightPropertyInfo(
             "/orientation/roll-deg", 
             "roll-deg",

@@ -5,7 +5,7 @@ namespace Domain.ValueObjects;
 
 public class FlightPropertyInfo
 {
-    private string Path { get; }
+    public string Path { get; }
     public string Name { get; }
     public string TypeName { get; }
     public double Multiplier { get; }
