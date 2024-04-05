@@ -7,6 +7,7 @@ public class FlightManipulator : IFlightManipulator
 {
     public FlightManipulator()
     {
+
     }
 
     public async Task InitializeAsync(FlightPlan flightPlan)

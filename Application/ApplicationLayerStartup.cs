@@ -13,8 +13,6 @@ public static class ApplicationLayerStartup
         services.TryAddSingleton<IUserAnalyticsMasterService, UserAnalyticsMasterService>();
         services.TryAddSingleton<IUserSimulationMasterService, UserSimulationMasterService>();
         
-        services.TryAddSingleton<IConnectionReader, ConnectionReader>();
-        services.TryAddSingleton<IConnectionSender, ConnectionSender>();
         services.TryAddSingleton<IFlightExportedParametersReader, FlightExportedParametersReader>();
         services.TryAddSingleton<IFlightGearLauncher, FlightGearLauncher>();
         services.TryAddSingleton<IFlightManipulator, FlightManipulator>();

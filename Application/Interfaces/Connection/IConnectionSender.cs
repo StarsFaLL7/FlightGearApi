@@ -1,6 +1,6 @@
 ﻿using Domain.Enums.FlightUtilityProperty;
 
-namespace Application.Interfaces;
+namespace Application.Interfaces.Connection;
 
 /// <summary>
 /// Сервис для установки значений свойств в FG

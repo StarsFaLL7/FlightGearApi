@@ -1,7 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.Enums.FlightUtilityProperty;
 
-namespace Application.Interfaces;
+namespace Application.Interfaces.Connection;
 
 /// <summary>
 /// Сервис для получения текущих значений параметров из запущенной симуляции
