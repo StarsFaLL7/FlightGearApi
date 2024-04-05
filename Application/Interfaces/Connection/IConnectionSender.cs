@@ -11,6 +11,4 @@ public interface IConnectionSender
     /// Установить указанные значения соответствующим параметрам.
     /// </summary>
     Task SendParametersAsync(Dictionary<FlightUtilityProperty, double> propertiesToChange);
-
-    byte[] ConvertDoublesToBigEndianBytes(double[] numbers);
 }
