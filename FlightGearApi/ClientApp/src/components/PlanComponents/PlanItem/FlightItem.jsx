@@ -3,8 +3,9 @@ import styles from './PlanItem.module.css';
 import minus from '../../../assets/img/Decrease.png';
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
 import "../../../../node_modules/bootstrap/dist/css/bootstrap.css"
+import PlanItem from './PlanItem';
 
-const PlanItem = (props) => {
+const FlightItem = (props) => {
 
     useEffect(() => { return () => { }; }, []);
 
@@ -12,9 +13,7 @@ const PlanItem = (props) => {
         <>
             <div className={styles.added_flight} id={props.id}>
                 <tr className={styles.table_element}>
-                    <td className={styles.table_element_item_2}>{props.heading}</td>
-                    <td className={styles.table_element_item_3}>{props.speed}</td>
-                    <td className={styles.table_element_item_4}>{props.altitude}</td>
+                    <td className={styles.table_element_item_2}>{props.flight_name}</td>
                     <td>
                         <button className={styles.minus} type='button' onClick={() => handleClickDeleteItem(props)}><img src={minus} alt='Decrease' /></button>
                     </td>
@@ -24,4 +23,4 @@ const PlanItem = (props) => {
     )
 }
 
-export default PlanItem;
+export default FlightItem;
