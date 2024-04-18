@@ -27,7 +27,6 @@ public class RoutePoint : BaseEntityWithKey<Guid>
     public required Guid FlightPlanId { get; set; }
     [ForeignKey("FlightPlanId")]
     public FlightPlan FlightPlan { get; set; }
-
     
     public double GetDistanceToIt()
     {
@@ -58,8 +57,15 @@ public class RoutePoint : BaseEntityWithKey<Guid>
             return 0;
         }
 
-        var prevAngle = PreviousRoutePoint.GetDirectionToNextPoint();
-        var curAngle = GetDirectionToNextPoint();
-        return Math.Abs(prevAngle - curAngle);
+        var prevAngle = GeographyHelper.GetDirectionDeg(PreviousRoutePoint.Latitude, 
+            PreviousRoutePoint.Longitude, Latitude, Longitude);
+        var curAngle = GeographyHelper.GetDirectionDeg(Latitude, Longitude,
+            NextRoutePoint.Latitude, NextRoutePoint.Longitude);
+        var angle = Math.Abs(prevAngle - curAngle);
+        if (angle > 180)
+        {
+            angle = 360 - angle;
+        }
+        return angle;
     }
 }
