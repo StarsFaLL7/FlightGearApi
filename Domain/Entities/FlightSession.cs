@@ -3,7 +3,6 @@ using Domain.Base;
 
 namespace Domain.Entities;
 
-[Table("flight_sessions")]
 public class FlightSession : BaseEntityWithKey<Guid>
 {
     public required string Title { get; set; }

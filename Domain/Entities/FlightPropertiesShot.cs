@@ -6,7 +6,6 @@ using Domain.Enums.FlightExportProperty;
 
 namespace Domain.Entities;
 
-[Table("flight_properties_shots")]
 public class FlightPropertiesShot : BaseEntityWithKey<Guid>
 {
     public required int Order { get; set; }

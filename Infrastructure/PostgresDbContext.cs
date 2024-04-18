@@ -8,14 +8,14 @@ internal class PostgresDbContext : DbContext
 {
     private readonly string _connectionString;
 
-    public DbSet<Airport> Airports;
-    public DbSet<AirportRunway> AirportRunways;
-    public DbSet<FlightPlan> FlightPlans;
-    public DbSet<FlightPropertiesShot> FlightPropertiesShots;
-    public DbSet<FlightSession> FlightSessions;
-    public DbSet<FunctionPoint> FunctionPoints;
-    public DbSet<ReadyFlightFunction> FlightFunctions;
-    public DbSet<RoutePoint> RoutePoints;
+    public DbSet<Airport> Airports { get; set; }
+    public DbSet<AirportRunway> AirportRunways { get; set; }
+    public DbSet<FlightPlan> FlightPlans { get; set; }
+    public DbSet<FlightPropertiesShot> FlightPropertiesShots { get; set; }
+    public DbSet<FlightSession> FlightSessions { get; set; }
+    public DbSet<FunctionPoint> FunctionPoints { get; set; }
+    public DbSet<ReadyFlightFunction> FlightFunctions { get; set; }
+    public DbSet<RoutePoint> RoutePoints { get; set; }
     
     public PostgresDbContext(IConfiguration configuration)
     {
