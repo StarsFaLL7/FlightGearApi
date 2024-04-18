@@ -16,51 +16,45 @@ public class RoutePoint : BaseEntityWithKey<Guid>
     
     public string? Remarks { get; set; }
     
-    public Guid? NextPointId { get; set; }
-    [ForeignKey("NextPointId")]
-    public RoutePoint? NextRoutePoint { get; set; }
-    
-    public Guid? PreviousPointId { get; set; }
-    [ForeignKey("NextPointId")]
-    public RoutePoint? PreviousRoutePoint { get; set; }
+
     
     public required Guid FlightPlanId { get; set; }
     [ForeignKey("FlightPlanId")]
     public FlightPlan FlightPlan { get; set; }
     
-    public double GetDistanceToIt()
+    public double GetDistanceToIt(RoutePoint? previousPoint)
     {
-        if (PreviousRoutePoint is null)
+        if (previousPoint is null)
         {
             return 0;
         }
 
-        return GeographyHelper.GetDistanceBetweenCoordsInMeters(PreviousRoutePoint.Latitude, PreviousRoutePoint.Longitude,
+        return GeographyHelper.GetDistanceBetweenCoordsInMeters(previousPoint.Latitude, previousPoint.Longitude,
             Latitude, Longitude);
     }
     
-    public double GetDirectionToNextPoint()
+    public double GetDirectionToNextPoint(RoutePoint? nextPoint)
     {
-        if (NextRoutePoint is null)
+        if (nextPoint is null)
         {
             return 0;
         }
 
         return GeographyHelper.GetDirectionDeg(Latitude, Longitude,
-            NextRoutePoint.Latitude, NextRoutePoint.Longitude);
+            nextPoint.Latitude, nextPoint.Longitude);
     }
 
-    public double GetRotationDegrees()
+    public double GetRotationDegrees(RoutePoint? previousPoint, RoutePoint? nextPoint)
     {
-        if (NextRoutePoint is null || PreviousRoutePoint is null)
+        if (previousPoint is null || nextPoint is null)
         {
             return 0;
         }
 
-        var prevAngle = GeographyHelper.GetDirectionDeg(PreviousRoutePoint.Latitude, 
-            PreviousRoutePoint.Longitude, Latitude, Longitude);
+        var prevAngle = GeographyHelper.GetDirectionDeg(previousPoint.Latitude, 
+            previousPoint.Longitude, Latitude, Longitude);
         var curAngle = GeographyHelper.GetDirectionDeg(Latitude, Longitude,
-            NextRoutePoint.Latitude, NextRoutePoint.Longitude);
+            nextPoint.Latitude, nextPoint.Longitude);
         var angle = Math.Abs(prevAngle - curAngle);
         if (angle > 180)
         {

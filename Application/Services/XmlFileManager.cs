@@ -87,27 +87,33 @@ public class XmlFileManager : IXmlFileManager
             }
         }
 
-        var normalSpeed = 600;
-        foreach (var point in flightPlan.RoutePoints.OrderBy(p => p.Order))
+        var normalSpeed = 600; 
+        var index = 0;
+        foreach (var point in flightPlan.RoutePoints)
         {
-            var rotationAgle = point.GetRotationDegrees();
-            if (rotationAgle > 80)
+            if (index > 0 && flightPlan.RoutePoints.Count > index + 1)
             {
-                var dist = point.GetDistanceToIt();
-                var direction = GeographyHelper.GetDirectionDeg(point.Latitude, point.Longitude, 
-                    point.PreviousRoutePoint.Latitude, point.PreviousRoutePoint.Longitude);
-                var utilityPoint = GeographyHelper.MoveGeoPoint(point.Latitude, point.Longitude, dist * 0.3, direction);
-                var speed = Math.Round(Math.Max(120, 600 - (rotationAgle / 30) * 100));
-                builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
-                               "\t\t\t<type type=\"string\">basic</type>\n" +
-                               "\t\t\t<alt-restrict type=\"string\">at</alt-restrict>\n" +
-                               $"\t\t\t<altitude-ft type=\"double\">{point.Altitude}</altitude-ft>\n" +
-                               $"\t\t\t<knots type=\"int\">{speed}</knots>\n" +
-                               $"\t\t\t<ident type=\"string\">WP-UTILITY-{wpindex}</ident>\n" +
-                               $"\t\t\t<lon type=\"double\">{utilityPoint.Longitude}</lon>\n" +
-                               $"\t\t\t<lat type=\"double\">{utilityPoint.Latitude}</lat>\n" +
-                               "\t\t</wp>\n");
-                wpindex++;
+                var nextPoint = flightPlan.RoutePoints[index + 1];
+                var prevPoint = flightPlan.RoutePoints[index - 1];
+                var rotationAgle = point.GetRotationDegrees(prevPoint, nextPoint);
+                if (rotationAgle > 80)
+                {
+                    var dist = point.GetDistanceToIt(prevPoint);
+                    var direction = GeographyHelper.GetDirectionDeg(point.Latitude, point.Longitude, 
+                        prevPoint.Latitude, prevPoint.Longitude);
+                    var utilityPoint = GeographyHelper.MoveGeoPoint(point.Latitude, point.Longitude, dist * 0.3, direction);
+                    var speed = Math.Round(Math.Max(120, 600 - (rotationAgle / 30) * 100));
+                    builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
+                                   "\t\t\t<type type=\"string\">basic</type>\n" +
+                                   "\t\t\t<alt-restrict type=\"string\">at</alt-restrict>\n" +
+                                   $"\t\t\t<altitude-ft type=\"double\">{point.Altitude}</altitude-ft>\n" +
+                                   $"\t\t\t<knots type=\"int\">{speed}</knots>\n" +
+                                   $"\t\t\t<ident type=\"string\">WP-UTILITY-{wpindex}</ident>\n" +
+                                   $"\t\t\t<lon type=\"double\">{utilityPoint.Longitude}</lon>\n" +
+                                   $"\t\t\t<lat type=\"double\">{utilityPoint.Latitude}</lat>\n" +
+                                   "\t\t</wp>\n");
+                    wpindex++;
+                }
             }
             
             builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
@@ -120,6 +126,7 @@ public class XmlFileManager : IXmlFileManager
                            $"\t\t\t<lat type=\"double\">{point.Latitude}</lat>\n" +
                            "\t\t</wp>\n");
             wpindex++;
+            index++;
         }
         
         if (endOnAirport)

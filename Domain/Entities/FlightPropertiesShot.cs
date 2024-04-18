@@ -11,7 +11,7 @@ public class FlightPropertiesShot : BaseEntityWithKey<Guid>
 {
     public required int Order { get; set; }
     
-    public required int FlightSessionId { get; set; }
+    public required Guid FlightSessionId { get; set; }
     [ForeignKey("FlightSessionId")] 
     public FlightSession FlightSession { get; set; }
     
