@@ -1,13 +1,16 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Connection;
 using Domain.Entities;
 
 namespace Application.Services;
 
 public class FlightManipulator : IFlightManipulator
 {
-    public FlightManipulator()
+    private readonly IConnectionManager _connectionManager;
+    public bool IsRunning { get; set; }
+    public FlightManipulator(IConnectionManager connectionManager)
     {
-
+        _connectionManager = connectionManager;
     }
 
     public async Task InitializeAsync(FlightPlan flightPlan)
@@ -17,6 +20,11 @@ public class FlightManipulator : IFlightManipulator
 
     public async Task FlyCycleAsync()
     {
+        IsRunning = true;
+        while (IsRunning)
+        {
+            
+        }
         throw new NotImplementedException();
     }
 

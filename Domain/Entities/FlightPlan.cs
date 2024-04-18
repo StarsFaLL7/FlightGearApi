@@ -9,13 +9,13 @@ public class FlightPlan : BaseEntityWithKey<Guid>
     
     public string Remarks { get; set; }
     
-    public Guid DepartureRunwayId { get; set; }
+    public Guid? DepartureRunwayId { get; set; }
     [ForeignKey("DepartureRunwayId")]
-    public AirportRunway DepartureRunway { get; set; }
+    public AirportRunway? DepartureRunway { get; set; }
     
-    public Guid ArrivalRunwayId { get; set; }
+    public Guid? ArrivalRunwayId { get; set; }
     [ForeignKey("ArrivalRunwayId")]
-    public AirportRunway ArrivalRunway { get; set; }
+    public AirportRunway? ArrivalRunway { get; set; }
     
-    public ICollection<RoutePoint> RoutePoints { get; set; }
+    public List<RoutePoint> RoutePoints { get; set; }
 }

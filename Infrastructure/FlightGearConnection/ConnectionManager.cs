@@ -81,7 +81,7 @@ internal class ConnectionManager : IConnectionManager
         var result = new FlightPropertiesShot
         {
             Order = 0,
-            FlightSessionId = 0,
+            FlightSessionId = default,
             Longitude = 0,
             Latitude = 0,
             AltitudeAgl = 0,

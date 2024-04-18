@@ -1,5 +1,6 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Controllers.RoutePoint.Responses;
 using webapi.DtoModels;
 
 namespace WebApi.Controllers;
@@ -19,7 +20,7 @@ public class AnalyticsController : Controller
     /// </summary>
     [HttpGet("sessions/{id:int}")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetSessions([FromQuery] int id)
+    public async Task<IActionResult> GetSessions(int id)
     {
         return Ok($"OK! You entered id: {id}");
     }
@@ -33,6 +34,6 @@ public class AnalyticsController : Controller
     public async Task<IActionResult> CreateSession([FromBody] TestDtoRequest dtoRequest)
     {
         dtoRequest.Number = Random.Shared.Next(1000);
-        return Ok($"OK! We changed id in dtoModel to random number: {dtoRequest}");
+        return Ok(dtoRequest);
     }
 }

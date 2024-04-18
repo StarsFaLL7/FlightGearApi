@@ -2,9 +2,11 @@
 
 namespace Domain.Entities;
 
-public class Airport : BaseEntityWithKey<string>
+public class Airport : BaseEntityWithKey<Guid>
 {
     public required string Title { get; set; }
+    
+    public required string Code { get; set; }
     
     public required string City { get; set; }
     

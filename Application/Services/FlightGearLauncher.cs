@@ -3,8 +3,13 @@ using Domain.Entities;
 
 namespace Application.Services;
 
-public class FlightGearLauncher : IFlightGearLauncher
+internal class FlightGearLauncher : IFlightGearLauncher
 {
+    public FlightGearLauncher()
+    {
+        
+    }
+    
     public async Task InitializeWithFlightPlanAsync(FlightPlan flightPlan)
     {
         throw new NotImplementedException();
@@ -12,6 +17,7 @@ public class FlightGearLauncher : IFlightGearLauncher
 
     public async Task<bool> TryLaunchSimulationAsync()
     {
+        
         throw new NotImplementedException();
     }
 

@@ -59,4 +59,38 @@ public static class GeographyHelper
     {
         return angle * (180d / Math.PI);
     }
+
+    /// <summary>
+    /// Метод создаёт новую географ. точку, сдвинутую от указанных координат на расстояние в метрах по заданному курсу.
+    /// </summary>
+    /// <param name="latitude">Широта начальной точки</param>
+    /// <param name="longitude">Долгота начальной точки</param>
+    /// <param name="distanceInMeters">Расстояние, на которое нужно сдвинуть координаты (в метрах)</param>
+    /// <param name="bearing">Курс в сторону которого нужно сдвинуть координаты. (0/360 - Север, 90 - Восток, 180 - Юг, 270 - Запад)</param>
+    /// <returns></returns>
+    public static GeoCoordinate MoveGeoPoint(double latitude, double longitude, double distanceInMeters, double bearing)
+    {
+        const double radiusEarthKm = 6371.0; // Радиус Земли в километрах
+
+        // Преобразование расстояния из метров в радианы
+        double distanceRadians = distanceInMeters / (radiusEarthKm * 1000.0);
+
+        // Преобразование курса из градусов в радианы
+        double bearingRadians = ConvertToRadians(bearing);
+
+        // Преобразование широты текущей точки в радианы
+        double latRad = ConvertToRadians(latitude);
+        double lonRad = ConvertToRadians(longitude);
+
+        // Вычисление новой широты и долготы
+        double newLatRad = Math.Asin(Math.Sin(latRad) * Math.Cos(distanceRadians) +
+                                     Math.Cos(latRad) * Math.Sin(distanceRadians) * Math.Cos(bearingRadians));
+        double newLonRad = lonRad + Math.Atan2(Math.Sin(bearingRadians) * Math.Sin(distanceRadians) * Math.Cos(latRad),
+            Math.Cos(distanceRadians) - Math.Sin(latRad) * Math.Sin(newLatRad));
+
+        // Преобразование новых координат из радианов в градусы
+        var lat = Math.Round(ConvertToDegrees(newLatRad), 5);
+        var lon = Math.Round(ConvertToDegrees(newLonRad), 5);
+        return new GeoCoordinate(lat, lon);
+    }
 }
