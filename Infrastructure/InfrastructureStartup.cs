@@ -10,19 +10,20 @@ namespace Infrastructure;
 public static class InfrastructureStartup
 {
     public static IServiceCollection TryAddInfrastructure(this IServiceCollection services)
-    { 
+    {
+        services.AddDbContext<PostgresDbContext>(contextLifetime: ServiceLifetime.Transient, optionsLifetime: ServiceLifetime.Singleton);
         services.TryAddSingleton<IConnectionManager, ConnectionManager>();
         services.TryAddSingleton<IConnectionReader>(provider => provider.GetRequiredService<IConnectionManager>());
         services.TryAddSingleton<IConnectionSender>(provider => provider.GetRequiredService<IConnectionManager>());
         
-        services.TryAddScoped<IAirportRepository, AirportRepository>();
-        services.TryAddScoped<IAirportRunwayRepository, AirportRunwayRepository>();
-        services.TryAddScoped<IFlightPlanRepository, FlightPlanRepository>();
-        services.TryAddScoped<IFlightPropertiesShotRepository, FlightPropertyShotRepository>();
-        services.TryAddScoped<IFlightSavedSessionsRepository, FlightSavedSessionsRepository>();
-        services.TryAddScoped<IFunctionPointRepository, FunctionPointRepository>();
-        services.TryAddScoped<IReadyFlightFunctionRepository, ReadyFlightFunctionRepository>();
-        services.TryAddScoped<IRoutePointRepository, RoutePointRepository>();
+        services.TryAddTransient<IAirportRepository, AirportRepository>();
+        services.TryAddTransient<IAirportRunwayRepository, AirportRunwayRepository>();
+        services.TryAddTransient<IFlightPlanRepository, FlightPlanRepository>();
+        services.TryAddTransient<IFlightPropertiesShotRepository, FlightPropertyShotRepository>();
+        services.TryAddTransient<IFlightSavedSessionsRepository, FlightSavedSessionsRepository>();
+        services.TryAddTransient<IFunctionPointRepository, FunctionPointRepository>();
+        services.TryAddTransient<IReadyFlightFunctionRepository, ReadyFlightFunctionRepository>();
+        services.TryAddTransient<IRoutePointRepository, RoutePointRepository>();
         return services;
     }
 }

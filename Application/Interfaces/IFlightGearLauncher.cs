@@ -15,7 +15,7 @@ public interface IFlightGearLauncher
     /// <summary>
     /// Запуск симуляции
     /// </summary>
-    Task<bool> TryLaunchSimulationAsync();
+    Task<bool> TryLaunchSimulationAsync(int propertiesReadsPerSecond);
 
     /// <summary>
     /// Завершение симуляции
@@ -25,5 +25,5 @@ public interface IFlightGearLauncher
     /// <summary>
     /// Получить строку запуска FlightGear со всеми параметрами. Нужно для отладки.
     /// </summary>
-    string GetLaunchString();
+    string GetLaunchString(int propertiesReadsPerSecond);
 }

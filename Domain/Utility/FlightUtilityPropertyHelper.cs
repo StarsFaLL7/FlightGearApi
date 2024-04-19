@@ -9,7 +9,7 @@ public static class FlightUtilityPropertiesHelper
     {
         { FlightUtilityProperty.Altitude, new FlightPropertyInfo(
             "/position/altitude-ft", 
-            "altitude-ft",
+            "altitude-m",
             "double", 
             0.304785) },
         { FlightUtilityProperty.Latitude, new FlightPropertyInfo(
@@ -34,12 +34,12 @@ public static class FlightUtilityPropertiesHelper
             "double") },
         { FlightUtilityProperty.VerticalSpeed , new FlightPropertyInfo(
             "/velocities/vertical-speed-fps",
-            "vertical-speed-fps",
+            "vertical-speed-meters-per-sec",
             "double", 
             0.304785) },
         { FlightUtilityProperty.IndicatedSpeed , new FlightPropertyInfo(
             "/instrumentation/airspeed-indicator/indicated-speed-kt",
-            "indicated-speed-kt",
+            "indicated-speed-meters-per-sec",
             "double", 
             0.514444) },
     };

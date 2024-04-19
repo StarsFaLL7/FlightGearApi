@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Domain.Base;
 using Domain.Utility;
 
@@ -20,6 +21,7 @@ public class RoutePoint : BaseEntityWithKey<Guid>
     
     public required Guid FlightPlanId { get; set; }
     [ForeignKey("FlightPlanId")]
+    [JsonIgnore]
     public FlightPlan FlightPlan { get; set; }
     
     public double GetDistanceToIt(RoutePoint? previousPoint)
