@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -46,33 +45,19 @@ internal class ConnectionManager : IConnectionManager
             return result;
         }
 
-        CreateTcpClientIfNotExist();
-
-        await _tcpClientSemaphore.WaitAsync();
-        try
+        var infos = properties.Select(p => p.GetInfo()).ToArray();
+        
+        var commands = infos.Select(p => $"get {p.Path}").ToArray();
+        var responses = await SendCommandsAsync(commands, true);
+        var i = 0;
+        foreach (var response in responses)
         {
-            await using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
-            using var reader = new StreamReader(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
-
-            foreach (var property in properties)
-            {
-                var propInfo = property.GetInfo();
-                await writer.WriteLineAsync($"get {propInfo.Path}");
-                await writer.FlushAsync();
-                var response = await reader.ReadLineAsync();
-                var value = ParseDoubleFromResponse(response) * propInfo.Multiplier;
-                result[propInfo.Name] = value;
-            }
+            var propertyInfo = infos[i];
+            var value = ParseDoubleFromResponse(response.Response) * propertyInfo.Multiplier;
+            result[propertyInfo.Name] = value;
+            i++;
         }
-        catch (Exception e)
-        {
-            // Todo: logging
-            Console.WriteLine($"Error while trying to get currentValues by Telnet in ConnectionListener {e}");
-        }
-        finally
-        {
-            _tcpClientSemaphore.Release();
-        }
+        
         return result;
     }
 
@@ -119,68 +104,133 @@ internal class ConnectionManager : IConnectionManager
 
             propertiesDict[attribute.ExportPropertyEnum] = propertyInfo;
         }
+
+        var commands = FlightExportPropertyExtensions.PropertiesInfoDict.Select(pair => $"get {pair.Value.Path}").ToArray();
+        var responses = await SendCommandsAsync(commands, true);
+
+        var i = 0;
+        foreach (var keyValuePair in FlightExportPropertyExtensions.PropertiesInfoDict)
+        {
+            var response = responses[i];
+            var value = ParseDoubleFromResponse(response.Response) * keyValuePair.Value.Multiplier;
+            propertiesDict[keyValuePair.Key].SetValue(result, value);
+            i++;
+        }
         
-        CreateTcpClientIfNotExist();
-        await _tcpClientSemaphore.WaitAsync();
-
-        try
-        {
-            await using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
-            using var reader = new StreamReader(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
-
-            foreach (var keyValuePair in FlightExportPropertyExtensions.PropertiesInfoDict)
-            {
-                var path = keyValuePair.Value.Path;
-                await writer.WriteLineAsync($"get {path}");
-                await writer.FlushAsync();
-                var response = await reader.ReadLineAsync();
-                var value = ParseDoubleFromResponse(response) * keyValuePair.Value.Multiplier;
-                propertiesDict[keyValuePair.Key].SetValue(result, value);
-            }
-        }
-        catch (Exception e)
-        {
-            // Todo: logging
-            Console.WriteLine($"Error while trying to get currentValues by Telnet in ConnectionListener {e}");
-        }
-        finally
-        {
-            _tcpClientSemaphore.Release();
-        }
         return result;
     }
-    
-    public async Task SendParametersAsync(Dictionary<FlightUtilityProperty, double> propertiesToChange)
+
+    public async Task<double> GetPropertyDoubleValueAsync(string propertyPath)
+    {
+        if (string.IsNullOrWhiteSpace(propertyPath))
+        {
+            return 0;
+        }
+        var response = await SendCommandAsync($"get {propertyPath}", true);
+        var result = ParseDoubleFromResponse(response);
+        return result;
+    }
+
+    public async Task<string?> GetPropertyStringValueAsync(string propertyPath)
+    {
+        if (string.IsNullOrWhiteSpace(propertyPath))
+        {
+            return "";
+        }
+        var response = await SendCommandAsync($"get {propertyPath}", true);
+        return ParseStringFromResponse(response);
+    }
+
+    public async Task SetParametersAsync(Dictionary<FlightUtilityProperty, double> propertiesToChange)
     {
         if (propertiesToChange.Count == 0)
         {
             return;
         }
-        CreateTcpClientIfNotExist();
+        
+        var commands = propertiesToChange.Select(pair =>
+        {
+            var propInfo = pair.Key.GetInfo();
+            return $"set {propInfo.Path} {pair.Value}";
+        }).ToArray();
+        await SendCommandsAsync(commands, false);
+    }
 
+    public async Task SetPropertyAsync(string propertyPath, object value)
+    {
+        if (string.IsNullOrWhiteSpace(propertyPath))
+        {
+            return;
+        }
+
+        await SendCommandAsync($"set {propertyPath} {value}", false);
+    }
+
+    public async Task<string?> SendCommandAsync(string command, bool readLine)
+    {
+        CreateTcpClientIfNotExist();
+        string? response = null;
         await _tcpClientSemaphore.WaitAsync();
         try
         {
             await using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
-
-            foreach (var property in propertiesToChange)
+            if (readLine)
             {
-                var propInfo = property.Key.GetInfo();
-                await writer.WriteLineAsync($"set {propInfo.Path} {property.Value}");
+                using var reader = new StreamReader(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
+                await writer.WriteLineAsync(command);
+                await writer.FlushAsync();
+                response = await reader.ReadLineAsync();
+            }
+            else
+            {
+                await writer.WriteLineAsync(command);
                 await writer.FlushAsync();
             }
         }
         catch (Exception e)
         {
-            // Todo: logging
-            Console.WriteLine($"Error while trying to set values by Telnet in ConnectionListener {e}");
+            Console.WriteLine($"Error while trying to send command {command}, readLines={readLine} by Telnet in ConnectionListener {e}");
         }
         finally
         {
             _tcpClientSemaphore.Release();
         }
-    }
 
+        return response;
+    }
+    
+    private async Task<List<(string Command, string? Response)>> SendCommandsAsync(string[] commands, bool readLines)
+    {
+        CreateTcpClientIfNotExist();
+        var result = new List<(string Command, string? Response)>();
+        await _tcpClientSemaphore.WaitAsync();
+        try
+        {
+            await using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
+            using var reader = new StreamReader(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
+            foreach (var command in commands)
+            {
+                await writer.WriteLineAsync(command);
+                await writer.FlushAsync();
+                if (readLines)
+                {
+                    var response = await reader.ReadLineAsync();
+                    result.Add((command, response));
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error while trying to send commands {commands}, readLines={readLines} by Telnet in ConnectionListener {e}");
+        }
+        finally
+        {
+            _tcpClientSemaphore.Release();
+        }
+
+        return result;
+    }
+    
     private void CreateTcpClientIfNotExist()
     {
         if (_tcpClient is null || _networkTcpStream is null)
@@ -225,4 +275,20 @@ internal class ConnectionManager : IConnectionManager
 
         return 0;
     }
+    
+    private string? ParseStringFromResponse(string? response)
+    {
+        if (string.IsNullOrWhiteSpace(response))
+        {
+            throw new ArgumentException("Invalid response provided.");
+        }
+
+        var commaIndex = response.IndexOf('\'')+1;
+
+        var valueString =
+            response.Substring(commaIndex, response.LastIndexOf('\'') - commaIndex);
+
+        return valueString;
+    }
+    
 }
