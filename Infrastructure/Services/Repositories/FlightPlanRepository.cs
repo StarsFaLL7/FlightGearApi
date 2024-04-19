@@ -23,6 +23,11 @@ internal class FlightPlanRepository : IFlightPlanRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task<FlightPlan[]> GetAll()
+    {
+        return _dbContext.FlightPlans.ToArray();
+    }
+
     public async Task RemoveByIdAsync(Guid planId)
     {
         var plan = _dbContext.FlightPlans.FirstOrDefault(p => p.Id == planId);

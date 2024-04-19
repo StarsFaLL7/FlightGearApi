@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.Connection;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums.FlightUtilityProperty;
 using Microsoft.AspNetCore.Mvc;
@@ -11,14 +12,22 @@ public class TestController : Controller
 {
     private readonly IConnectionManager _connectionManager;
     private readonly IXmlFileManager _xmlFileManager;
+    private readonly IFlightGearLauncher _flightGearLauncher;
+    private readonly IFlightPlanRepository _flightPlanRepository;
+    private readonly IRoutePointRepository _routePointRepository;
 
-    public TestController(IConnectionManager connectionManager, IXmlFileManager xmlFileManager)
+    public TestController(IConnectionManager connectionManager, IXmlFileManager xmlFileManager, 
+        IFlightGearLauncher flightGearLauncher, IFlightPlanRepository flightPlanRepository, 
+        IRoutePointRepository routePointRepository)
     {
         _connectionManager = connectionManager;
         _xmlFileManager = xmlFileManager;
+        _flightGearLauncher = flightGearLauncher;
+        _flightPlanRepository = flightPlanRepository;
+        _routePointRepository = routePointRepository;
     }
     
-    [HttpGet("get-current-values")]
+    [HttpGet("connections/current-value")]
     [ProducesResponseType(typeof(FlightPropertiesShot), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCurrentValues()
     {
@@ -26,7 +35,7 @@ public class TestController : Controller
         return Ok(res);
     }
     
-    [HttpGet("get-utility-values")]
+    [HttpGet("connections/position")]
     [ProducesResponseType(typeof(Dictionary<string, double>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUtilityValues()
     {
@@ -35,53 +44,49 @@ public class TestController : Controller
         return Ok(res);
     }
     
-    [HttpPost("updateRouteFile")]
-    public async Task<IActionResult> CreateRouteFile([FromBody] FlightPlan flightPlan)
+    [HttpPost("plans/initialize")]
+    public async Task<IActionResult> CreateRouteFile([FromQuery] Guid flightPlanId)
     {
-        await _xmlFileManager.CreateOrUpdateRouteManagerXmlFileAsync(flightPlan);
+        var plan = await _flightPlanRepository.GetAggregateByIdAsync(flightPlanId);
+        await _xmlFileManager.CreateOrUpdateRouteManagerXmlFileAsync(plan);
+        await _flightGearLauncher.InitializeWithFlightPlanAsync(plan);
         return Ok();
     }
     
-    [HttpGet("getTestJsonRoute")]
-    public async Task<IActionResult> GetTestRoute()
+    [HttpPost("plans/save")]
+    public async Task<IActionResult> SaveFlightPlanToDb([FromBody] FlightPlan flightPlan)
     {
-        var plan = new FlightPlan
+        await _flightPlanRepository.SaveAsync(flightPlan);
+        foreach (var point in flightPlan.RoutePoints)
         {
-            Title = "Test",
-            Remarks = "Тестовый маршрут над Питером без взлета и посадки.",
-            RoutePoints = new List<Domain.Entities.RoutePoint>(),
-            Id = Guid.NewGuid()
-        };
-        var point1 = new Domain.Entities.RoutePoint
-        {
-            Order = 0,
-            Longitude = 30.23026,
-            Latitude = 59.77368,
-            Altitude = 1000,
-            FlightPlanId = plan.Id,
-            Id = Guid.NewGuid()
-        };
-        var point2 = new Domain.Entities.RoutePoint
-        {
-            Order = 1,
-            Longitude = 30.27557,
-            Latitude = 59.83101,
-            Altitude = 1200,
-            FlightPlanId = plan.Id,
-            Id = Guid.NewGuid()
-        };
-        var point3 = new Domain.Entities.RoutePoint
-        {
-            Order = 2,
-            Longitude = 30.12451,
-            Latitude = 59.82239,
-            Altitude = 900,
-            FlightPlanId = plan.Id,
-            Id = Guid.NewGuid()
-        };
-        plan.RoutePoints.Add(point1);
-        plan.RoutePoints.Add(point2);
-        plan.RoutePoints.Add(point3);
+            await _routePointRepository.SaveAsync(point);
+        }
+        return Ok();
+    }
+    
+    [HttpGet("plans")]
+    public async Task<IActionResult> GetFlightPlanById([FromQuery] Guid planId)
+    {
+        var plan = await _flightPlanRepository.GetAggregateByIdAsync(planId);
         return Ok(plan);
+    }
+    
+    [HttpGet("plans/all")]
+    public async Task<IActionResult> GetAllFlightPlans()
+    {
+        return Ok(await _flightPlanRepository.GetAll());
+    }
+    
+    [HttpGet("launch-arguments")]
+    public async Task<IActionResult> GetLaunchArguments([FromQuery] int readsPerSecond)
+    {
+        return Ok(_flightGearLauncher.GetLaunchString(readsPerSecond));
+    }
+    
+    [HttpPost("launch-flight-gear")]
+    public async Task<IActionResult> LaunchFlightGear([FromQuery] int readsPerSecond)
+    {
+        await _flightGearLauncher.TryLaunchSimulationAsync(readsPerSecond);
+        return Ok(_flightGearLauncher.GetLaunchString(readsPerSecond));
     }
 }
