@@ -4,11 +4,15 @@ import ChartComponent from '../../components/AnalyzeComponents/chart/chart';
 import PopupLoad from '../../components/AnalyzeComponents/popup/popup';
 import RefreshButtonComponent from '../../components/AnalyzeComponents/refreshButton/refreshButton';
 import ChangeSession from '../../components/AnalyzeComponents/changeSession/changeSession';
-import NavToPlan from '../../components/AnalyzeComponents/navToPlan/navToPlan';
+import NavHeader from '../../components/PlanComponents/NavItem/NavItem';
+import "../../../node_modules/bootstrap/dist/css/bootstrap.css";
 
 function Analyze() {
   return <>
   <div className="Analyze">
+    <div className={`header`}>
+      <NavHeader/>
+    </div>
     <div className='dark__content'>
       <PopupLoad />
     </div>
@@ -22,7 +26,6 @@ function Analyze() {
       </div>
       <ChartComponent />
       </main>
-      <NavToPlan />
     </div>
   </>;
 }

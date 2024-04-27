@@ -3,17 +3,18 @@ import { sendDataToServer } from "../api-methods/api-methods";
 const clearForm = () => {
     const form = document.getElementById('form');
 
-    form.querySelector('input[name=heading]').value = '';
+    form.querySelector('input[name=longitude]').value = '';
+    form.querySelector('input[name=latitude]').value = '';
     form.querySelector('input[name=speed]').value = '';
     form.querySelector('input[name=altitude]').value = '';
 }
 
-export const handlerAddFlight = async (formData, plan, setPlan, sendingData, setSendingData) => {
-  if (!formData.heading || !formData.speed || !formData.altitude) { return; }
+export const handlerAddFlight = async (formData, flight, setFlight, sendingData, setSendingData) => {
+  if (!formData.longitude || !formData.latitude || !formData.speed || !formData.altitude) { return; }
 
-  const newFlight = { id: plan.length, ...formData };
+  const newFlight = { id: flight.length, ...formData };
 
-  setPlan((prevFlight) => {
+  setFlight((prevFlight) => {
     const updatedFlight = [...prevFlight, newFlight];
     //logPlanItemData(updatedPlan); Log the updated plan items
     return updatedFlight;
@@ -31,7 +32,7 @@ export const handlerAddFlight = async (formData, plan, setPlan, sendingData, set
 };
 
 export const handlerAddPlan = async (formData, plan, setPlan, sendingData, setSendingData) => {
-    if (!formData.heading || !formData.speed || !formData.altitude) { return; }
+    if (!formData.longitude || !formData.latitude || !formData.speed || !formData.altitude) { return; }
 
     const newPlan = { id: plan.length, ...formData };
 

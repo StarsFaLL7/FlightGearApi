@@ -1,5 +1,6 @@
 import { useDispatch } from 'react-redux';
-import styles from './popup.module.css'
+import styles from './popup.module.css';
+import minus from '../../../assets/img/Decrease.png';
 import React, { useEffect, useState } from "react";
 import { setSession } from '../../../redux/ChartSlice/ChartSlice';
 import axios from "axios";
@@ -24,13 +25,20 @@ const PopupLoad = () => {
     const onClickHandler = (id) => {
         dispatch(setSession(id))
 
-        document.querySelector('.dark__content').classList.add('hidden')
+        document.querySelector('.dark__content').classList.add('hidden');
     };
 
-    return <div className={styles.popup}>
-        <h1 className={styles.popup__title}>Выберите сессию</h1>
-        <div className={styles.sessionList}>
-        {sessionList.map((s) => <button key={s.id} onClick={() => onClickHandler(s.id)}>Сессия {s.title} ({s.id})</button>)}
+    const onClickHandlerClose = () => {
+        document.querySelector('.dark__content').classList.add('hidden');
+    }
+
+    return <div className={`${styles.popup}`}>
+        <div className={`d-flex`}>
+            <div className={``}><h1 className={styles.popup__title}>Выберите сессию</h1></div>
+            <div className={`ms-auto`}><button className={styles.minus} type='button' onClick={() => onClickHandlerClose()}><img src={minus} alt='Decrease'></img></button></div>
+        </div>
+        <div className={`${styles.sessionList}`}>
+            {sessionList.map((s) => <button key={s.id} onClick={() => onClickHandler(s.id)}>Сессия {s.title} ({s.id})</button>)}
         </div>
     </div>
 };

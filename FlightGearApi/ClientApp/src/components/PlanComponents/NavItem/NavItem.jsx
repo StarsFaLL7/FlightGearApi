@@ -1,51 +1,90 @@
-import React from "react";
-import "../../../../node_modules/bootstrap/dist/css/bootstrap.css";
-import "../NavItem/NavItem.css";
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { OverlayTrigger, Button, Popover } from "react-bootstrap";
+import "../NavItem/NavItem.css"
+import MainApp from '../PlanTable/PlanTable';
 
 import plane from '../NavItem/imgs/plane.png';
 import analytics from '../NavItem/imgs/analytics.png';
 import docs from '../NavItem/imgs/docs.png';
-import flights from '../NavItem/imgs/flights.png';
+import flightPlans from '../NavItem/imgs/flight-plans.png';
+import flightPoints from '../NavItem/imgs/flight-stages.png';
 
-//<button class="btn btn-primary btn-hover" onClick={(evt) => handleClick(evt)} type="submit"><img src={plus} alt="Union"/></button>
 const NavHeader = () => {
+  const [showPopoverPoints, setShowPopoverPoints] = useState(false);
+  const [showPopoverPlans, setShowPopoverPlans] = useState(false);
 
-    return (
-      <>
-        <header className={`container-fluid bg-light`} >
-          <div>
-            <nav class="d-flex justify-content-center">
-              <ul class="nav nav-pills justify-content-center">
-                <li class="nav-item">
-                  <a href="" class="nav-link" aria-current="page">
-                    <img src={plane} width="45"/>
-                    <figcaption>Planner</figcaption>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <img src={docs} width="45"/>
-                    <figcaption>Docs</figcaption>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/analyze" class="nav-link">
-                    <img src={analytics} width="45"/>
-                    <figcaption>Analytics</figcaption>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/analyze" class="nav-link">
-                    <img src={flights} width="45"/>
-                    <figcaption>Flights</figcaption>
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </header>
-      </>
-    ) 
-  }
-  
-  export default NavHeader;
+  const popoverPoints = (
+    <Popover id="popover-basic">
+      <Popover.Header as="h3">Popover Title</Popover.Header>
+      <Popover.Body>
+        <MainApp/>
+      </Popover.Body>
+    </Popover>
+  );
+
+  const popoverPlans = (
+    <Popover id="popover-basic">
+      <Popover.Header as="h3">Popover Title</Popover.Header>
+      <Popover.Body>
+        This is the content of the popover.
+      </Popover.Body>
+    </Popover>
+  );
+
+  return (
+    <header className="container-fluid bg-not-light">
+      <div>
+        <nav className="d-flex flex-row justify-content-between">
+        <ul className="nav nav-pills align-items-center">
+            <li className="nav-item mx-2">
+              <OverlayTrigger
+                trigger="click"
+                placement="bottom"
+                show={showPopoverPoints}
+                onToggle={(nextShow) => setShowPopoverPoints(nextShow)}
+                overlay={popoverPoints}
+              >
+                <Button className="btn flight-points" variant="transparent" >
+                  <img src={flightPoints} width="50" alt="Flight Points"/>
+                </Button>
+              </OverlayTrigger>
+            </li>
+            <li className="nav-item mx-2">
+            <OverlayTrigger
+                trigger="click"
+                placement="bottom"
+                show={showPopoverPlans}
+                onToggle={(nextShow) => setShowPopoverPlans(nextShow)}
+                overlay={popoverPlans}
+              >
+                <Button className="btn flight-plans" variant="transparent">
+                  <img src={flightPlans} width="28" alt="Flight Plans"/>
+                </Button>
+              </OverlayTrigger>
+            </li>
+          </ul>
+          <ul className="nav nav-pills">
+            <li className="nav-item mx-2">
+              <a href="/" className="nav-link" aria-current="page" alt="Planner" title="Planner">
+                <img src={plane} width="40" alt="Planner"/>
+              </a>
+            </li>
+            <li className="nav-item mx-2">
+              <a href="#" className="nav-link" alt="Docs" title="Docs">
+                <img src={docs} width="40" alt="Docs"/>
+              </a>
+            </li>
+            <li className="nav-item mx-2">
+              <a href="/analyze" className="nav-link" alt="Analytics" title="Analytics">
+                <img src={analytics} width="40" alt="Analytics"/>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export default NavHeader;

@@ -20,6 +20,9 @@ input[type="text"]
     max-width: 150px;
     min-width: 100px;
   }
+  .cols {
+    height: fit-content;
+  }
   .title_main {
     -webkit-text-stroke: 1px #000000;
     color: #ecf0f1;

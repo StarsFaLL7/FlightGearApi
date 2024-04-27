@@ -2,70 +2,39 @@ import axios from 'axios';
 import { SERVER_URL } from '../const/const';
 
 export const handleClickDeleteItem = async (props) => {  
-    await axios ({
-        method: 'delete',
-        url: `https://localhost:7110/api/launch/stages/${props.index}`,
-    })
-    .then((response) => {
+    await axios
+      .delete(`https://localhost:7110/api/launch/stages/${props.index}`)
+      .then((response) => {
         if (response.status === 200) {
-            props.onRemoveData();
+          props.onRemoveData();
         } else {
-            console.error('Failed to delete the plan item with id:', props.id);
+          console.error('Failed to delete the plan item with id:', props.id);
         }
-    })
-    .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
+      })
+      .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
 };
 
 export const getPlanData = async (setPlan) => {
-    // await fetch(SERVER_URL, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    // })
-    //   .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error(`HTTP error! status: ${response.status}`);
-    //     }
-    //   })
-    //   .then((response) => setPlan(response.json()))
-    //   .catch((err) => console.error('There was an error fetching the data:', err));
+  console.log(setPlan)
     try {
-      const result = await axios.get(SERVER_URL);
-      console.log('Plan result.data = ', result.data)
-      setPlan(result.data)
+      await axios
+        .get(SERVER_URL)
+        .then((response) => {setPlan(response.data); console.log(response.data)})
     } catch (err) {
       console.error('There was an error fetching the data:', err)
     }
 };
 
 export const sendDataToServer = async (body, sendingData, setSendingData) => {
-    // Параметр функции - data
-    // await fetch(SERVER_URL, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify(data)
-    // })
-    //   .then((response) => {
-    //     if (!response.ok) {
-    //       throw new Error(`HTTP error! status: ${response.status}`);
-    //     }
-    //   })
-    //   .then((response) => setSendingData(response.json()));
-
-      await axios({
-        method: 'post',
-        url: SERVER_URL,
-        data: body
-      })
+    console.log(body)
+      await axios
+        .post(SERVER_URL, body)
         .then((response) => {
+          console.log(response)
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
         })
         .then((response) => setSendingData(response.json()));
-
     return sendingData;
 };
