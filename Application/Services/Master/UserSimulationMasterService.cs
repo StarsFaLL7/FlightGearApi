@@ -1,4 +1,6 @@
-﻿using Application.Interfaces;
+﻿using Application.Enums;
+using Application.Interfaces;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 
 namespace Application.Services.Master;
@@ -6,63 +8,45 @@ namespace Application.Services.Master;
 /// <inheritdoc />
 internal class UserSimulationMasterService : IUserSimulationMasterService
 {
+    private readonly IFlightGearLauncher _flightGearLauncher;
+    private readonly IFlightPlanRepository _flightPlanRepository;
+
+    private FlightStatus _currentStatus = FlightStatus.NotRunning;
     
-    public UserSimulationMasterService()
+    public UserSimulationMasterService(IFlightGearLauncher flightGearLauncher, IFlightPlanRepository flightPlanRepository)
     {
-        
+        _flightGearLauncher = flightGearLauncher;
+        _flightPlanRepository = flightPlanRepository;
+    }
+    
+    public async Task StartSimulationWithFlightPlanAsync(Guid flightPlanId, FlightSession flightSession)
+    {
+        _currentStatus = FlightStatus.Launching;
+        try
+        {
+            var flightPlan = await _flightPlanRepository.GetAggregateByIdAsync(flightPlanId);
+            await _flightGearLauncher.InitializeWithFlightPlanAsync(flightPlan);
+            await _flightGearLauncher.TryLaunchSimulationAsync(flightSession);
+            _currentStatus = FlightStatus.Running;
+        }
+        catch (Exception e)
+        {
+            _currentStatus = FlightStatus.Exited;
+            throw;
+        }
     }
 
-    public async Task<Guid> SaveFlightPlanAsync(FlightPlan flightPlan)
+    public async Task ExitSimulationAsync()
     {
-        throw new NotImplementedException();
+        await _flightGearLauncher.ExitSimulationAsync();
     }
 
-    public async Task RemoveFlightPlanAsync(Guid flightPlanId)
+    public async Task<FlightStatus> GetSimulationStatus()
     {
-        throw new NotImplementedException();
+        return _currentStatus;
     }
 
-    public async Task<Guid> SaveRoutePointAsync(RoutePoint routePoint)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<FlightPlan> GetFlightPlanAsync(Guid flightPlanId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task SetDepartureRunwayAsync(Guid flightPlanId, Guid runwayId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task SetArrivalRunwayAsync(Guid flightPlanId, Guid runwayId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task RemoveDepartureRunwayAsync(Guid flightPlanId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task RemoveArrivalRunwayAsync(Guid flightPlanId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<Guid> StartSimulationWithFlightPlanAsync(Guid flightPlanId, FlightSession flightSession)
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool IsSimulationRunningAsync()
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<Guid> GetCurrentGoalRoutePointAsync()
+    public async Task<int> GetLastReachedRoutePointOrderAsync()
     {
         throw new NotImplementedException();
     }
@@ -76,7 +60,7 @@ internal class UserSimulationMasterService : IUserSimulationMasterService
     {
         throw new NotImplementedException();
     }
-
+    
     /// <summary>
     /// Запуск цикла обновления для своевременного выхода из симуляции. Цикл крутится всё время, пока идёт симуляция.
     /// </summary>

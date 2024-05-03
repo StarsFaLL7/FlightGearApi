@@ -15,12 +15,12 @@ public interface IFlightGearLauncher
     /// <summary>
     /// Запуск симуляции
     /// </summary>
-    Task<bool> TryLaunchSimulationAsync(int propertiesReadsPerSecond);
+    Task TryLaunchSimulationAsync(FlightSession flightSession);
 
     /// <summary>
     /// Завершение симуляции
     /// </summary>
-    void Exit();
+    Task ExitSimulationAsync();
     
     /// <summary>
     /// Получить строку запуска FlightGear со всеми параметрами. Нужно для отладки.

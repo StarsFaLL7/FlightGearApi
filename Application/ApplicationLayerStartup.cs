@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces;
+using Application.Interfaces.Entities;
 using Application.Services;
+using Application.Services.Entities;
 using Application.Services.Master;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,6 +14,10 @@ public static class ApplicationLayerStartup
     {
         services.TryAddSingleton<IUserAnalyticsMasterService, UserAnalyticsMasterService>();
         services.TryAddSingleton<IUserSimulationMasterService, UserSimulationMasterService>();
+        
+        services.TryAddScoped<IFlightPlanService, FlightPlanService>();
+        services.TryAddScoped<IRunwayService, RunwayService>();
+        services.TryAddScoped<IAirportService, AirportService>();
         
         services.TryAddSingleton<IFlightExportedParametersReader, FlightExportedParametersReader>();
         services.TryAddSingleton<IFlightGearLauncher, FlightGearLauncher>();

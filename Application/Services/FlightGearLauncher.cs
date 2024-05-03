@@ -87,16 +87,16 @@ internal class FlightGearLauncher : IFlightGearLauncher
         _isInitialized = true;
     }
 
-    public async Task<bool> TryLaunchSimulationAsync(int propertiesReadsPerSecond)
+    public async Task TryLaunchSimulationAsync(FlightSession flightSession)
     {
         if (!_isInitialized)
         {
-            return false;
+            throw new Exception("First you need to initialize FlightGearLauncher with flightPlan.");
         }
         
         if (_flightGearProcess != null && _flightGearProcess.HasExited == false)
         {
-            return false;
+            throw new Exception("Simulation hasn't exited.");
         }
 
         _isRunning = false;
@@ -104,29 +104,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
         {
             Console.WriteLine("Trying to launch Flight Gear...");
 
-            var arguments = GetLaunchString(propertiesReadsPerSecond);
-            /*_flightGearProcess = new Process();
-            var startInfo = new ProcessStartInfo
-            {
-                Arguments = arguments,
-                FileName = Path.Combine(_binPath, _exeFileName + ".exe"),
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false
-            };
-            _flightGearProcess.StartInfo = startInfo;
-            _flightGearProcess.Start();
-            _flightGearProcess.BeginOutputReadLine();
-            //_flightGearProcess.BeginErrorReadLine();
-            
-            _flightGearProcess.OutputDataReceived += (sender, e) =>
-            {
-                Console.WriteLine(e.Data);
-            };
-            _flightGearProcess.ErrorDataReceived += (sender, e) =>
-            {
-                Console.WriteLine(e.Data);
-            };*/
+            var arguments = GetLaunchString(flightSession.PropertiesReadsPerSec);
             
             _flightGearProcess = new Process();
         
@@ -146,13 +124,13 @@ internal class FlightGearLauncher : IFlightGearLauncher
                         Console.WriteLine("FlightGear launched successfully!");
                         await SendInitialParameters();
                         _isRunning = true;
-                        return true;
+                        return;
                     }
 
                     tries++;
                     if (tries > 100)
                     {
-                        return false;
+                        throw new Exception($"Simulation didn't start after {tries} tries.");
                     }
                 }
                 catch (Exception e)
@@ -160,8 +138,8 @@ internal class FlightGearLauncher : IFlightGearLauncher
                     // ignored
                 }
             }
-            
-            return false;
+
+            throw new Exception("Launch failed. Unknown reason.");
         }
         catch (Exception e)
         {
@@ -193,7 +171,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
         await _connectionManager.SetPropertyAsync("/sim/freeze/clock", pause);
     }
     
-    public void Exit()
+    public Task ExitSimulationAsync()
     {
         throw new NotImplementedException();
     }

@@ -1,6 +1,5 @@
 using Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Controllers.RoutePoint.Responses;
 using webapi.DtoModels;
 
 namespace WebApi.Controllers;

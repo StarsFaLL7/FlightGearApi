@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Application.Interfaces;
 using Application.Interfaces.Connection;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -61,7 +62,8 @@ public class TestController : Controller
         {
             await _routePointRepository.SaveAsync(point);
         }
-        return Ok();
+        var plan = await _flightPlanRepository.GetAggregateByIdAsync(flightPlan.Id);
+        return Ok(plan);
     }
     
     [HttpGet("plans")]
@@ -80,13 +82,6 @@ public class TestController : Controller
     [HttpGet("launch-arguments")]
     public async Task<IActionResult> GetLaunchArguments([FromQuery] int readsPerSecond)
     {
-        return Ok(_flightGearLauncher.GetLaunchString(readsPerSecond));
-    }
-    
-    [HttpPost("launch-flight-gear")]
-    public async Task<IActionResult> LaunchFlightGear([FromQuery] int readsPerSecond)
-    {
-        await _flightGearLauncher.TryLaunchSimulationAsync(readsPerSecond);
         return Ok(_flightGearLauncher.GetLaunchString(readsPerSecond));
     }
 }
