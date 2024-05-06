@@ -39,6 +39,7 @@ internal class FlightPlanService : IFlightPlanService
             Title = flightPlan.Title,
             DepartureRunway = null,
             ArrivalRunway = null,
+            Remarks = flightPlan.Remarks,
             RoutePoints = new List<RoutePointWithIsEditableProperty>(),
             Id = flightPlan.Id
         };
@@ -57,6 +58,7 @@ internal class FlightPlanService : IFlightPlanService
                     Order = result.RoutePoints.Count,
                     Longitude = functionPoint.Longitude,
                     Latitude = functionPoint.Latitude,
+                    Remarks = functionPoint.Remarks,
                     Altitude = functionPoint.Altitude,
                     Id = Guid.Empty,
                     IsEditable = false
@@ -72,6 +74,7 @@ internal class FlightPlanService : IFlightPlanService
                 Longitude = userPoint.Longitude,
                 Latitude = userPoint.Latitude,
                 Altitude = userPoint.Altitude,
+                Remarks = userPoint.Remarks,
                 Id = userPoint.Id,
                 IsEditable = true
             });
@@ -93,6 +96,7 @@ internal class FlightPlanService : IFlightPlanService
                     Longitude = functionPoint.Longitude,
                     Latitude = functionPoint.Latitude,
                     Altitude = functionPoint.Altitude,
+                    Remarks = functionPoint.Remarks,
                     Id = Guid.Empty,
                     IsEditable = false
                 });
@@ -153,5 +157,27 @@ internal class FlightPlanService : IFlightPlanService
 
         await _flightPlanRepository.SaveAsync(flightPlan);
         
+    }
+
+    public async Task RemoveDepartureRunwayFromFlightPlansByRunwayId(Guid runwayId)
+    {
+        var flightplans = await _flightPlanRepository.GetFlightPlansByDepartureRunwayId(runwayId);
+        foreach (var flightplan in flightplans)
+        {
+            flightplan.DepartureRunway = null;
+            flightplan.DepartureRunwayId = null;
+            await _flightPlanRepository.SaveAsync(flightplan);
+        }
+    }
+
+    public async Task RemoveArrivalRunwayFromFlightPlansByRunwayId(Guid runwayId)
+    {
+        var flightplans = await _flightPlanRepository.GetFlightPlansByArrivalRunwayId(runwayId);
+        foreach (var flightplan in flightplans)
+        {
+            flightplan.ArrivalRunway = null;
+            flightplan.ArrivalRunwayId = null;
+            await _flightPlanRepository.SaveAsync(flightplan);
+        }
     }
 }

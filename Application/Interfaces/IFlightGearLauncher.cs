@@ -20,10 +20,12 @@ public interface IFlightGearLauncher
     /// <summary>
     /// Завершение симуляции
     /// </summary>
-    Task ExitSimulationAsync();
+    Task CloseFlightGearAsync();
     
     /// <summary>
     /// Получить строку запуска FlightGear со всеми параметрами. Нужно для отладки.
     /// </summary>
     string GetLaunchString(int propertiesReadsPerSecond);
+
+    string GetExportedTextDataFilePath();
 }

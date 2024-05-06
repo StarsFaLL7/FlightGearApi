@@ -22,4 +22,9 @@ public interface IAirportService
     /// Сохранить аэропорт. Если он не существует в базе данных, он будет добавлен.
     /// </summary>
     Task SaveAirportAsync(Airport airport);
+    
+    /// <summary>
+    /// Удалить аэропорт. Будут удалены также все взлетные полосы и их функции.
+    /// </summary>
+    Task DeleteAirportAsync(Guid airportId);
 }

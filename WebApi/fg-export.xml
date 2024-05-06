@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<PropertyList>
+    <generic>
+        <output>
+            <line_separator>\n</line_separator>
+            <var_separator>;</var_separator>
+            <binary_mode>false</binary_mode>
+
+            <chunk>
+
+                <type>double</type>
+                <name>Longitude</name>
+                <node>/position/longitude-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Latitude</name>
+                <node>/position/latitude-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>AltitudeAgl</name>
+                <node>/position/altitude-agl-ft</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Altitude</name>
+                <node>/position/altitude-ft</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>AltitudeIndicatedBaro</name>
+                <node>/instrumentation/altimeter/indicated-altitude-ft</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>AltitudeAbsoluteBaro</name>
+                <node>/instrumentation/altimeter/pressure-alt-ft</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Roll</name>
+                <node>/orientation/roll-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Pitch</name>
+                <node>/orientation/pitch-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Heading</name>
+                <node>/orientation/heading-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>HeadingMagnetic</name>
+                <node>/orientation/heading-magnetic-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>HeadingMagneticIndicated</name>
+                <node>/instrumentation/heading-indicator/indicated-heading-deg</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>IndicatedSpeed</name>
+                <node>/instrumentation/indicated-speed-kt</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Airspeed</name>
+                <node>/velocities/airspeed-kt</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>VerticalBaroSpeed</name>
+                <node>/instrumentation/vertical-speed-indicator/indicated-speed-kts</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Mach</name>
+                <node>/velocities/mach</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>UBodyMps</name>
+                <node>/velocities/uBody-fps</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>VBodyMps</name>
+                <node>/velocities/vBody-fps</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>WBodyMps</name>
+                <node>/velocities/wBody-fps</node>
+                <format>%.5f</format>
+            </chunk>
+
+            <chunk>
+
+                <type>double</type>
+                <name>SideOverload</name>
+                <node>/accelerations/pilot-g</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>PilotOverload</name>
+                <node>/accelerations/pilot/z-accel-fps_sec</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>AccelerationY</name>
+                <node>/accelerations/pilot/y-accel-fps_sec</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>AccelerationX</name>
+                <node>/accelerations/pilot/x-accel-fps_sec</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>AccelerationNormal</name>
+                <node>/accelerations/nlf</node>
+                <format>%.5f</format>
+            </chunk>
+            <chunk>
+
+                <type>double</type>
+                <name>Temperature</name>
+                <node>/environment/temperature-degc</node>
+                <format>%.5f</format>
+            </chunk>
+        </output>
+    </generic>
+</PropertyList>

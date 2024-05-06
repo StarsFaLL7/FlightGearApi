@@ -25,4 +25,11 @@ internal class FlightPropertyShotRepository : IFlightPropertiesShotRepository
             .OrderBy(p => p.Order)
             .ToArray();
     }
+
+    public async Task RemoveBySessionIdAsync(Guid sessionId)
+    {
+        var shotsToDelete = _dbContext.FlightPropertiesShots.Where(shot => shot.FlightSessionId == sessionId);
+        _dbContext.FlightPropertiesShots.RemoveRange(shotsToDelete);
+        await _dbContext.SaveChangesAsync();
+    }
 }

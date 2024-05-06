@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Airports\Requests\" />
+    <Folder Include="Controllers\Analytics\Requests\" />
   </ItemGroup>
 
 </Project>

@@ -7,10 +7,12 @@ namespace Application.Services.Entities;
 internal class AirportService : IAirportService
 {
     private readonly IAirportRepository _airportRepository;
+    private readonly IRunwayService _runwayService;
 
-    public AirportService(IAirportRepository airportRepository)
+    public AirportService(IAirportRepository airportRepository, IRunwayService runwayService)
     {
         _airportRepository = airportRepository;
+        _runwayService = runwayService;
     }
     
     public async Task<Airport[]> GetAllAirportsAsync()
@@ -26,5 +28,11 @@ internal class AirportService : IAirportService
     public async Task SaveAirportAsync(Airport airport)
     {
         await _airportRepository.SaveAsync(airport);
+    }
+
+    public async Task DeleteAirportAsync(Guid airportId)
+    {
+        await _runwayService.RemoveRunwaysByAirportIdAsync(airportId);
+        await _airportRepository.RemoveByIdAsync(airportId);
     }
 }

@@ -33,12 +33,21 @@ public class FlightController : Controller
         {
             Title = dto.Title,
             PropertiesReadsPerSec = dto.ReadsPerSecond,
-            DateTimeStart = DateTime.Now,
+            DateTimeStart = DateTime.Now.ToUniversalTime(),
             DurationSec = 0,
             Id = Guid.NewGuid()
         };
         await _sessionService.SaveSessionAsync(flightSession);
-        await _masterService.StartSimulationWithFlightPlanAsync(dto.FlightPlanId, flightSession);
+        try
+        {
+            await _masterService.StartSimulationWithFlightPlanAsync(dto.FlightPlanId, flightSession);
+        }
+        catch (Exception e)
+        {
+            await _sessionService.RemoveSessionAsync(flightSession.Id);
+            throw;
+        }
+        
         return Ok(new BasicStatusResponse
         {
             Status = BasicStatusEnum.Success.ToString(),
@@ -55,12 +64,14 @@ public class FlightController : Controller
     public async Task<IActionResult> GetFlightStatus()
     {
         var status = await _masterService.GetSimulationStatus();
+        var percentCompleted = await _masterService.GetRoutePercentCompletionAsync();
+        var lastReachedWp = await _masterService.GetLastReachedRoutePointOrderAsync();
         var res = new FlightStatusResponse
         {
             Status = status.ToString(),
             IsRunning = status == FlightStatus.Running,
-            LastReachedPointOrder = await _masterService.GetLastReachedRoutePointOrderAsync(),
-            PercentCompleted = await _masterService.GetRoutePercentCompletionAsync()
+            LastReachedPointOrder = lastReachedWp,
+            PercentCompleted = percentCompleted
         };
         return Ok(res);
     }
@@ -112,7 +123,7 @@ public class FlightController : Controller
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ExitSimulation()
     {
-        await _masterService.ExitSimulationAsync();
+        await _masterService.ExitSimulationWithPropertySaveAsync();
         return Ok(new BasicStatusResponse
         {
             Status = BasicStatusEnum.Success.ToString(),

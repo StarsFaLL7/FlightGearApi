@@ -17,9 +17,14 @@ public interface IUserSimulationMasterService
     Task StartSimulationWithFlightPlanAsync(Guid flightPlanId, FlightSession flightSession);
 
     /// <summary>
-    /// Досрочный выход из симуляции
+    /// Досрочный выход из симуляции без сохранения параметров
     /// </summary>
     Task ExitSimulationAsync();
+    
+    /// <summary>
+    /// Досрочный выход из симуляции с сохранением параметров
+    /// </summary>
+    Task ExitSimulationWithPropertySaveAsync();
     
     /// <summary>
     /// Получить значение статуса симуляции полета

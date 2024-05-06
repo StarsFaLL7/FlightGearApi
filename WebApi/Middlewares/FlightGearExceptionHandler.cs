@@ -11,8 +11,14 @@ public class FlightGearExceptionHandler : IExceptionHandler
         var statusResponse = new BasicStatusResponse
         {
             Status = BasicStatusEnum.Failed.ToString(),
-            Comment = exception.Message
+            Comment = exception.ToString()
         };
+        if (exception.InnerException != null)
+        {
+            statusResponse.Comment += $"; Inner Exception: {exception.InnerException.Message}";
+        }
+
+        statusResponse.Comment += $";  Source: {exception.Source}";
         Console.WriteLine($"Exception occured: {exception}");
         httpContext.Response.ContentType = "application/json";
         var json = JsonSerializer.Serialize(statusResponse);

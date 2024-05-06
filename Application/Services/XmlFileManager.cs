@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Application.Interfaces;
+using Application.Interfaces.Entities;
 using Domain.Entities;
 using Domain.Utility;
 using Microsoft.Extensions.Configuration;
@@ -8,12 +9,13 @@ namespace Application.Services;
 
 public class XmlFileManager : IXmlFileManager
 {
+    private readonly IRunwayService _runwayService;
     private readonly string _pathToExportXmlFile;
     private readonly string _pathToRouteXmlFile;
-
     
-    public XmlFileManager(IConfiguration configuration)
+    public XmlFileManager(IConfiguration configuration, IRunwayService runwayService)
     {
+        _runwayService = runwayService;
         var fgSection = configuration.GetSection("FlightGearSettings");
         var routeManagerSection = fgSection.GetSection("RouteManager");
         _pathToRouteXmlFile = Path.Combine(routeManagerSection.GetValue<string>("RoutePlanPath"), 
@@ -25,9 +27,12 @@ public class XmlFileManager : IXmlFileManager
             exportSection.GetValue<string>("XmlExportFilename") + ".xml");
     }
 
-    public async Task CreateOrUpdateExportXmlFileAsync(int readsPerSecond)
+    public async Task CreateOrUpdateExportXmlFileAsync()
     {
-        throw new NotImplementedException();
+        if (!File.Exists(_pathToExportXmlFile))
+        {
+            File.Copy("fg-export.xml", _pathToExportXmlFile);
+        }
     }
 
     public async Task CreateOrUpdateRouteManagerXmlFileAsync(FlightPlan flightPlan)
@@ -35,7 +40,7 @@ public class XmlFileManager : IXmlFileManager
         var content = await GetRouteXmlContent(flightPlan);
         try
         {
-            using (var fs = new FileStream(_pathToRouteXmlFile, FileMode.OpenOrCreate))
+            using (var fs = new FileStream(_pathToRouteXmlFile, FileMode.Create))
             {
                 var bytes = Encoding.UTF8.GetBytes(content);
                 await fs.WriteAsync(bytes);
@@ -54,7 +59,7 @@ public class XmlFileManager : IXmlFileManager
         var startFromAirport = flightPlan.DepartureRunway != null;
         var endOnAirport = flightPlan.ArrivalRunway != null;
         builder.Append("<?xml version=\"1.0\"?>\n<PropertyList>\n\t<version type=\"int\">2</version>\n");
-        if (startFromAirport)
+        /*if (startFromAirport)
         {
             builder.Append("\t<departure>\n" +
                            $"\t\t<airport type=\"string\">{flightPlan.DepartureRunway.Airport.Code}</airport>\n" +
@@ -67,13 +72,14 @@ public class XmlFileManager : IXmlFileManager
                            $"\t\t<airport type=\"string\">{flightPlan.ArrivalRunway.Airport.Code}</airport>\n" +
                            $"\t\t<runway type=\"string\">{flightPlan.ArrivalRunway.Title}</runway>" +
                            "\t</destination>\n");
-        }
+        }*/
 
         builder.Append("\t<route>\n");
-        var wpindex = 1;
+        var wpindex = 0;
         if (startFromAirport)
         {
-            foreach (var point in flightPlan.DepartureRunway.DepartureFunction.FunctionPoints.OrderBy(p => p.Order))
+            var runway = await _runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
+            foreach (var point in runway.DepartureFunction.FunctionPoints.OrderBy(p => p.Order))
             {
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                                "\t\t\t<type type=\"string\">basic</type>\n" +
@@ -84,6 +90,7 @@ public class XmlFileManager : IXmlFileManager
                                $"\t\t\t<lon type=\"double\">{point.Longitude}</lon>\n" +
                                $"\t\t\t<lat type=\"double\">{point.Latitude}</lat>\n" +
                                "\t\t</wp>\n");
+                wpindex++;
             }
         }
 
@@ -91,7 +98,7 @@ public class XmlFileManager : IXmlFileManager
         var index = 0;
         foreach (var point in flightPlan.RoutePoints)
         {
-            if (index > 0 && flightPlan.RoutePoints.Count > index + 1)
+            /*if (index > 0 && flightPlan.RoutePoints.Count > index + 1)
             {
                 var nextPoint = flightPlan.RoutePoints[index + 1];
                 var prevPoint = flightPlan.RoutePoints[index - 1];
@@ -114,7 +121,7 @@ public class XmlFileManager : IXmlFileManager
                                    "\t\t</wp>\n");
                     wpindex++;
                 }
-            }
+            }*/
             
             builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                            "\t\t\t<type type=\"string\">basic</type>\n" +
@@ -131,7 +138,8 @@ public class XmlFileManager : IXmlFileManager
         
         if (endOnAirport)
         {
-            foreach (var point in flightPlan.ArrivalRunway.ArrivalFunction.FunctionPoints.OrderBy(p => p.Order))
+            var runway = await _runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
+            foreach (var point in runway.ArrivalFunction.FunctionPoints.OrderBy(p => p.Order))
             {
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                                "\t\t\t<type type=\"string\">basic</type>\n" +
@@ -142,6 +150,7 @@ public class XmlFileManager : IXmlFileManager
                                $"\t\t\t<lon type=\"double\">{point.Longitude}</lon>\n" +
                                $"\t\t\t<lat type=\"double\">{point.Latitude}</lat>\n" +
                                "\t\t</wp>\n");
+                wpindex++;
             }
         }
         builder.Append("\t</route>\n");

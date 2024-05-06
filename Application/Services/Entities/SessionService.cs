@@ -7,10 +7,12 @@ namespace Application.Services.Entities;
 public class SessionService : ISessionService
 {
     private readonly IFlightSavedSessionsRepository _sessionsRepository;
+    private readonly IFlightPropertiesShotRepository _propertiesShotRepository;
 
-    public SessionService(IFlightSavedSessionsRepository sessionsRepository)
+    public SessionService(IFlightSavedSessionsRepository sessionsRepository, IFlightPropertiesShotRepository propertiesShotRepository)
     {
         _sessionsRepository = sessionsRepository;
+        _propertiesShotRepository = propertiesShotRepository;
     }
     
     public async Task<FlightSession[]> GetAllSessions()
@@ -34,6 +36,7 @@ public class SessionService : ISessionService
 
     public async Task RemoveSessionAsync(Guid sessionId)
     {
+        await _propertiesShotRepository.RemoveBySessionIdAsync(sessionId);
         await _sessionsRepository.RemoveByIdAsync(sessionId);
     }
 }

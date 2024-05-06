@@ -57,7 +57,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
         var exportSection = fgSection.GetSection("Export");
         _exportXmlFileName = exportSection.GetValue<string>("XmlExportFilename");
         _exportTextFilePath = Path.Combine(mainFolderPath, exportSection.GetValue<string>("ExportPropertiesFileName"));
-
+        
         var routeSection = fgSection.GetSection("RouteManager");
         _routeXmlFilePath = Path.Combine(routeSection.GetValue<string>("RoutePlanPath"), 
             routeSection.GetValue<string>("RoutePlanFileName"));
@@ -83,7 +83,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
             _startHeading = GeographyHelper.GetDirectionDeg(_startRoutePoint.Latitude, _startRoutePoint.Longitude,
                 first2Points[1].Latitude, first2Points[1].Longitude);
         }
-
+        
         _isInitialized = true;
     }
 
@@ -155,7 +155,9 @@ internal class FlightGearLauncher : IFlightGearLauncher
         await _connectionManager.SetPropertyAsync("autopilot/locks/speed", "speed-with-throttle");
         await _connectionManager.SetPropertyAsync("autopilot/locks/heading", "true-heading-hold");
         await _connectionManager.SetPropertyAsync("autopilot/settings/target-speed-kt", 600);
+        
         await _connectionManager.SetPropertyAsync("autopilot/route-manager/input", "@activate");
+        
         await _connectionManager.SetPropertyAsync("canopy/position-norm", 0);
         await _connectionManager.SetPropertyAsync("sim/current-view/view-number", 1);
         await _connectionManager.SetPropertyAsync("sim/current-view/field-of-view", 90);
@@ -171,9 +173,17 @@ internal class FlightGearLauncher : IFlightGearLauncher
         await _connectionManager.SetPropertyAsync("/sim/freeze/clock", pause);
     }
     
-    public Task ExitSimulationAsync()
+    public async Task CloseFlightGearAsync()
     {
-        throw new NotImplementedException();
+        if (!_isRunning)
+        {
+            throw new Exception("Simulation is not running.");
+        }
+
+        _flightGearProcess?.Kill();
+        _flightGearProcess?.Dispose();
+        _isRunning = false;
+        _isInitialized = false;
     }
 
     public string GetLaunchString(int propertiesReadsPerSecond)
@@ -211,5 +221,10 @@ internal class FlightGearLauncher : IFlightGearLauncher
         }
 
         return sb.ToString();
+    }
+
+    public string GetExportedTextDataFilePath()
+    {
+        return _exportTextFilePath;
     }
 }

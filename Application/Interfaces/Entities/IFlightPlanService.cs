@@ -49,6 +49,8 @@ public interface IFlightPlanService
     /// Удаление точки маршрута у существующего плана полета
     /// </summary>
     Task RemoveRoutePointAsync(Guid flightPlanId, int pointOrder);
+
+    Task RemoveDepartureRunwayFromFlightPlansByRunwayId(Guid runwayId);
     
-    
+    Task RemoveArrivalRunwayFromFlightPlansByRunwayId(Guid runwayId);
 }

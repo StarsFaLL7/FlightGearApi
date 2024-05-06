@@ -56,16 +56,46 @@ internal class AirportRunwayRepository : IAirportRunwayRepository
 
     public async Task<AirportRunway> GetAggregateByIdAsync(Guid id)
     {
-        return _dbContext.AirportRunways
+        var runway = _dbContext.AirportRunways
             .Include(r => r.Airport)
-            .Include(r=> r.ArrivalFunction)
+            .Include(r => r.ArrivalFunction)
             .Include(r => r.DepartureFunction)
             .First(r => r.Id == id);
+        if (runway.ArrivalFunction != null)
+        {
+            var arrivalFunctionPoints = _dbContext.FunctionPoints
+                .OrderBy(p => p.Order)
+                .Where(p => p.FunctionId == runway.ArrivalFunctionId)
+                .ToArray();
+            runway.ArrivalFunction.FunctionPoints = arrivalFunctionPoints;
+        }
+        if (runway.DepartureFunction != null)
+        {
+            var arrivalFunctionPoints = _dbContext.FunctionPoints
+                .OrderBy(p => p.Order)
+                .Where(p => p.FunctionId == runway.DepartureFunctionId)
+                .ToArray();
+            runway.DepartureFunction.FunctionPoints = arrivalFunctionPoints;
+        }
+        
+        return runway;
     }
 
     public async Task<AirportRunway[]> GetAllByAirportId(Guid airportId)
     {
         return _dbContext.AirportRunways
+            .Where(r => r.AirportId == airportId)
+            .ToArray();
+    }
+
+    public async Task<AirportRunway[]> GetAggregatedRunwaysByAirportId(Guid airportId)
+    {
+        return _dbContext.AirportRunways
+            .Include(r => r.Airport)
+            .Include(r=> r.ArrivalFunction)
+            .ThenInclude(f => f.FunctionPoints)
+            .Include(r => r.DepartureFunction)
+            .ThenInclude(f => f.FunctionPoints)
             .Where(r => r.AirportId == airportId)
             .ToArray();
     }

@@ -8,16 +8,16 @@ namespace Application.Interfaces.Entities;
 public interface IRunwayService
 {
     Task SaveRunwayAsync(AirportRunway runway);
-
-    Task RemoveRunwayAsync(AirportRunway runway);
     
     Task RemoveRunwayByIdAsync(Guid runwayId);
     
-    Task RemoveRunwayByAirportIdAsync(Guid airportId);
+    Task RemoveRunwaysByAirportIdAsync(Guid airportId);
 
     Task<AirportRunway> GetRunwayByIdAsync(Guid id);
     
     Task<AirportRunway> GetAggregatedRunwayByIdAsync(Guid id);
 
     Task<AirportRunway[]> GetAllRunwaysByAirportId(Guid airportId);
+    
+    Task<AirportRunway[]> GetAggregatedRunwaysByAirportId(Guid airportId);
 }

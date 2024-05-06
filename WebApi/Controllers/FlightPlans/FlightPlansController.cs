@@ -104,7 +104,7 @@ public class FlightPlansController : Controller
         flightPlan.Title = dto.Title;
         flightPlan.Remarks = dto.Remarks;
         flightPlan.DepartureRunwayId = dto.DepartureRunwayId;
-        flightPlan.ArrivalRunwayId = dto.DepartureRunwayId;
+        flightPlan.ArrivalRunwayId = dto.ArrivalRunwayId;
         await _flightPlanService.SaveFlightPlanAsync(flightPlan);
         var savedFlightPlan = await _flightPlanService.GetFlightPlanWithConvertedPointsAsync(flightPlan.Id);
         return Ok(new FlightPlanWithStatusResponse

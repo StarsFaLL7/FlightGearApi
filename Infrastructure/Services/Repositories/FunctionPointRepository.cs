@@ -22,6 +22,13 @@ internal class FunctionPointRepository : IFunctionPointRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task SaveRangeAsync(FunctionPoint[] points)
+    {
+        await _dbContext.FunctionPoints.AddRangeAsync(points);
+
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task RemoveByIdAsync(Guid pointId)
     {
         var point = _dbContext.FunctionPoints.FirstOrDefault(p => p.Id == pointId);
@@ -30,6 +37,13 @@ internal class FunctionPointRepository : IFunctionPointRepository
             _dbContext.FunctionPoints.Remove(point);
             await _dbContext.SaveChangesAsync();
         }
+    }
+
+    public async Task RemoveAllByFunctionIdAsync(Guid functionId)
+    {
+        var pointsToDelete = _dbContext.FunctionPoints.Where(p => p.FunctionId == functionId);
+        _dbContext.FunctionPoints.RemoveRange(pointsToDelete);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async Task<FunctionPoint> GetByIdAsync(Guid id)

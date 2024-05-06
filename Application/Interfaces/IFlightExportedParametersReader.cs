@@ -10,5 +10,5 @@ public interface IFlightExportedParametersReader
     /// <summary>
     /// Считать параметры полёта в объекты из файла .xml по указанному пути.
     /// </summary>
-    Task<FlightPropertiesShot[]> GetExportedPropertiesAsync(string pathToExportFile);
+    Task<FlightPropertiesShot[]> GetExportedPropertiesAsync(Guid flightSessionId);
 }

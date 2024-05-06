@@ -10,7 +10,7 @@ public interface IXmlFileManager
     /// <summary>
     /// Создаёт или обновляет xml-файл, в котором задаются настройки считвания параметров из FG
     /// </summary>
-    Task CreateOrUpdateExportXmlFileAsync(int readsPerSecond);
+    Task CreateOrUpdateExportXmlFileAsync();
     
     /// <summary>
     /// Создаёт или обновляет xml-файл, в котором задаются настройки маршрута для FG
