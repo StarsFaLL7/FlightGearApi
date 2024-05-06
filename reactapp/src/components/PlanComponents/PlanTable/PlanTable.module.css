@@ -1,0 +1,233 @@
+input[type="text"]
+  {
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: normal;
+    white-space: nowrap;
+    max-width: 150px;
+    min-width: 100px; 
+  }
+  input[type="number"]
+  {
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: normal;
+    white-space: nowrap;
+    max-width: 150px;
+    min-width: 100px;
+  }
+  .cols {
+    height: fit-content;
+  }
+  .title_main {
+    -webkit-text-stroke: 1px #000000;
+    color: #ecf0f1;
+/*     font-size: 56px;
+    font-weight: 700;
+    line-height: normal; */
+    /* margin-bottom: 2%;
+    margin-top: 83px; */
+  }
+  .title_main_inverse {
+    -webkit-text-stroke: 1px #ecf0f1;
+    color: #000000;
+  }
+  /* .add_stage{
+    width: 80%;
+    height: 1%;
+    padding: 1%;
+    background-color: #ECF0F1;
+    border-radius: 25px;
+    display: flex;
+    justify-content: space-between;
+    margin: auto;
+  } */
+  /* .add_stage_element{
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: normal;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    margin-right: 1%;
+  } */
+  .datalist {
+    height:50px !important;
+    max-height:80px !important;
+    overflow-y:auto;
+    display:block !important;
+  }
+  .course{
+    background-color: #ecf0f1;
+    border: 1px solid;
+    border-color: #373737;
+    border-radius: 13px;
+    box-shadow: var(--enter-field);
+    height: 2em;
+    width: 100%;
+  }
+  .speed{
+    background-color: #ecf0f1;
+    border: 1px solid;
+    border-color: #373737;
+    border-radius: 13px;
+    box-shadow: var(--enter-field);
+    height: 2em;
+    width: 50%;
+  }
+  .altitude{
+    background-color: #ecf0f1;
+    border: 1px solid;
+    border-color: #373737;
+    border-radius: 13px;
+    box-shadow: var(--enter-field);
+    height: 2em;
+    width: 60%;
+  }
+  .speed_label{
+    width: 40%;
+  }
+  .altitude_label{
+    width: 40%;
+  }
+  header p{
+    margin-right: 4%;
+  }
+  .plus{
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: #2a65a1;
+    border-radius: 13px;
+    border: 1px solid;
+  }
+
+  .plus img {
+    vertical-align: auto;
+    float: none;
+  }
+  
+  /* .add_stage_element_1{
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: normal;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    margin-left: 2%;
+    margin-right: 1%;
+  } */
+  /* .add_stage_element_3{
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: normal;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    margin-right: 3%;
+  } */
+  /* .add_stage_element_4{
+    color: #000000;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: normal;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    margin-right: 1%;
+  } */
+  /* .map{
+    margin-left: 11%;
+    height: 35rem;
+    width: 39%;
+    border-radius: 25px;
+    border: 1px solid;
+    border-color: #373737;
+  } */
+  .main_info{
+    margin-top: 1%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .plan_table {
+    width: 39%;
+    margin-right: 11%;
+  }
+  h2{
+    font-size: 36px;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 7px;
+  }
+  .table_head{
+    background-color: #d4d4d4;
+    /* width: 100%; */
+    border: 1px solid;
+    border-color: #373737;
+    /* height: 8%; */
+    
+  }
+  /* .table_head_info{
+    display: flex;
+    width: 100%;
+    background-color: #ecf0f1;
+    border-radius: 25px;
+    height: 5%;
+    align-items: center;
+  } */
+  /* .table_element{
+    display: flex;
+    width: 100%;
+    align-items: center;
+  } */
+  /* .table_element_info_2{
+    justify-items: center;
+    margin-left: 10%;
+    color: #000000;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    line-height: normal;
+  }
+  .table_element_info_3{
+    justify-self: right;
+    margin-left: 7%;
+    color: #000000;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    line-height: normal;
+    word-wrap:break-word;
+  }
+  .table_element_info_4{
+    justify-items: center;
+    margin-left: 1%;
+    margin-right: 15%;
+    color: #000000;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    line-height: normal;
+  } */
+  .scroll{
+    overflow-y: scroll;
+    height: 70%;
+  }
+  .scroll::-webkit-scrollbar {
+    width: 100%;
+    height: 0;
+  }
+  
+  .scroll::-webkit-scrollbar-thumb {
+    background-color: white;
+    border-radius: 20px;
+  }
