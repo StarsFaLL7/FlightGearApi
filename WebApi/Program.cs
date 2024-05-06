@@ -1,6 +1,7 @@
 using Application;
 using Infrastructure;
 using Microsoft.OpenApi.Models;
+using webapi.Middlewares;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,11 +14,14 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 
+builder.Services.AddExceptionHandler<FlightGearExceptionHandler>();
 builder.Services.TryAddApplicationLayer();
 builder.Services.TryAddInfrastructure();
 
 var app = builder.Build();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

@@ -59,8 +59,8 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     AirportId = table.Column<Guid>(type: "uuid", nullable: false),
-                    DepartureFunctionId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ArrivalFunctionId = table.Column<Guid>(type: "uuid", nullable: false)
+                    DepartureFunctionId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ArrivalFunctionId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -7,5 +7,6 @@ public interface IFlightPropertiesShotRepository
     Task SaveRangeAsync(params FlightPropertiesShot[] shots);
     
     Task<FlightPropertiesShot[]> GetAllBySessionIdAsync(Guid sessionId);
-    
+
+    Task RemoveBySessionIdAsync(Guid sessionId);
 }

@@ -51,4 +51,14 @@ internal class FlightPlanRepository : IFlightPlanRepository
             .Include(p => p.RoutePoints)
             .First(p => p.Id == id);
     }
+
+    public async Task<FlightPlan[]> GetFlightPlansByDepartureRunwayId(Guid departureRunwayId)
+    {
+        return _dbContext.FlightPlans.Where(fp => fp.DepartureRunwayId == departureRunwayId).ToArray();
+    }
+
+    public async Task<FlightPlan[]> GetFlightPlansByArrivalRunwayId(Guid arrivalRunwayId)
+    {
+        return _dbContext.FlightPlans.Where(fp => fp.ArrivalRunwayId == arrivalRunwayId).ToArray();
+    }
 }

@@ -13,4 +13,9 @@ public interface IFlightPlanRepository
     Task<FlightPlan> GetByIdAsync(Guid id);
     
     Task<FlightPlan> GetAggregateByIdAsync(Guid id);
+
+    Task<FlightPlan[]> GetFlightPlansByDepartureRunwayId(Guid departureRunwayId);
+    
+    Task<FlightPlan[]> GetFlightPlansByArrivalRunwayId(Guid arrivalRunwayId);
+
 }

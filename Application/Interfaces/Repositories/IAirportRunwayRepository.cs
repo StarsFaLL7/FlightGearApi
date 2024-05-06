@@ -17,4 +17,6 @@ public interface IAirportRunwayRepository
     Task<AirportRunway> GetAggregateByIdAsync(Guid id);
 
     Task<AirportRunway[]> GetAllByAirportId(Guid airportId);
+    
+    Task<AirportRunway[]> GetAggregatedRunwaysByAirportId(Guid airportId);
 }

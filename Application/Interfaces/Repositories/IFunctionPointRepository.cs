@@ -6,7 +6,11 @@ public interface IFunctionPointRepository
 {
     Task SaveAsync(FunctionPoint point);
     
+    Task SaveRangeAsync(FunctionPoint[] point);
+    
     Task RemoveByIdAsync(Guid pointId);
+    
+    Task RemoveAllByFunctionIdAsync(Guid functionId);
 
     Task<FunctionPoint> GetByIdAsync(Guid id);
 

@@ -7,7 +7,7 @@ public class FlightPlan : BaseEntityWithKey<Guid>
 {
     public required string Title { get; set; }
     
-    public string Remarks { get; set; }
+    public string? Remarks { get; set; }
     
     public Guid? DepartureRunwayId { get; set; }
     [ForeignKey("DepartureRunwayId")]
