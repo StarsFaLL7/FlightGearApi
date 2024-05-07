@@ -3,7 +3,7 @@ import { SERVER_URL } from '../const/const';
 
 export const handleClickDeleteItem = async (props) => {  
     await axios
-      .delete(`https://localhost:7110/api/launch/stages/${props.index}`)
+      .delete(`https://localhost:7229/api/launch/stages/${props.index}`)
       .then((response) => {
         if (response.status === 200) {
           props.onRemoveData();

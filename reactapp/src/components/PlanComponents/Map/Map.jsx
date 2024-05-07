@@ -38,10 +38,10 @@ const MainMap = () => {
     map.on('contextmenu', (e) => {
         let lngLat = Object.values(e.lngLat);
         markersArr.push(lngLat);
-        const marker = createMarker(lngLat, map);
-        let popup = createPopup(e, map, marker, markersArr);
-        marker.setPopup(popup);
-        marker.on('dragend', () => {
+        const marker = createMarker(lngLat, map, false);
+        //let popup = createPopup(e, map, marker, markersArr);
+        //marker.setPopup(popup);
+        /* marker.on('dragend', () => {
             let newLngLat = Object.values(marker.getLngLat());
             e.lngLat = marker.getLngLat();
             let index = markersArr.indexOf(lngLat);
@@ -50,10 +50,10 @@ const MainMap = () => {
             updateLine(map, markersArr);
             popup = createPopup(e, map, marker, markersArr);
             marker.setPopup(popup);
-        });
+        }); */
         updateLine(map, markersArr);
-        const formData = getData(marker.getPopup().getElement().querySelector('form'));
-        handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
+        //const formData = getData(marker.getPopup().getElement().querySelector('form'));
+        //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
     });
 }
 
@@ -98,10 +98,30 @@ const MainMap = () => {
       }   
   }
 
-  function createMarker(lngLat, map) {
-      return new maplibregl.Marker({draggable: true, color: "#0d6efd" })
-          .setLngLat(lngLat)
-          .addTo(map);
+  function createMarker(lngLat, map, addPopup = true) {
+    const marker = new maplibregl.Marker({draggable: true, color: "#0d6efd" }).setLngLat(lngLat).addTo(map);
+
+    if (addPopup) {
+      marker.on('click', (e) => {
+        const popup = createPopup(e, map, marker, markersArr);
+        marker.setPopup(popup);
+      });
+    }
+    marker.on('dragend', (e) => {
+      let newLngLat = Object.values(marker.getLngLat());
+      e.lngLat = marker.getLngLat();
+      let index = markersArr.indexOf(lngLat);
+      markersArr[index] = newLngLat;
+      lngLat = newLngLat;
+      updateLine(map, markersArr);
+      const popup = createPopup(e, map, marker, markersArr);
+      marker.setPopup(popup);
+    });
+
+    const formData = getData(marker.getPopup().getElement().querySelector('form'));
+    handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
+
+    return marker;      
   }
 
   function createPopup(data, map, marker, markersArr) {
