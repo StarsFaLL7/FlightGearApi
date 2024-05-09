@@ -1,0 +1,16 @@
+.containerCss {
+    background-color: aliceblue;
+    opacity: 0.9;
+    width: 100%;
+}
+.bg-not-light {
+   background-color: #d4d4d4;
+
+}
+#popover-basic {
+    min-width: fit-content;
+}
+
+.popover-header {
+    text-align: center;
+}

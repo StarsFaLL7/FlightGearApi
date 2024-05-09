@@ -1,0 +1,14 @@
+.reload__btn {
+    margin: 0 2%;
+    padding: 3%;
+    border: none;
+    border-radius: 30%;
+    color: white;
+    transition: .2s linear;
+    background: #0b61f600;
+    display: inline-block;
+  }
+  
+  .reload__btn:hover {
+    background-color: #7999d5 ;
+  }
