@@ -2,12 +2,19 @@ import React, {useState, useEffect} from "react";
 import PlanItem from "../PlanItem/PlanItem"
 import styles from '../PlanTable/PlanTable.module.css';
 import { getPlanData } from "../../../api-methods/api-methods";
+import FlightItem from "../FlightItem/FlightItem";
 
 const PlanPoints = () => {
   const [plan, setPlan] = useState([]);
-  const [sendingData, setSendingData] = useState([]);
+  //const [sendingData, setSendingData] = useState([]);
+
+  const [flight, setFlight] = useState([]);
+  console.log(flight)
+  const [sendingFlightData, setSendingFlightData] = useState([]);
 
   useEffect(() => { getPlanData(setPlan); }, []);
+  useEffect(() => { getPlanData(setFlight); }, []);
+
   const onRemoveData = async () => { await getPlanData(setPlan); }
 
   return (
@@ -28,11 +35,7 @@ const PlanPoints = () => {
                 </div>
               </thead>
               <tbody>
-              {/* <div className={styles.scroll}>
-                <FlightItem
-                  onRemoveData={onRemoveData}
-                /> */}
-                <div className={styles.scroll}>
+                {/* <div className={styles.scroll}>
                   
                     {plan && plan.map((element, index) =>
                       <PlanItem
@@ -49,8 +52,16 @@ const PlanPoints = () => {
                       />
                     )}
                      
+                </div> */}
+                <div className={styles.scroll}>
+                  {flight.flightPlans && flight.flightPlans.map((element, index) =>
+                      <FlightItem
+                        index={index}
+                        Title={element.Title}
+                        onRemoveData={onRemoveData}
+                      />
+                    )}
                 </div>
-              {/* </div> */}
               </tbody>
             </table>
         </div>     

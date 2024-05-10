@@ -231,3 +231,7 @@ input[type="text"]
     background-color: white;
     border-radius: 20px;
   }
+
+  .btn {
+    width:fit-content;
+  }

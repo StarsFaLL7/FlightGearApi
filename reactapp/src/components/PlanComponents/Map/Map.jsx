@@ -6,7 +6,7 @@ import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import * as turf from '@turf/turf'
 import { getPlanData } from "../../../api-methods/api-methods";
-import { handlerAddPlan } from "../../../utils/common";
+//import { handlerAddPlan } from "../../../utils/common";
 import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
 
@@ -38,10 +38,10 @@ const MainMap = () => {
     map.on('contextmenu', (e) => {
         let lngLat = Object.values(e.lngLat);
         markersArr.push(lngLat);
-        const marker = createMarker(lngLat, map, false);
-        //let popup = createPopup(e, map, marker, markersArr);
-        //marker.setPopup(popup);
-        /* marker.on('dragend', () => {
+        const marker = createMarker(lngLat, map);
+        let popup = createPopup(e, map, marker, markersArr);
+        marker.setPopup(popup);
+        marker.on('dragend', () => {
             let newLngLat = Object.values(marker.getLngLat());
             e.lngLat = marker.getLngLat();
             let index = markersArr.indexOf(lngLat);
@@ -50,9 +50,11 @@ const MainMap = () => {
             updateLine(map, markersArr);
             popup = createPopup(e, map, marker, markersArr);
             marker.setPopup(popup);
-        }); */
+        });
         updateLine(map, markersArr);
-        //const formData = getData(marker.getPopup().getElement().querySelector('form'));
+        const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
+        marker.getPopup().remove();
+        console.log(formData)
         //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
     });
 }
@@ -98,30 +100,10 @@ const MainMap = () => {
       }   
   }
 
-  function createMarker(lngLat, map, addPopup = true) {
-    const marker = new maplibregl.Marker({draggable: true, color: "#0d6efd" }).setLngLat(lngLat).addTo(map);
-
-    if (addPopup) {
-      marker.on('click', (e) => {
-        const popup = createPopup(e, map, marker, markersArr);
-        marker.setPopup(popup);
-      });
-    }
-    marker.on('dragend', (e) => {
-      let newLngLat = Object.values(marker.getLngLat());
-      e.lngLat = marker.getLngLat();
-      let index = markersArr.indexOf(lngLat);
-      markersArr[index] = newLngLat;
-      lngLat = newLngLat;
-      updateLine(map, markersArr);
-      const popup = createPopup(e, map, marker, markersArr);
-      marker.setPopup(popup);
-    });
-
-    const formData = getData(marker.getPopup().getElement().querySelector('form'));
-    handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
-
-    return marker;      
+  function createMarker(lngLat, map) {
+      return new maplibregl.Marker({draggable: true, color: "#0d6efd" })
+          .setLngLat(lngLat)
+          .addTo(map);
   }
 
   function createPopup(data, map, marker, markersArr) {
@@ -175,11 +157,10 @@ const MainMap = () => {
       saveButton.onclick = function(evt) {
         evt.preventDefault();
         const formData = getData(document.getElementById('form'));
-        console.log(document.getElementById('form'))
-        handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);  
+        //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);  
       };
 
-      let popup = new maplibregl.Popup().setLngLat([data.lngLat.lng, data.lngLat.lat]).setDOMContent(popupContent).addTo(map);
+      let popup = new maplibregl.Popup().setLngLat([data.lngLat.lng, data.lngLat.lat]).setDOMContent(popupContent);
       return popup;
   }
 

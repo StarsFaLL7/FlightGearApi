@@ -11,6 +11,9 @@
     min-width: fit-content;
 }
 
-.popover-header {
+.popover-header{
     text-align: center;
+    -webkit-text-stroke: 1px #000000;
+    color: #ecf0f1;
+    font-size: 30px;
 }
