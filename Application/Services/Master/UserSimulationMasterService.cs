@@ -4,6 +4,7 @@ using Application.Interfaces.Connection;
 using Application.Interfaces.Entities;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services.Master;
 
@@ -11,26 +12,22 @@ namespace Application.Services.Master;
 internal class UserSimulationMasterService : IUserSimulationMasterService
 {
     private readonly IFlightGearLauncher _flightGearLauncher;
-    private readonly IFlightPlanService _flightPlanService;
     private readonly IXmlFileManager _xmlFileManager;
     private readonly IConnectionManager _connectionManager;
     private readonly IFlightExportedParametersReader _flightExportedParametersReader;
-    private readonly IFlightPropertiesShotRepository _propertiesShotRepository;
-    private readonly ISessionService _sessionService;
+    private readonly IServiceProvider _serviceProvider;
 
     private FlightStatus _currentStatus = FlightStatus.NotRunning;
     private FlightSession? _runningSession;
-    public UserSimulationMasterService(IFlightGearLauncher flightGearLauncher, IFlightPlanService flightPlanService,
+    public UserSimulationMasterService(IFlightGearLauncher flightGearLauncher,
         IXmlFileManager xmlFileManager, IConnectionManager connectionManager, IFlightExportedParametersReader flightExportedParametersReader,
-        IFlightPropertiesShotRepository propertiesShotRepository, ISessionService sessionService)
+        IServiceProvider serviceProvider)
     {
         _flightGearLauncher = flightGearLauncher;
-        _flightPlanService = flightPlanService;
         _xmlFileManager = xmlFileManager;
         _connectionManager = connectionManager;
         _flightExportedParametersReader = flightExportedParametersReader;
-        _propertiesShotRepository = propertiesShotRepository;
-        _sessionService = sessionService;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task StartSimulationWithFlightPlanAsync(Guid flightPlanId, FlightSession flightSession)
@@ -38,7 +35,8 @@ internal class UserSimulationMasterService : IUserSimulationMasterService
         _currentStatus = FlightStatus.Launching;
         try
         {
-            var flightPlan = await _flightPlanService.GetAggregatedFlightPlanAsync(flightPlanId);
+            var flightPlanService = _serviceProvider.GetRequiredService<IFlightPlanService>();
+            var flightPlan = await flightPlanService.GetAggregatedFlightPlanAsync(flightPlanId);
             await _xmlFileManager.CreateOrUpdateRouteManagerXmlFileAsync(flightPlan);
             await _xmlFileManager.CreateOrUpdateExportXmlFileAsync();
             await _flightGearLauncher.InitializeWithFlightPlanAsync(flightPlan);
@@ -74,8 +72,10 @@ internal class UserSimulationMasterService : IUserSimulationMasterService
         await _flightGearLauncher.CloseFlightGearAsync();
         await Task.Delay(500);
         var propertiesShots = await _flightExportedParametersReader.GetExportedPropertiesAsync(_runningSession.Id);
-        await _propertiesShotRepository.SaveRangeAsync(propertiesShots);
-        await _sessionService.SaveSessionAsync(_runningSession);
+        var propertiesShotRepository = _serviceProvider.GetRequiredService<IFlightPropertiesShotRepository>();
+        await propertiesShotRepository.SaveRangeAsync(propertiesShots);
+        var sessionService = _serviceProvider.GetRequiredService<ISessionService>();
+        await sessionService.SaveSessionAsync(_runningSession);
         ResetStatus();
     }
 

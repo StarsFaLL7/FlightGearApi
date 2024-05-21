@@ -1,36 +1,37 @@
 ﻿using Application.Interfaces.Entities;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services.Entities;
 
 public class FlightFunctionService : IFlightFunctionService
 {
-    private readonly IFunctionPointRepository _functionPointRepository;
-    private readonly IReadyFlightFunctionRepository _flightFunctionRepository;
+    private readonly IServiceProvider _serviceProvider;
 
-    public FlightFunctionService(IFunctionPointRepository functionPointRepository, IReadyFlightFunctionRepository flightFunctionRepository)
+    public FlightFunctionService(IServiceProvider serviceProvider)
     {
-        _functionPointRepository = functionPointRepository;
-        _flightFunctionRepository = flightFunctionRepository;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task SaveFunction(ReadyFlightFunction flightFunction)
     {
-        await _flightFunctionRepository.SaveAsync(flightFunction);
+        var flightFunctionRepository = _serviceProvider.GetRequiredService<IReadyFlightFunctionRepository>();
+        await flightFunctionRepository.SaveAsync(flightFunction);
     }
 
     public async Task RemoveFunctionById(Guid id)
     {
-        //await _functionPointRepository.RemoveAllByFunctionIdAsync(id);
-        await _flightFunctionRepository.RemoveByIdAsync(id);
+        var flightFunctionRepository = _serviceProvider.GetRequiredService<IReadyFlightFunctionRepository>();
+        await flightFunctionRepository.RemoveByIdAsync(id);
     }
 
     public async Task SaveFunctionPointRange(FunctionPoint[] points)
     {
+        var functionPointRepository = _serviceProvider.GetRequiredService<IFunctionPointRepository>();
         foreach (var point in points)
         {
-            await _functionPointRepository.SaveAsync(point);
+            await functionPointRepository.SaveAsync(point);
         }
         
     }
