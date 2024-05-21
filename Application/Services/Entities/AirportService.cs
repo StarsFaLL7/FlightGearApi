@@ -1,38 +1,43 @@
 ﻿using Application.Interfaces.Entities;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services.Entities;
 
 internal class AirportService : IAirportService
 {
-    private readonly IAirportRepository _airportRepository;
     private readonly IRunwayService _runwayService;
+    private readonly IServiceProvider _serviceProvider;
 
-    public AirportService(IAirportRepository airportRepository, IRunwayService runwayService)
+    public AirportService(IRunwayService runwayService, IServiceProvider serviceProvider)
     {
-        _airportRepository = airportRepository;
         _runwayService = runwayService;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task<Airport[]> GetAllAirportsAsync()
     {
-        return await _airportRepository.GetAllAirports();
+        var airportRepository = _serviceProvider.GetRequiredService<IAirportRepository>();
+        return await airportRepository.GetAllAirports();
     }
 
     public async Task<Airport> GetAirportAggregatedAsync(Guid airportId)
     {
-        return await _airportRepository.GetAggregateByIdAsync(airportId);
+        var airportRepository = _serviceProvider.GetRequiredService<IAirportRepository>();
+        return await airportRepository.GetAggregateByIdAsync(airportId);
     }
 
     public async Task SaveAirportAsync(Airport airport)
     {
-        await _airportRepository.SaveAsync(airport);
+        var airportRepository = _serviceProvider.GetRequiredService<IAirportRepository>();
+        await airportRepository.SaveAsync(airport);
     }
 
     public async Task DeleteAirportAsync(Guid airportId)
     {
+        var airportRepository = _serviceProvider.GetRequiredService<IAirportRepository>();
         await _runwayService.RemoveRunwaysByAirportIdAsync(airportId);
-        await _airportRepository.RemoveByIdAsync(airportId);
+        await airportRepository.RemoveByIdAsync(airportId);
     }
 }

@@ -4,18 +4,19 @@ using Application.Interfaces.Entities;
 using Domain.Entities;
 using Domain.Utility;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services;
 
 public class XmlFileManager : IXmlFileManager
 {
-    private readonly IRunwayService _runwayService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly string _pathToExportXmlFile;
     private readonly string _pathToRouteXmlFile;
     
-    public XmlFileManager(IConfiguration configuration, IRunwayService runwayService)
+    public XmlFileManager(IConfiguration configuration, IServiceProvider serviceProvider)
     {
-        _runwayService = runwayService;
+        _serviceProvider = serviceProvider;
         var fgSection = configuration.GetSection("FlightGearSettings");
         var routeManagerSection = fgSection.GetSection("RouteManager");
         _pathToRouteXmlFile = Path.Combine(routeManagerSection.GetValue<string>("RoutePlanPath"), 
@@ -76,9 +77,10 @@ public class XmlFileManager : IXmlFileManager
 
         builder.Append("\t<route>\n");
         var wpindex = 0;
+        var runwayService = _serviceProvider.GetRequiredService<IRunwayService>();
         if (startFromAirport)
         {
-            var runway = await _runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
+            var runway = await runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
             foreach (var point in runway.DepartureFunction.FunctionPoints.OrderBy(p => p.Order))
             {
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
@@ -138,7 +140,7 @@ public class XmlFileManager : IXmlFileManager
         
         if (endOnAirport)
         {
-            var runway = await _runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
+            var runway = await runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
             foreach (var point in runway.ArrivalFunction.FunctionPoints.OrderBy(p => p.Order))
             {
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +

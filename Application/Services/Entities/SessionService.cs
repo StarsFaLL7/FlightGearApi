@@ -1,28 +1,28 @@
 ﻿using Application.Interfaces.Entities;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services.Entities;
 
 public class SessionService : ISessionService
 {
-    private readonly IFlightSavedSessionsRepository _sessionsRepository;
-    private readonly IFlightPropertiesShotRepository _propertiesShotRepository;
-
-    public SessionService(IFlightSavedSessionsRepository sessionsRepository, IFlightPropertiesShotRepository propertiesShotRepository)
+    private readonly IServiceProvider _serviceProvider;
+    public SessionService(IServiceProvider serviceProvider)
     {
-        _sessionsRepository = sessionsRepository;
-        _propertiesShotRepository = propertiesShotRepository;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task<FlightSession[]> GetAllSessions()
     {
-        return await _sessionsRepository.GetAllSessionsAsync();
+        var sessionsRepository = _serviceProvider.GetRequiredService<IFlightSavedSessionsRepository>();
+        return await sessionsRepository.GetAllSessionsAsync();
     }
 
     public async Task<FlightSession> GetAggregatedSession(Guid sessionId)
     {
-        return await _sessionsRepository.GetAggregateByIdAsync(sessionId);
+        var sessionsRepository = _serviceProvider.GetRequiredService<IFlightSavedSessionsRepository>();
+        return await sessionsRepository.GetAggregateByIdAsync(sessionId);
     }
 
     public async Task SaveSessionAsync(FlightSession session)
@@ -31,12 +31,15 @@ public class SessionService : ISessionService
         {
             throw new ArgumentException($"Invalid value for session.PropertiesReadsPerSecond = {session.PropertiesReadsPerSec}");
         }
-        await _sessionsRepository.SaveAsync(session);
+        var sessionsRepository = _serviceProvider.GetRequiredService<IFlightSavedSessionsRepository>();
+        await sessionsRepository.SaveAsync(session);
     }
 
     public async Task RemoveSessionAsync(Guid sessionId)
     {
-        await _propertiesShotRepository.RemoveBySessionIdAsync(sessionId);
-        await _sessionsRepository.RemoveByIdAsync(sessionId);
+        var sessionsRepository = _serviceProvider.GetRequiredService<IFlightSavedSessionsRepository>();
+        var propertiesShotRepository = _serviceProvider.GetRequiredService<IFlightPropertiesShotRepository>();
+        await propertiesShotRepository.RemoveBySessionIdAsync(sessionId);
+        await sessionsRepository.RemoveByIdAsync(sessionId);
     }
 }
