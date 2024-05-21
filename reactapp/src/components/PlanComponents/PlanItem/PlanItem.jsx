@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+/* import React, { useEffect } from 'react';
 import styles from './PlanItem.module.css';
 import minus from '../../../assets/img/Decrease.png';
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
@@ -14,7 +14,7 @@ const PlanItem = (props) => {
                 <tr className={styles.table_element}>
                     <td className={styles.table_element_item_2}>{props.longitude}</td>
                     <td className={styles.table_element_item_2}>{props.latitude}</td>
-                    {/* <td className={styles.table_element_item_2}>{props.heading}</td> */}
+                    <td className={styles.table_element_item_2}>{props.heading}</td>
                     <td className={styles.table_element_item_3}>{props.speed}</td>
                     <td className={styles.table_element_item_4}>{props.altitude}</td>
                     <td>
@@ -26,4 +26,4 @@ const PlanItem = (props) => {
     )
 }
 
-export default PlanItem;
+export default PlanItem; */

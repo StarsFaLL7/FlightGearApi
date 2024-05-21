@@ -5,21 +5,23 @@ import '../Map/Map.css';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import * as turf from '@turf/turf'
-import { getPlanData } from "../../../api-methods/api-methods";
-import { handlerAddPlan } from "../../../utils/common";
+import { getPlanData} from "../../../api-methods/api-methods";
+import { handlerAddPoint } from "../../../utils/common";
 import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
+import FlightItem from '../FlightItem/FlightItem';
 
 //import {addMarker, mapUtils, addControlPanel, getMousePosition} from './map-functions';
 //shadow-lg
 //rounded-4
 const MainMap = () => {
-  //const [point, setPoint] = useState([])
-  const [plan, setPlan] = useState([]);
-  const [sendingData, setSendingData] = useState([]);
+  const [flights, setFlights] = useState([])
+  const [point, setPoint] = useState([]);
+  const [sendingPointData, setSendingPointData] = useState([]);
+  useEffect(() => { getPlanData(setFlights); }, []);
 
-  useEffect(() => { getPlanData(setPlan); }, []);
-  const onRemoveData = async () => { await getPlanData(setPlan); }
+  //useEffect(() => { getPointData(setPoint); }, []);
+  //const onRemoveData = async () => { await getPlanData(setPoint); }
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -34,14 +36,13 @@ const MainMap = () => {
   }
 
   function addMarker(map) {
-
     map.on('contextmenu', (e) => {
         let lngLat = Object.values(e.lngLat);
         markersArr.push(lngLat);
-        const marker = createMarker(lngLat, map, false);
-        //let popup = createPopup(e, map, marker, markersArr);
-        //marker.setPopup(popup);
-        /* marker.on('dragend', () => {
+        const marker = createMarker(lngLat, map);
+        let popup = createPopup(e, map, marker, markersArr);
+        marker.setPopup(popup);
+        marker.on('dragend', () => {
             let newLngLat = Object.values(marker.getLngLat());
             e.lngLat = marker.getLngLat();
             let index = markersArr.indexOf(lngLat);
@@ -50,10 +51,14 @@ const MainMap = () => {
             updateLine(map, markersArr);
             popup = createPopup(e, map, marker, markersArr);
             marker.setPopup(popup);
-        }); */
+        });
+        console.log(markersArr)
         updateLine(map, markersArr);
-        //const formData = getData(marker.getPopup().getElement().querySelector('form'));
-        //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
+        const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
+        marker.getPopup().remove();
+        console.log(formData)
+        handlerAddPoint(formData, point, setPoint, sendingPointData, setSendingPointData);
+        //console.log(handlerAddPoint(formData, point, setPoint, sendingPointData, setSendingPointData))
     });
 }
 
@@ -98,30 +103,10 @@ const MainMap = () => {
       }   
   }
 
-  function createMarker(lngLat, map, addPopup = true) {
-    const marker = new maplibregl.Marker({draggable: true, color: "#0d6efd" }).setLngLat(lngLat).addTo(map);
-
-    if (addPopup) {
-      marker.on('click', (e) => {
-        const popup = createPopup(e, map, marker, markersArr);
-        marker.setPopup(popup);
-      });
-    }
-    marker.on('dragend', (e) => {
-      let newLngLat = Object.values(marker.getLngLat());
-      e.lngLat = marker.getLngLat();
-      let index = markersArr.indexOf(lngLat);
-      markersArr[index] = newLngLat;
-      lngLat = newLngLat;
-      updateLine(map, markersArr);
-      const popup = createPopup(e, map, marker, markersArr);
-      marker.setPopup(popup);
-    });
-
-    const formData = getData(marker.getPopup().getElement().querySelector('form'));
-    handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
-
-    return marker;      
+  function createMarker(lngLat, map) {
+      return new maplibregl.Marker({draggable: true, color: "#0d6efd" })
+          .setLngLat(lngLat)
+          .addTo(map);
   }
 
   function createPopup(data, map, marker, markersArr) {
@@ -175,11 +160,11 @@ const MainMap = () => {
       saveButton.onclick = function(evt) {
         evt.preventDefault();
         const formData = getData(document.getElementById('form'));
-        console.log(document.getElementById('form'))
-        handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);  
+        console.log(formData)
+        //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);  
       };
 
-      let popup = new maplibregl.Popup().setLngLat([data.lngLat.lng, data.lngLat.lat]).setDOMContent(popupContent).addTo(map);
+      let popup = new maplibregl.Popup().setLngLat([data.lngLat.lng, data.lngLat.lat]).setDOMContent(popupContent);
       return popup;
   }
 

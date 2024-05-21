@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { OverlayTrigger, Button, Popover } from "react-bootstrap";
 import "../NavItem/NavItem.css"
-import MainApp from '../PlanTable/PlanTable';
+import FlightsPlanTable from '../FlightPlanTable/FlightsPlanTable';
 import PlanPoints from "../PlanPoints/plan-points";
 
 import plane from '../NavItem/imgs/plane.png';
@@ -10,14 +10,16 @@ import analytics from '../NavItem/imgs/analytics.png';
 import docs from '../NavItem/imgs/docs.png';
 import flightPlans from '../NavItem/imgs/flight-plans.png';
 import flightPoints from '../NavItem/imgs/flight-stages.png';
+import CurrentFlight from "../currentFlight/currentFlight";
 
 const NavHeader = () => {
   const [showPopoverPoints, setShowPopoverPoints] = useState(false);
   const [showPopoverPlans, setShowPopoverPlans] = useState(false);
+  const [showPopoverCurrentFlight, setShowPopoverCurrentFlight] = useState(false);
 
   const popoverPoints = (
     <Popover id="popover-basic">
-      <Popover.Header as="h3">Points</Popover.Header>
+      <Popover.Header as="h1">All Flights</Popover.Header>
       <Popover.Body>
         <PlanPoints/>
       </Popover.Body>
@@ -26,9 +28,18 @@ const NavHeader = () => {
 
   const popoverPlans = (
     <Popover id="popover-basic">
-      <Popover.Header as="h3">All Flights</Popover.Header>
+      <Popover.Header as="h1">All Flights!</Popover.Header>
       <Popover.Body>
-        <MainApp/>
+        <FlightsPlanTable/>
+      </Popover.Body>
+    </Popover>
+  );
+
+  const popoverCurentFlight = (
+    <Popover id="popover-basic">
+      <Popover.Header as="h1">Current Flight</Popover.Header>
+      <Popover.Body>
+        <CurrentFlight/>
       </Popover.Body>
     </Popover>
   );
@@ -38,6 +49,20 @@ const NavHeader = () => {
       <div>
         <nav className="d-flex flex-row justify-content-between">
         <ul className="nav nav-pills align-items-center">
+          <li className="nav-item mx-2">
+            <OverlayTrigger
+              trigger="click"
+              placement="bottom"
+              show={showPopoverCurrentFlight}
+              onToggle={(nextShow) => setShowPopoverCurrentFlight(nextShow)}
+              overlay={popoverCurentFlight}
+              rootClose={true}
+            >
+              <Button className="btn flight-plans" variant="transparent">
+                <img src={flightPoints} width="50" alt="Flight Plans"/>
+              </Button>
+            </OverlayTrigger>
+          </li>
             <li className="nav-item mx-2">
               <OverlayTrigger
                 trigger="click"
