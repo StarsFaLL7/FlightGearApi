@@ -77,7 +77,7 @@ export const postFlightPointToFlight = async (flight, point, sendingData, setSen
   }
 }; */
 
-/* export const getFlightData = async (flight, setCurFlight) => {
+export const getFlightData = async (flight, setCurFlight) => {
   try {
     const response = await axios.get(`${ALL_FLIGHTS_URL}/${flight}`);
     setCurFlight(response.data);
@@ -94,39 +94,6 @@ export const changeFlightData = async (flight, data, setCurFlight) => {
   } catch (err) {
     console.error('There was an error updating the flight data:', err);
     setCurFlight(null);
-  }
-}; */
-export const getFlightData = async (flight, setCurFlight) => {
-  try {
-    const response = await fetch(`${ALL_FLIGHTS_URL}/${flight}`);
-    if (response.ok) {
-      const data = await response.json();
-      setCurFlight(data);
-    } else {
-      console.error('Failed to fetch the flight data.');
-      setCurFlight(null);
-    }
-  } catch (err) {
-    console.error('There was an error fetching the data:', err);
-    setCurFlight(null);
-  }
-};
-
-export const changeFlightData = async (flight, data, setCurFlight) => {
-  try {
-    const response = await fetch(`${ALL_FLIGHTS_URL}/${flight}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      const updatedData = await response.json();
-      setCurFlight(updatedData);
-    } else {
-      console.error('Failed to update the flight data.');
-    }
-  } catch (err) {
-    console.error('There was an error updating the flight data:', err);
   }
 };
 

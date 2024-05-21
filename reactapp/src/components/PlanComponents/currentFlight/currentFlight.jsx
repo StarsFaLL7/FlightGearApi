@@ -18,9 +18,8 @@ const CurrentFlight = () => {
   const handleClickAddFlight = (evt) => {
     evt.preventDefault();
     const formData = getData(document.getElementById('formFlight'));
-    let item = handlerAddFlight(formData, flight, setFlight, sendingFlightData, setSendingFlightData);
-    //console.log(item)
-    return item;
+    handlerAddFlight(formData, flight, setFlight, sendingFlightData, setSendingFlightData);
+    //console.log(handlerAddFlight(formData, flight, setFlight, sendingFlightData, setSendingFlightData))
   };
 
   return (

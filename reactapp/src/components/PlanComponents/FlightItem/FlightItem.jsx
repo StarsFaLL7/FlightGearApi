@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import minus from '../../../assets/img/Decrease.png';
 import arrow from '../../../assets/img/arrow.png';
-import { handleClickDeleteItem, getFlightData, changeFlightData } from '../../../api-methods/api-methods';
+import { handleClickDeleteItem, getFlightData, changeFlightData, getPlanData } from '../../../api-methods/api-methods';
 import 'bootstrap/dist/css/bootstrap.css';
 import '../FlightItem/FlightItem.css';
 import { getData } from '../../../utils/common';
@@ -11,36 +11,31 @@ const FlightItem = (props) => {
     const [showForm, setShowForm] = useState(false);
     const [error, setError] = useState(null);
 
+    let isOpen = props.id ? true : false;
+
     const handleFlightItemFormChange = (evt) => {
         evt.preventDefault();
+        props.handleFormToggle(props.id);
+        getFlightData(props.id, setCurrentFlight);
         setShowForm(!showForm);
+        console.log(props.id)
     };
 
-    useEffect(() => {
-        console.log(props, currentFlight)
-        if (props.id && (!currentFlight || currentFlight.id !== props.id)) {
-            const fetchFlightData = async () => {
-                try {
-                    await getFlightData(props.id, setCurrentFlight);
-                    setError(null); // Clear previous errors
-                } catch (err) {
-                    setError('Failed to fetch flight data.');
-                }
-            };
-            fetchFlightData();
-        }
-    }, [props.id, currentFlight]); // Depend only on props.id and currentFlight
+    useEffect(() => {getPlanData(setCurrentFlight);}, [])
+    useEffect(() => {},[])
 
     const saveFlight = async (evt) => {
         evt.preventDefault();
         const formData = getData(document.getElementById('form-current-flight'));
         try {
-            await changeFlightData(props.id, formData, setCurrentFlight);
+            await changeFlightData(currentFlight.id, formData, setCurrentFlight);
             setShowForm(false);
-            setError(null); // Clear previous errors
+            setError(null);
         } catch (err) {
             setError('Failed to save flight data.');
         }
+        getFlightData(props.id, setCurrentFlight);
+        props.handleFormToggle(null);
     };
 
     return (
@@ -79,7 +74,7 @@ const FlightItem = (props) => {
                     ) : (
                         <>
                             <div className={`title m-0 align-self-center`}>
-                                {currentFlight.title}
+                                {currentFlight.title !== undefined ? currentFlight.title : props.title}
                             </div>
                             <div className={`btns ms-auto`}>
                                 <button className='btn' type='button' onClick={() => handleClickDeleteItem(props)}>
