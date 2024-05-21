@@ -11,7 +11,7 @@ public class FlightExportedParametersReader : IFlightExportedParametersReader
 {
     private readonly string _pathToExportDataFile;
 
-    public FlightExportedParametersReader(IConfiguration configuration, IFlightGearLauncher launcher)
+    public FlightExportedParametersReader(IFlightGearLauncher launcher)
     {
         _pathToExportDataFile = launcher.GetExportedTextDataFilePath();
     }

@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using webapi.Middlewares;
 
@@ -13,6 +14,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddCors();
 
 builder.Services.AddExceptionHandler<FlightGearExceptionHandler>();
 builder.Services.TryAddApplicationLayer();
@@ -38,7 +41,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowSpecificOrigin");
+app.UseCors(options => options.AllowAnyOrigin());
 
 app.UseHttpsRedirection();
 app.MapControllers();

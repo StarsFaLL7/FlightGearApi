@@ -3,37 +3,38 @@ using Application.Interfaces;
 using Application.Interfaces.Entities;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.Services.Entities;
 
 /// <inheritdoc />
 internal class FlightPlanService : IFlightPlanService
 {
-    private readonly IFlightPlanRepository _flightPlanRepository;
     private readonly IRunwayService _runwayService;
-    private readonly IRoutePointRepository _routePointRepository;
+    private readonly IServiceProvider _serviceProvider;
 
-    public FlightPlanService(IFlightPlanRepository flightPlanRepository, IRunwayService runwayService, 
-        IRoutePointRepository routePointRepository)
+    public FlightPlanService(IRunwayService runwayService, IServiceProvider serviceProvider)
     {
-        _flightPlanRepository = flightPlanRepository;
         _runwayService = runwayService;
-        _routePointRepository = routePointRepository;
+        _serviceProvider = serviceProvider;
     }
     
     public async Task<FlightPlan[]> GetAllBasicFlightPlansInfosAsync()
     {
-        return await _flightPlanRepository.GetAll();
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        return await flightPlanRepository.GetAll();
     }
 
     public async Task<FlightPlan> GetAggregatedFlightPlanAsync(Guid flightPlanId)
     {
-        return await _flightPlanRepository.GetAggregateByIdAsync(flightPlanId);
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        return await flightPlanRepository.GetAggregateByIdAsync(flightPlanId);
     }
 
     public async Task<FlightPlanAggregated> GetFlightPlanWithConvertedPointsAsync(Guid flightPlanId)
     {
-        var flightPlan = await _flightPlanRepository.GetAggregateByIdAsync(flightPlanId);
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        var flightPlan = await flightPlanRepository.GetAggregateByIdAsync(flightPlanId);
         var result = new FlightPlanAggregated
         {
             Title = flightPlan.Title,
@@ -108,13 +109,15 @@ internal class FlightPlanService : IFlightPlanService
 
     public async Task<FlightPlan> SaveFlightPlanAsync(FlightPlan flightPlan)
     {
-        await _flightPlanRepository.SaveAsync(flightPlan);
-        return await _flightPlanRepository.GetAggregateByIdAsync(flightPlan.Id);
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        await flightPlanRepository.SaveAsync(flightPlan);
+        return await flightPlanRepository.GetAggregateByIdAsync(flightPlan.Id);
     }
 
     public async Task RemoveFlightPlanAsync(Guid flightPlanId)
     {
-        await _flightPlanRepository.RemoveByIdAsync(flightPlanId);
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        await flightPlanRepository.RemoveByIdAsync(flightPlanId);
     }
 
     public async Task UpdateRoutePointAsync(Guid flightPlanId, int pointOrder, double longitude, double latitude, double altitude,
@@ -136,11 +139,15 @@ internal class FlightPlanService : IFlightPlanService
 
     public async Task SaveRoutePointAsync(RoutePoint routePoint)
     {
-        await _routePointRepository.SaveAsync(routePoint);
+        var routePointRepository = _serviceProvider.GetRequiredService<IRoutePointRepository>();
+        await routePointRepository.SaveAsync(routePoint);
     }
 
     public async Task RemoveRoutePointAsync(Guid flightPlanId, int pointOrder)
     {
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        var routePointRepository = _serviceProvider.GetRequiredService<IRoutePointRepository>();
+        
         var flightPlan = await GetAggregatedFlightPlanAsync(flightPlanId);
         if (pointOrder < 0 || pointOrder > flightPlan.RoutePoints.Count - 1)
         {
@@ -152,32 +159,34 @@ internal class FlightPlanService : IFlightPlanService
         for (var i = pointOrder; i < flightPlan.RoutePoints.Count; i++)
         {
             flightPlan.RoutePoints[i].Order -= 1;
-            await _routePointRepository.SaveAsync(flightPlan.RoutePoints[i]);
+            await routePointRepository.SaveAsync(flightPlan.RoutePoints[i]);
         }
-
-        await _flightPlanRepository.SaveAsync(flightPlan);
+        await flightPlanRepository.SaveAsync(flightPlan);
         
     }
 
     public async Task RemoveDepartureRunwayFromFlightPlansByRunwayId(Guid runwayId)
-    {
-        var flightplans = await _flightPlanRepository.GetFlightPlansByDepartureRunwayId(runwayId);
+    {        
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+
+        var flightplans = await flightPlanRepository.GetFlightPlansByDepartureRunwayId(runwayId);
         foreach (var flightplan in flightplans)
         {
             flightplan.DepartureRunway = null;
             flightplan.DepartureRunwayId = null;
-            await _flightPlanRepository.SaveAsync(flightplan);
+            await flightPlanRepository.SaveAsync(flightplan);
         }
     }
 
     public async Task RemoveArrivalRunwayFromFlightPlansByRunwayId(Guid runwayId)
     {
-        var flightplans = await _flightPlanRepository.GetFlightPlansByArrivalRunwayId(runwayId);
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        var flightplans = await flightPlanRepository.GetFlightPlansByArrivalRunwayId(runwayId);
         foreach (var flightplan in flightplans)
         {
             flightplan.ArrivalRunway = null;
             flightplan.ArrivalRunwayId = null;
-            await _flightPlanRepository.SaveAsync(flightplan);
+            await flightPlanRepository.SaveAsync(flightplan);
         }
     }
 }

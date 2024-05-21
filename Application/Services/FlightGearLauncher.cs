@@ -6,15 +6,14 @@ using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Utility;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 
 namespace Application.Services;
 
 internal class FlightGearLauncher : IFlightGearLauncher
 {
-    private readonly IAirportRunwayRepository _airportRunwayRepository;
-    private readonly IAirportRepository _airportRepository;
-    private readonly IFlightPlanRepository _flightPlanRepository;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IConnectionManager _connectionManager;
 
     private readonly int _telnetPort;
@@ -38,12 +37,9 @@ internal class FlightGearLauncher : IFlightGearLauncher
 
     private bool _isRunning;
 
-    public FlightGearLauncher(IAirportRunwayRepository airportRunwayRepository, IAirportRepository airportRepository,
-        IFlightPlanRepository flightPlanRepository, IConfiguration configuration, IConnectionManager connectionManager)
+    public FlightGearLauncher(IServiceProvider serviceProvider, IConfiguration configuration, IConnectionManager connectionManager)
     {
-        _airportRunwayRepository = airportRunwayRepository;
-        _airportRepository = airportRepository;
-        _flightPlanRepository = flightPlanRepository;
+        _serviceProvider = serviceProvider;
         _connectionManager = connectionManager;
         var fgSection = configuration.GetSection("FlightGearSettings");
         _defaultLaunchArguments = fgSection.GetValue<string>("DefaultLaunchArgs");
@@ -70,14 +66,18 @@ internal class FlightGearLauncher : IFlightGearLauncher
     public async Task InitializeWithFlightPlanAsync(FlightPlan flightPlan)
     {
         _isStartFromAirport = flightPlan.DepartureRunwayId is not null;
+        var airportRepository = _serviceProvider.GetRequiredService<IAirportRepository>();
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        var airportRunwayRepository = _serviceProvider.GetRequiredService<IAirportRunwayRepository>();
+
         if (_isStartFromAirport)
         {
-            _startRunway = await _airportRunwayRepository.GetByIdAsync(flightPlan.DepartureRunwayId.Value);
-            _startAirport = await _airportRepository.GetByIdAsync(_startRunway.AirportId);
+            _startRunway = await airportRunwayRepository.GetByIdAsync(flightPlan.DepartureRunwayId.Value);
+            _startAirport = await airportRepository.GetByIdAsync(_startRunway.AirportId);
         }
         else
         {
-            var planFull = await _flightPlanRepository.GetAggregateByIdAsync(flightPlan.Id);
+            var planFull = await flightPlanRepository.GetAggregateByIdAsync(flightPlan.Id);
             var first2Points = planFull.RoutePoints.OrderBy(p => p.Order).Take(2).ToArray();
             _startRoutePoint = first2Points[0];
             _startHeading = GeographyHelper.GetDirectionDeg(_startRoutePoint.Latitude, _startRoutePoint.Longitude,
