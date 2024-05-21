@@ -5,21 +5,23 @@ import '../Map/Map.css';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import * as turf from '@turf/turf'
-import { getPlanData } from "../../../api-methods/api-methods";
-//import { handlerAddPlan } from "../../../utils/common";
+import { getPlanData} from "../../../api-methods/api-methods";
+import { handlerAddPoint } from "../../../utils/common";
 import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
+import FlightItem from '../FlightItem/FlightItem';
 
 //import {addMarker, mapUtils, addControlPanel, getMousePosition} from './map-functions';
 //shadow-lg
 //rounded-4
 const MainMap = () => {
-  //const [point, setPoint] = useState([])
-  const [plan, setPlan] = useState([]);
-  const [sendingData, setSendingData] = useState([]);
+  const [flights, setFlights] = useState([])
+  const [point, setPoint] = useState([]);
+  const [sendingPointData, setSendingPointData] = useState([]);
+  useEffect(() => { getPlanData(setFlights); }, []);
 
-  useEffect(() => { getPlanData(setPlan); }, []);
-  const onRemoveData = async () => { await getPlanData(setPlan); }
+  //useEffect(() => { getPointData(setPoint); }, []);
+  //const onRemoveData = async () => { await getPlanData(setPoint); }
 
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -34,7 +36,6 @@ const MainMap = () => {
   }
 
   function addMarker(map) {
-
     map.on('contextmenu', (e) => {
         let lngLat = Object.values(e.lngLat);
         markersArr.push(lngLat);
@@ -51,11 +52,13 @@ const MainMap = () => {
             popup = createPopup(e, map, marker, markersArr);
             marker.setPopup(popup);
         });
+        console.log(markersArr)
         updateLine(map, markersArr);
         const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
         marker.getPopup().remove();
         console.log(formData)
-        //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);
+        handlerAddPoint(formData, point, setPoint, sendingPointData, setSendingPointData);
+        //console.log(handlerAddPoint(formData, point, setPoint, sendingPointData, setSendingPointData))
     });
 }
 
@@ -157,6 +160,7 @@ const MainMap = () => {
       saveButton.onclick = function(evt) {
         evt.preventDefault();
         const formData = getData(document.getElementById('form'));
+        console.log(formData)
         //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);  
       };
 

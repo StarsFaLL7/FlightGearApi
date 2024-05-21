@@ -232,6 +232,19 @@ input[type="text"]
     border-radius: 20px;
   }
 
+textarea {
+  height: 42px;
+  max-height: 100px;
+  color: #000000;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: wrap;
+  max-width: 150px;
+  min-width: 100px; 
+}
+
   .btn {
     width:fit-content;
   }
