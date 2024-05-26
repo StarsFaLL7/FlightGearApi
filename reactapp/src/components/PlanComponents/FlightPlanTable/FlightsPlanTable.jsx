@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+/* import React, {useState, useEffect} from "react";
 import plus from '../../../assets/img/Union.png';
 import styles from './PlanTable.module.css';
 import { getPlanData } from "../../../api-methods/api-methods";
@@ -25,7 +25,7 @@ const FlightsPlanTable = () => {
 
   return (
     <>
-      {/* <main className={`container`}>
+      <main className={`container`}>
         <div className={`row ${styles.cols}`}>
           <div className={`col ${styles.cols}`}>
             <div className={`shadow-lg bg-light rounded-4`}>
@@ -56,9 +56,9 @@ const FlightsPlanTable = () => {
             </div>
           </div>
         </div>
-      </main> */}
+      </main>
     </>
   );
 }
 
-export default FlightsPlanTable;
+export default FlightsPlanTable; */

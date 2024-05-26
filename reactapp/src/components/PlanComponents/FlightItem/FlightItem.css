@@ -22,3 +22,10 @@
 p {
     width: fit-content;
 }
+.point-container {
+    max-height: 300px;
+    min-width: 300px;
+    overflow: hidden;
+    overflow: scroll;
+    overflow-x:hidden;
+}

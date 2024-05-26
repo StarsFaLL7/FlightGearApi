@@ -15,12 +15,6 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddCors();
-
-builder.Services.AddExceptionHandler<FlightGearExceptionHandler>();
-builder.Services.TryAddApplicationLayer();
-builder.Services.TryAddInfrastructure();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -30,6 +24,10 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials());
 });
+
+builder.Services.AddExceptionHandler<FlightGearExceptionHandler>();
+builder.Services.TryAddApplicationLayer();
+builder.Services.TryAddInfrastructure();
 
 var app = builder.Build();
 
@@ -41,7 +39,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(options => options.AllowAnyOrigin());
+// Use the defined CORS policy
+app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 app.MapControllers();

@@ -1,9 +1,6 @@
 import React, {useState, useEffect} from "react";
-import PlanItem from "../PlanItem/PlanItem"
-import styles from '../FlightPlanTable/PlanTable.module.css';
-import { getPlanData, getFlightData } from "../../../api-methods/api-methods";
-import FlightItem from "../FlightItem/FlightItem";
-import { getData } from "../../../utils/common";
+import { getPlanData, getFlightData } from "../../../../api-methods/api-methods";
+import FlightItem from "../../FlightItem/FlightItem";
 
 const PlanPoints = () => {
 
@@ -11,7 +8,6 @@ const PlanPoints = () => {
   const [openFlightId, setOpenFlightId] = useState(null);
 
   useEffect(() => { getPlanData(setFlight); }, []);
-
   const handleFormToggle = (id) => {
     setOpenFlightId(prevId => (prevId === id ? null : id));
   };
@@ -20,7 +16,7 @@ const PlanPoints = () => {
   return (
     <>
       <div className={`row`}>
-        <div className={styles.scroll}>
+        <div className={`scrollspy-example`}>
           {flight.flightPlans && flight.flightPlans.map((element, index) =>
             <FlightItem
               key={element.key}
@@ -35,6 +31,9 @@ const PlanPoints = () => {
               handleFormToggle={handleFormToggle}/>   
           )}
         </div>
+        {/* <div className={`hidden`}>
+          <MainMap flight={flight.flightPlans}/>
+        </div> */}
       </div>     
     </>
   ) 

@@ -14,21 +14,38 @@ export const handleClickDeleteItem = async (props) => {
     .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
 };
 
-/* export const getPointData = async (flight, setPoint) => {
+export const handleClickDeletePoint = async (props) => {
+  const getResp = await axios.get(ALL_FLIGHTS_URL);
+  let flight = getResp.data.flightPlans[getResp.data.flightPlans.length - 1].id;  
+  await axios
+    .delete(`${ALL_FLIGHTS_URL}/${flight}/points/${props.order}`)
+    .then((response) => {
+      if (response.status === 200) {
+        props.onRemoveData();
+      } else {
+        console.error('Failed to delete the plan item with id:');
+      }
+    })
+    .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
+};
+
+export const getPointsData = async (setPoints) => {
+    const getResp = await axios.get(ALL_FLIGHTS_URL);
+    let flight = getResp.data.flightPlans[getResp.data.flightPlans.length - 1].id;
     try {
       await axios
         .get(`${ALL_FLIGHTS_URL}/${flight}/points`)
-        .then((response) => {setPoint(response.data)})
+        .then((response) => {setPoints(response.data)})
     } catch (err) {
       console.error('There was an error fetching the data:', err)
     } 
-}; */
+};
 
 export const getPlanData = async (setPlan) => {
   try {
-    await axios
-      .get(ALL_FLIGHTS_URL)
-      .then((response) => {setPlan(response.data)})
+    const response = await axios.get(ALL_FLIGHTS_URL);
+    setPlan(response.data);
+    return response.data;
   } catch (err) {
     console.error('There was an error fetching the data:', err)
   } 
@@ -50,9 +67,13 @@ export const sendFlightDataToServer = async (body, sendingData, setSendingData) 
   }
 };
 
-export const postFlightPointToFlight = async (flight, point, sendingData, setSendingData) => {
+export const postFlightPointToFlight = async (point, sendingData, setSendingData) => {
+
   try {
-    const response = await axios.post(`${ALL_FLIGHTS_URL}/${flight}/points`, point);
+    const getResp = await axios.get(ALL_FLIGHTS_URL);
+    let id = getResp.data.flightPlans[getResp.data.flightPlans.length - 1].id;
+    const response = await axios.post(`${ALL_FLIGHTS_URL}/${id}/points`, point);
+    console.log(response)
     if (response.status === 200) {
       const responseData = response.data;
       setSendingData(responseData);

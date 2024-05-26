@@ -5,20 +5,24 @@ import { handleClickDeleteItem, getFlightData, changeFlightData, getPlanData } f
 import 'bootstrap/dist/css/bootstrap.css';
 import '../FlightItem/FlightItem.css';
 import { getData } from '../../../utils/common';
+import PointItem from '../PointItem/PointItem';
+import FlightPoints from '../frames/flight-points-frame/flight-points-frame';
 
 const FlightItem = (props) => {
     const [currentFlight, setCurrentFlight] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [error, setError] = useState(null);
 
-    let isOpen = props.id ? true : false;
+    const isOpen = props.openFlightId === props.id;
 
     const handleFlightItemFormChange = (evt) => {
         evt.preventDefault();
         props.handleFormToggle(props.id);
-        getFlightData(props.id, setCurrentFlight);
-        setShowForm(!showForm);
-        console.log(props.id)
+        if (!isOpen) {
+            getFlightData(props.id, setCurrentFlight);
+        }
+        //setShowForm(!showForm);
+        //console.log(props.id)
     };
 
     useEffect(() => {getPlanData(setCurrentFlight);}, [])
@@ -29,7 +33,7 @@ const FlightItem = (props) => {
         const formData = getData(document.getElementById('form-current-flight'));
         try {
             await changeFlightData(currentFlight.id, formData, setCurrentFlight);
-            setShowForm(false);
+            //setShowForm(false);
             setError(null);
         } catch (err) {
             setError('Failed to save flight data.');
@@ -43,7 +47,7 @@ const FlightItem = (props) => {
             {error && <div className="alert alert-danger">{error}</div>}
             {currentFlight && (
                 <div className={`d-flex bg-not-light rounded-3 form-container m-1`} id={props.id}>
-                    {showForm ? (
+                    {isOpen ? (
                         <form className="form-container" id="form-current-flight" onSubmit={saveFlight}>
                             <ul className={`list-unstyled`}>
                                 <li className='title d-flex m-1'>
@@ -56,14 +60,16 @@ const FlightItem = (props) => {
                                 </li>
                                 <li className='d-inline points m-1'>
                                     <p className={`border-bottom border-secondary m-0 mx-auto align-self-center`}>Points:</p>
-                                    <div className='form-control m-1 w-auto'>
-                                        {/* Render points data if needed */}
+                                    <div className='point-container form-control m-1 w-auto'>
+                                        <FlightPoints/>
                                     </div>
                                 </li>
                             </ul>
                             <div className={`d-flex block-btns`}>
                                 <div>
                                     <button className="m-1 btn save-flight btn-primary text-light" type="submit">Save</button>
+                                    <button className="m-1 btn delete-flight btn-primary text-light" type="button" onClick={() => {}}>Start</button>
+                                    <button className="m-1 btn delete-flight btn-primary text-light disabled" type="button" onClick={() => {}}>Get analytics</button>
                                     <button className="m-1 btn delete-flight btn-secondary text-light" type="button" onClick={() => handleClickDeleteItem(props)}>Delete</button>
                                 </div>
                                 <button className='btn' type='button' onClick={handleFlightItemFormChange}>
