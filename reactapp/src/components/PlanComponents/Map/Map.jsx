@@ -11,6 +11,7 @@ import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
 import FlightItem from '../FlightItem/FlightItem';
 import { getPointsData } from '../../../api-methods/api-methods';
+import NavHeader from '../NavItem/NavItem';
 
 //import {addMarker, mapUtils, addControlPanel, getMousePosition} from './map-functions';
 //shadow-lg
@@ -24,11 +25,12 @@ const MainMap = () => {
   //const [API_KEY] = useState('YOUR_MAPTILER_API_KEY_HERE');
   let markersArr = [];
 
-  let [flights, setFlights] = useState([]);
+  const [flights, setFlights] = useState([]);
   const [points, setPoints] = useState([]);
   const [sendingPointData, setSendingPointData] = useState([]);
 
-  console.log(points)
+  useEffect(() => {},[points])
+
   useEffect(() => {
     if (map.current) return;
 
@@ -201,46 +203,9 @@ const MainMap = () => {
       });
   }    
 
-  function mapUtils(map) {
-      MapboxDraw.constants.classes.CONTROL_BASE  = 'maplibregl-ctrl';
-      MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-';
-      MapboxDraw.constants.classes.CONTROL_GROUP = 'maplibregl-ctrl-group';
-
-      const draw = new MapboxDraw({
-          displayControlsDefault: true,
-          controls: {
-              polygon: true,
-              trash: true
-          }
-      });
-
-      map.addControl(draw);
-
-      map.on('draw.create', updateArea);
-      map.on('draw.delete', updateArea);
-      map.on('draw.update', updateArea);
-
-      function updateArea(e) {
-          const data = draw.getAll();
-          const answer = document.getElementById('calculated-area');
-          if (data.features.length > 0) {
-              const area = turf.area(data);
-              // restrict to area to 2 decimal points
-              const roundedArea = Math.round(area * 100) / 100;
-              answer.innerHTML =
-                  `<p><strong>${
-                      roundedArea
-                  }</strong></p><p>square meters</p>`;
-          } else {
-              answer.innerHTML = '';
-              if (e.type !== 'draw.delete')
-                  alert('Use the draw tools to draw a polygon!');
-          }
-      }
-  }
-
   return (
     <div className={`map-wrap bg-light`}>
+      <NavHeader/>
       <div ref={mapContainer} className={`map bg-light`}/>
       <div id={`info`}></div>
       <div id={`calculated-area`}></div>

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { OverlayTrigger, Button, Popover } from "react-bootstrap";
 import "../NavItem/NavItem.css"
-import FlightsPlanTable from '../FlightPlanTable/FlightsPlanTable';
 import PlanPoints from "../frames/flight-frame/flight-frame";
 
 import plane from '../NavItem/imgs/plane.png';
@@ -14,6 +13,7 @@ import flightPoints from '../NavItem/imgs/flight-stages.png';
 import { getData, handlerAddFlight } from "../../../utils/common";
 import plus from '../../../assets/img/Union.png';
 import FlightPoints from "../frames/flight-points-frame/flight-points-frame";
+import PointItem from "../PointItem/PointItem";
 
 const NavHeader = () => {
   const [showPopoverPoints, setShowPopoverPoints] = useState(false);
@@ -24,7 +24,7 @@ const NavHeader = () => {
   const [sendingFlightData, setSendingFlightData] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
-  useEffect(() => { return getForm(); }, [])
+  //useEffect(() => {getForm(); })
 
   const handleCreateNewFlightForm = (evt) => {
     evt.preventDefault();
@@ -55,7 +55,7 @@ const NavHeader = () => {
     <Popover id="popover-basic">
       <Popover.Header as="h1">All Flights!</Popover.Header>
       <Popover.Body>
-        <FlightsPlanTable />
+        {/* <FlightsPlanTable /> */}
       </Popover.Body>
     </Popover>
   );
@@ -70,7 +70,6 @@ const NavHeader = () => {
   );
 
   function getForm() {
-    console.log(isFormVisible)
     return isFormVisible ? (<form className={``} id="formFlight">
       <ul className="list-unstyled m-0">
         <li className="d-flex align-items-center">
@@ -129,7 +128,7 @@ const NavHeader = () => {
                 rootClose={true}
               >
                 <Button className="btn flight-plans" variant="transparent">
-                  <img src={flightPoints} width="50" alt="Flight Plans" />
+                  <img src={flightPoints} width="53" alt="Flight Plans" />
                 </Button>
               </OverlayTrigger>
             </li>
@@ -143,11 +142,11 @@ const NavHeader = () => {
                 rootClose={true}
               >
                 <Button className="btn flight-points" variant="transparent">
-                  <img src={flightPoints} width="50" alt="Flight Points" />
+                  <img src={flightPlans} width="28" alt="Flight Points" />
                 </Button>
               </OverlayTrigger>
             </li>
-            <li className="nav-item mx-2">
+            <li className="nav-item mx-2 hidden">
               <OverlayTrigger
                 trigger="click"
                 placement="bottom"

@@ -24,6 +24,7 @@ const PlanPoints = () => {
               id={element.id}
               title={element.title}
               remarks={element.remarks}
+              routePoints={element.routePoints}
               departureRunwayId={element.departureRunwayId}
               arrivalRunwayId={element.arrivalRunwayId}
               onRemoveData={onRemoveData}

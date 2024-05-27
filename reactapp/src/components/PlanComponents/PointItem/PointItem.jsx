@@ -5,7 +5,7 @@ import { handleClickDeletePoint } from '../../../api-methods/api-methods';
 import "../../../../node_modules/bootstrap/dist/css/bootstrap.css"
 
 const PointItem = (props) => {
-    console.log(props)
+    //console.log(props)
     //const flight
     useEffect(() => { return () => { }; }, []);
 

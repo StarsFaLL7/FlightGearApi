@@ -7,7 +7,7 @@ import MainMap from '../../components/PlanComponents/Map/Map';
 function Plan() {
   return (
     <div className={`Plan`}>
-      <NavHeader/>
+      {/* <NavHeader/> */}
       <MainMap/>
     </div>
   );

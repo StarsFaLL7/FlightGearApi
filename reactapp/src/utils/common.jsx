@@ -13,11 +13,12 @@ const clearForm = () => {
 }
 // sendingData, setSendingData
 export const handlerAddPoint = async (formData, point, setPoint, sendingPointData, setSendingPointData) => {
+  console.log(formData)
     if (!formData.longitude || !formData.latitude || !formData.speed || !formData.altitude) { return; }
     const newPoint = { order: point.length, ...formData };
 
     setPoint((prevPoints) => { 
-      const updatePoints = [...prevPoints, newPoint]; 
+      const updatePoints = [...prevPoints, newPoint];
       return updatePoints;
     });
 
@@ -34,13 +35,13 @@ export const handlerAddFlight = async (formData, flight, setFlight, sendingFligh
   if (!formData.title) { return; }
   if(formData.departureRunwayId === "") { formData.departureRunwayId = null; }
   if(formData.arrivalRunwayId === "") { formData.arrivalRunwayId = null; }
+  console.log(formData)
   const newFlight = { ...formData };
 
   setFlight((prevFlight) => {
     console.log(prevFlight)
     const updateFlights = [...prevFlight, newFlight];
     return updateFlights;
-    //return [...prevFlight.flightPlans, newFlight];
   });
 
   try {
