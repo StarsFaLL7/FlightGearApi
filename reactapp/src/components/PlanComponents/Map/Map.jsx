@@ -5,24 +5,17 @@ import '../Map/Map.css';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
 import * as turf from '@turf/turf'
-import { getPlanData} from "../../../api-methods/api-methods";
+import { getPlanData } from "../../../api-methods/api-methods";
 import { handlerAddPoint } from "../../../utils/common";
 import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
 import FlightItem from '../FlightItem/FlightItem';
+import { getPointsData } from '../../../api-methods/api-methods';
 
 //import {addMarker, mapUtils, addControlPanel, getMousePosition} from './map-functions';
 //shadow-lg
 //rounded-4
 const MainMap = () => {
-  const [flights, setFlights] = useState([])
-  const [point, setPoint] = useState([]);
-  const [sendingPointData, setSendingPointData] = useState([]);
-  useEffect(() => { getPlanData(setFlights); }, []);
-
-  //useEffect(() => { getPointData(setPoint); }, []);
-  //const onRemoveData = async () => { await getPlanData(setPoint); }
-
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng] = useState(0);
@@ -30,6 +23,32 @@ const MainMap = () => {
   const [zoom] = useState(0);
   //const [API_KEY] = useState('YOUR_MAPTILER_API_KEY_HERE');
   let markersArr = [];
+
+  let [flights, setFlights] = useState([]);
+  const [points, setPoints] = useState([]);
+  const [sendingPointData, setSendingPointData] = useState([]);
+
+  console.log(points)
+  useEffect(() => {
+    if (map.current) return;
+
+    map.current = new maplibregl.Map({
+      container: mapContainer.current,
+      style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=R2mBAn4LWE1EZYkPEhdD',
+      center: [lng, lat],
+      zoom: zoom,
+      attributionControl: false,
+    });
+
+    addControlPanel(map.current);
+    getMousePosition(map.current);
+    addMarker(map.current);
+
+  }, [ lng, lat, zoom]);
+
+  //useEffect(() => { getPlanData(setFlights); }, []);
+  //console.log(flights.flightPlans[flights.flightPlans.length - 1].id)
+  //const onRemoveData = async () => { await getPlanData(setPoint); }
 
   function addControlPanel(map) {
     map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
@@ -51,14 +70,15 @@ const MainMap = () => {
             updateLine(map, markersArr);
             popup = createPopup(e, map, marker, markersArr);
             marker.setPopup(popup);
+            const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
+            marker.getPopup().remove();
+            handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
         });
-        console.log(markersArr)
+        //console.log(markersArr)
         updateLine(map, markersArr);
         const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
         marker.getPopup().remove();
-        console.log(formData)
-        handlerAddPoint(formData, point, setPoint, sendingPointData, setSendingPointData);
-        //console.log(handlerAddPoint(formData, point, setPoint, sendingPointData, setSendingPointData))
+        handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
     });
 }
 
@@ -116,23 +136,27 @@ const MainMap = () => {
 
     popupContent.innerHTML = `
       <form class='bg-light rounded-4' id="form" method='POST' enctype="application/json">
-        <ul class='list-unstyled'>
-          <li class='d-flex align-items-center px-2'>
-            <p class='fs-6 form-control ms-auto'>Longitude: ${data.lngLat.lng}</p>
+        <ul class='list-unstyled justify-items-center'>
+          <li class='popover-item justify-self-center px-2'>
+            <p class='fs-6 form-control'>Longitude: ${data.lngLat.lng}</p>
             <input class='hidden form-control ms-auto' value='${data.lngLat.lng}' type="number" name="longitude" required/>
           </li>
-          <li class='d-flex align-items-center px-2'>
-            <p class='fs-6 form-control ms-auto'>Latitude: ${data.lngLat.lat}</p>
+          <li class='popover-item d-flex align-items-center px-2'>
+            <p class='fs-6 form-control'>Latitude: ${data.lngLat.lat}</p>
             <input class='hidden form-control ms-auto' value='${data.lngLat.lat}' type="number" name="latitude" required/>
           </li>
-          <li class='form-control d-flex align-items-center mb-3'>
+          <li class='popover-item form-control d-flex align-items-center mb-3'>
             <p class='fs-6 pb-0 mb-0'>Speed(m/s):</p>
             <input class='form-control ms-auto' type="number" step="0.01" name="speed" value="0" required/>
           </li> 
-          <li class='form-control d-flex align-items-center mb-3'>
+          <li class='popover-item form-control d-flex align-items-center mb-3'>
             <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
             <input class='form-control ms-auto' type="number" name="altitude" value="0" required/>
           </li>
+          <li class='popover-item form-control d-flex align-items-center mb-3'>
+            <p class='fs-6 pb-0 mb-0'>Remarks:</p>
+            <textarea class='form-control ms-auto' type="text" name="remarks"></textarea>
+          </li> 
           <li>
             <button class="btn save-popup btn-primary text-light" type="submit">
               save
@@ -147,7 +171,8 @@ const MainMap = () => {
       const saveButton = popupContent.querySelector('.save-popup');
       const deleteButton = popupContent.querySelector('.delete-popup');
 
-      deleteButton.onclick = function() {
+      deleteButton.onclick = function(evt) {
+          evt.preventDefault();
           marker.remove();
           for(let i = 0; i < markArr.length; i++) {
               if(markArr[i].toString() === marker.getLngLat().toArray().toString()){
@@ -161,7 +186,7 @@ const MainMap = () => {
         evt.preventDefault();
         const formData = getData(document.getElementById('form'));
         console.log(formData)
-        //handlerAddPlan(formData, plan, setPlan, sendingData, setSendingData);  
+        handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData); 
       };
 
       let popup = new maplibregl.Popup().setLngLat([data.lngLat.lng, data.lngLat.lat]).setDOMContent(popupContent);
@@ -213,24 +238,6 @@ const MainMap = () => {
           }
       }
   }
-
-  useEffect(() => {
-    if (map.current) return;
-
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: 'https://api.maptiler.com/maps/basic-v2/style.json?key=R2mBAn4LWE1EZYkPEhdD',
-      center: [lng, lat],
-      zoom: zoom,
-      attributionControl: false,
-    });
-
-    //mapUtils(map.current)
-    addControlPanel(map.current);
-    getMousePosition(map.current)
-    addMarker(map.current);
-    
-  }, [ lng, lat, zoom]);
 
   return (
     <div className={`map-wrap bg-light`}>

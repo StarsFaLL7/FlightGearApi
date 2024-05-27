@@ -1,4 +1,5 @@
-import { postFlightPointToFlight, sendFlightDataToServer } from "../api-methods/api-methods";
+import { useState } from "react";
+import { getPlanData, postFlightPointToFlight, sendFlightDataToServer } from "../api-methods/api-methods";
 
 const clearForm = () => {
     const form = document.getElementById('formFlight');
@@ -13,8 +14,7 @@ const clearForm = () => {
 // sendingData, setSendingData
 export const handlerAddPoint = async (formData, point, setPoint, sendingPointData, setSendingPointData) => {
     if (!formData.longitude || !formData.latitude || !formData.speed || !formData.altitude) { return; }
-    const newPoint = { index: point.length, ...formData };
-    console.log(newPoint)
+    const newPoint = { order: point.length, ...formData };
 
     setPoint((prevPoints) => { 
       const updatePoints = [...prevPoints, newPoint]; 
@@ -22,9 +22,7 @@ export const handlerAddPoint = async (formData, point, setPoint, sendingPointDat
     });
 
     try {
-      // Asynchronously send new plan to server
       return await postFlightPointToFlight(newPoint, sendingPointData, setSendingPointData);
-      // Here you might want to do something with the response
     } catch (error) {
       // Handle any errors that occur during the fetch
       console.error('There was an error sending the data to the server:', error);
@@ -37,12 +35,13 @@ export const handlerAddFlight = async (formData, flight, setFlight, sendingFligh
   if(formData.departureRunwayId === "") { formData.departureRunwayId = null; }
   if(formData.arrivalRunwayId === "") { formData.arrivalRunwayId = null; }
   const newFlight = { ...formData };
-  /* setFlight((prevFlight) => {
+
+  setFlight((prevFlight) => {
     console.log(prevFlight)
-    prevFlight.flightPlans = [...prevFlight.flightPlans, newFlight];
-    console.log(prevFlight)
-    return [...prevFlight.flightPlans, newFlight];
-  }); */
+    const updateFlights = [...prevFlight, newFlight];
+    return updateFlights;
+    //return [...prevFlight.flightPlans, newFlight];
+  });
 
   try {
     await sendFlightDataToServer(newFlight, sendingFlightData, setSendingFlightData);

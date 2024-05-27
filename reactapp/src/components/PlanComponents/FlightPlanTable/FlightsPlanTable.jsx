@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+/* import React, {useState, useEffect} from "react";
 import plus from '../../../assets/img/Union.png';
 import styles from './PlanTable.module.css';
 import { getPlanData } from "../../../api-methods/api-methods";
@@ -61,4 +61,4 @@ const FlightsPlanTable = () => {
   );
 }
 
-export default FlightsPlanTable;
+export default FlightsPlanTable; */

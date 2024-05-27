@@ -9,7 +9,6 @@ function Plan() {
     <div className={`Plan`}>
       <NavHeader/>
       <MainMap/>
-      {/* <Footer/> */}
     </div>
   );
 }

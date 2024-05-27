@@ -55,3 +55,9 @@
 .maplibregl-marker {
   cursor: pointer;
 }
+.popover-item {
+  width: 100%;
+}
+.popover-item p {
+  width: 100%;
+}
