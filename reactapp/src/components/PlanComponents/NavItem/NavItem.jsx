@@ -26,15 +26,21 @@ const NavHeader = () => {
 
   //useEffect(() => {getForm(); })
 
-  const handleCreateNewFlightForm = (evt) => {
+  const handleCreateNewFlightForm = async (evt) => {
     evt.preventDefault();
     setIsFormVisible(!isFormVisible);
+    evt.target.classList.add('disabled')
+    //const formData = getData(document.getElementById('formFlight'));
+    //console.log(formData)
+    //await handlerAddFlight(formData, flight, setFlight, sendingFlightData, setSendingFlightData);
   };
 
   const handleClickAddFlight = (evt) => {
     evt.preventDefault();
     const formData = getData(document.getElementById('formFlight'));
     handlerAddFlight(formData, flight, setFlight, sendingFlightData, setSendingFlightData);
+    document.querySelector('.btn-create').classList.remove('disabled');
+    setIsFormVisible(!isFormVisible);
   };
 
   const handleChooseCurrentFlight = () => {
@@ -64,17 +70,23 @@ const NavHeader = () => {
     <Popover id="popover-basic">
       <Popover.Header as="h1">Current Flight</Popover.Header>
       <Popover.Body>
-        {getMainForm()}
+        {getCurForm()}
       </Popover.Body>
     </Popover>
   );
 
-  function getForm() {
-    return isFormVisible ? (<form className={``} id="formFlight">
+  function getCurForm() {
+    return (<main className="container">
+      <div className={`row`}>
+        <div className="d-flex justify-content-center">
+          <button className="btn bg-primary me-auto btn-hover" onClick={handleChooseCurrentFlight}>Choose current flight</button>
+          <button className="btn-create btn bg-primary btn-hover" onClick={handleCreateNewFlightForm}>Create New</button>
+        </div>
+        {isFormVisible && (<form className={``} id="formFlight">
       <ul className="list-unstyled m-0">
         <li className="d-flex align-items-center">
           <p className="fs-5">Flight name:</p>
-          <input className="form-control ms-auto" type="text" name="title" required />
+          <input className="form-control ms-auto" defaultValue={`flight title`} type="text" name="title" required />
         </li>
         <li className="d-flex align-items-center">
           <p className="fs-5">Remarks:</p>
@@ -94,21 +106,11 @@ const NavHeader = () => {
         </li>
         <li className="mt-3 d-flex align-items-center justify-content-center">
           <button className="btn btn-primary btn-hover" onClick={handleClickAddFlight} type="submit">
-            <img src={plus} alt="Union" />
+            Save
           </button>
         </li>
       </ul>
-    </form>) : ('');
-  }
-
-  function getMainForm() {
-    return (<main className="container">
-      <div className={`row`}>
-        <div className="d-flex justify-content-center">
-          <button className="btn bg-primary me-auto" onClick={handleChooseCurrentFlight}>Choose current flight</button>
-          <button className="btn bg-primary" onClick={handleCreateNewFlightForm}>Create New</button>
-        </div>
-        {getForm()}
+    </form>)}
       </div>
     </main>);
   }

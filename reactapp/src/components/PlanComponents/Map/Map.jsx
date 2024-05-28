@@ -48,27 +48,27 @@ const MainMap = () => {
 
   }, [ lng, lat, zoom]);
 
-  //useEffect(() => { getPlanData(setFlights); }, []);
-  //console.log(flights.flightPlans[flights.flightPlans.length - 1].id)
-  //const onRemoveData = async () => { await getPlanData(setPoint); }
-
   function addControlPanel(map) {
     map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
   }
 
   function addMarker(map) {
     map.on('contextmenu', (e) => {
+
         let lngLat = Object.values(e.lngLat);
         markersArr.push(lngLat);
         const marker = createMarker(lngLat, map);
         let popup = createPopup(e, map, marker, markersArr);
         marker.setPopup(popup);
+
         marker.on('dragend', () => {
+
             let newLngLat = Object.values(marker.getLngLat());
             e.lngLat = marker.getLngLat();
             let index = markersArr.indexOf(lngLat);
             markersArr[index] = newLngLat;
             lngLat = newLngLat;
+
             updateLine(map, markersArr);
             popup = createPopup(e, map, marker, markersArr);
             marker.setPopup(popup);
@@ -81,6 +81,7 @@ const MainMap = () => {
         const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
         marker.getPopup().remove();
         handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
+        
     });
 }
 

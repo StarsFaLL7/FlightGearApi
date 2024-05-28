@@ -73,7 +73,6 @@ export const postFlightPointToFlight = async (point, sendingData, setSendingData
     const getResp = await axios.get(ALL_FLIGHTS_URL);
     let id = getResp.data.flightPlans[getResp.data.flightPlans.length - 1].id;
     const response = await axios.post(`${ALL_FLIGHTS_URL}/${id}/points`, point);
-    console.log(response)
     if (response.status === 200) {
       const responseData = response.data;
       setSendingData(responseData);
