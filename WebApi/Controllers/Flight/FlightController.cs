@@ -1,6 +1,9 @@
 ﻿using Application.Enums;
 using Application.Interfaces;
+using Application.Interfaces.Connection;
 using Application.Interfaces.Entities;
+using Application.Interfaces.Repositories;
+using Application.Services.Master;
 using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Controllers.Base;
@@ -12,13 +15,23 @@ namespace webapi.Controllers.Flight;
 [Route("api/flight")]
 public class FlightController : Controller
 {
-    private readonly IUserSimulationMasterService _masterService;
     private readonly ISessionService _sessionService;
+    private readonly IFlightPropertiesShotRepository _flightPropertiesShotRepository;
+    private readonly IFlightPlanService _flightPlanService;
+    private readonly IXmlFileManager _xmlFileManager;
+    private readonly IFlightGearLauncher _flightGearLauncher;
+    private readonly IFlightManipulator _flightManipulator;
 
-    public FlightController(IUserSimulationMasterService masterService, ISessionService sessionService)
+    public FlightController(ISessionService sessionService, 
+        IFlightPropertiesShotRepository flightPropertiesShotRepository, IFlightPlanService flightPlanService,
+        IXmlFileManager xmlFileManager, IFlightGearLauncher flightGearLauncher, IFlightManipulator flightManipulator)
     {
-        _masterService = masterService;
         _sessionService = sessionService;
+        _flightPropertiesShotRepository = flightPropertiesShotRepository;
+        _flightPlanService = flightPlanService;
+        _xmlFileManager = xmlFileManager;
+        _flightGearLauncher = flightGearLauncher;
+        _flightManipulator = flightManipulator;
     }
     
     /// <summary>
@@ -40,7 +53,8 @@ public class FlightController : Controller
         await _sessionService.SaveSessionAsync(flightSession);
         try
         {
-            await _masterService.StartSimulationWithFlightPlanAsync(dto.FlightPlanId, flightSession);
+            await UserSimulationMasterService.StartSimulationWithFlightPlanAsync(dto.FlightPlanId, 
+                flightSession, _flightPlanService, _xmlFileManager, _flightGearLauncher, _flightManipulator);
         }
         catch (Exception e)
         {
@@ -61,11 +75,11 @@ public class FlightController : Controller
     [HttpGet("status")]
     [ProducesResponseType(typeof(FlightStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetFlightStatus()
+    public async Task<IActionResult> GetFlightStatus([FromServices] IFlightManipulator flightManipulator)
     {
-        var status = await _masterService.GetSimulationStatus();
-        var percentCompleted = await _masterService.GetRoutePercentCompletionAsync();
-        var lastReachedWp = await _masterService.GetLastReachedRoutePointOrderAsync();
+        var status = await flightManipulator.GetSimulationStatus();
+        var percentCompleted = await flightManipulator.GetRoutePercentCompletionAsync();
+        var lastReachedWp = await flightManipulator.GetLastReachedRoutePointOrderAsync();
         var res = new FlightStatusResponse
         {
             Status = status.ToString(),
@@ -82,9 +96,10 @@ public class FlightController : Controller
     [HttpGet("properties")]
     [ProducesResponseType(typeof(FlightPositionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetFlightProperties()
+    public async Task<IActionResult> GetFlightProperties([FromServices] IConnectionManager connectionManager,
+        [FromServices] IFlightManipulator flightManipulator)
     {
-        var status = await _masterService.GetSimulationStatus();
+        var status = await flightManipulator.GetSimulationStatus();
         var res = new FlightPositionResponse
         {
             Status = status.ToString(),
@@ -102,7 +117,7 @@ public class FlightController : Controller
         {
             return Ok(res);
         }
-        var properties = await _masterService.GetCurrentFlightValuesAsync();
+        var properties = await connectionManager.GetCurrentValuesAsync();
         res.Longitude = properties.Longitude;
         res.Latitude = properties.Latitude;
         res.Altitude = properties.Altitude;
@@ -123,7 +138,7 @@ public class FlightController : Controller
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ExitSimulation()
     {
-        await _masterService.ExitSimulationWithPropertySaveAsync();
+        await _flightManipulator.ExitSimulationWithPropertySaveAsync();
         return Ok(new BasicStatusResponse
         {
             Status = BasicStatusEnum.Success.ToString(),

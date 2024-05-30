@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Enums;
+using Domain.Entities;
 
 namespace Application.Interfaces;
 
@@ -11,25 +12,23 @@ public interface IFlightManipulator
     /// Инициализировать настройки в соответствии с планом полёта.
     /// </summary>
     Task InitializeAsync(FlightPlan flightPlan);
-    
-    /// <summary>
-    /// Запустить цикл контроля полёта. Цикл крутится всё время, пока самолёт летит к последней точке.
-    /// </summary>
-    Task FlyCycleAsync();
 
     /// <summary>
-    /// Получить кол-во точек, до которых ещё предстоить лететь.
+    /// Получить значение статуса симуляции полета
     /// </summary>
-    /// <returns></returns>
-    Task<int> GetLeftPointsToAchieveAsync();
+    Task<FlightStatus> GetSimulationStatus();
     
     /// <summary>
-    /// Получить процент, насколько маршрут завершён.
+    /// Получить порядковый номер послдней точки маршрута, которую достиг самолет.
     /// </summary>
-    Task GetPercentRouteCompletionAsync();
+    Task<int> GetLastReachedRoutePointOrderAsync();
     
     /// <summary>
-    /// Закончить управление полётом.
+    /// Получить процент маршрута, который уже был преодолён в текущей симуляции.
     /// </summary>
-    void EndFlight();
+    Task<int> GetRoutePercentCompletionAsync();
+
+    Task ExitSimulationWithPropertySaveAsync();
+
+    Task FlyCycleAsync(FlightPlan flightPlan);
 }

@@ -25,5 +25,5 @@ public interface IConnectionSender
     /// <param name="command">Команда, которая будет отправлена.</param>
     /// <param name="readResponse">Нужно ли возвращать ответ, который выведет FlightGear после получения команды.</param>
     /// <returns>Ответ от FlightGear, если readResponse = true, иначе null</returns>
-    Task<string?> SendCommandAsync(string command, bool readResponse);
+    string? SendCommand(string command, bool readResponse);
 }
