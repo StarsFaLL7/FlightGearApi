@@ -3,15 +3,17 @@ import styles from './PointItem.css';
 import minus from '../../../assets/img/Decrease.png';
 import { handleClickDeletePoint } from '../../../api-methods/api-methods';
 import "../../../../node_modules/bootstrap/dist/css/bootstrap.css"
+import NavHeader from '../NavItem/NavItem';
+
 
 const PointItem = (props) => {
-    console.log(props)
+    //console.log(props)
     //const flight
     useEffect(() => { return () => { }; }, []);
 
     const handleDelete = async () => {
         await handleClickDeletePoint(props);
-        props.onRemoveData(); // Re-fetch points data after deletion
+        props.onRemoveData();
     };
 
     return (

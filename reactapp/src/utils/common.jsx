@@ -13,11 +13,12 @@ const clearForm = () => {
 }
 // sendingData, setSendingData
 export const handlerAddPoint = async (formData, point, setPoint, sendingPointData, setSendingPointData) => {
+  console.log(formData)
     if (!formData.longitude || !formData.latitude || !formData.speed || !formData.altitude) { return; }
     const newPoint = { order: point.length, ...formData };
 
     setPoint((prevPoints) => { 
-      const updatePoints = [...prevPoints, newPoint]; 
+      const updatePoints = [...prevPoints, newPoint];
       return updatePoints;
     });
 
@@ -30,21 +31,42 @@ export const handlerAddPoint = async (formData, point, setPoint, sendingPointDat
     //clearForm();
 };
 
-export const handlerAddFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData) => {
+export const handlerSetCurrentFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData) => {
+  console.log(formData)
   if (!formData.title) { return; }
   if(formData.departureRunwayId === "") { formData.departureRunwayId = null; }
   if(formData.arrivalRunwayId === "") { formData.arrivalRunwayId = null; }
   const newFlight = { ...formData };
 
-  setFlight((prevFlight) => {
-    console.log(prevFlight)
-    const updateFlights = [...prevFlight, newFlight];
-    return updateFlights;
-    //return [...prevFlight.flightPlans, newFlight];
-  });
+  try {
+    const response = await postFlightPointToFlight(newFlight, sendingFlightData, setSendingFlightData);
+
+    setFlight((prevPoint) => { 
+      prevPoint = response.data;
+      console.log(prevPoint)
+    });
+    return response;
+  } catch (error) {
+    // Handle any errors that occur during the fetch
+    console.error('There was an error sending the data to the server:', error);
+  }
+  //clearForm();
+};
+
+export const handlerAddFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData) => {
+  if (!formData.title) { return; }
+  if(formData.departureRunwayId === "") { formData.departureRunwayId = null; }
+  if(formData.arrivalRunwayId === "") { formData.arrivalRunwayId = null; }
+  console.log(formData)
+  const newFlight = { ...formData };
 
   try {
     await sendFlightDataToServer(newFlight, sendingFlightData, setSendingFlightData);
+    setFlight((prevFlight) => {
+      console.log(prevFlight)
+      const updateFlights = [...prevFlight, newFlight];
+      return updateFlights;
+    });
   } catch (error) {
     console.error('There was an error sending the data to the server:', error);
   }

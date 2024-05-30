@@ -21,8 +21,6 @@ const FlightItem = (props) => {
         if (!isOpen) {
             getFlightData(props.id, setCurrentFlight);
         }
-        //setShowForm(!showForm);
-        //console.log(props.id)
     };
 
     useEffect(() => {getPlanData(setCurrentFlight);}, [])
