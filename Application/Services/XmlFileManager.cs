@@ -126,11 +126,11 @@ public class XmlFileManager : IXmlFileManager
                     wpindex++;
                 }
             }*/
-            
+            var altitude = point.Altitude * 3.282;
             builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                            "\t\t\t<type type=\"string\">basic</type>\n" +
                            "\t\t\t<alt-restrict type=\"string\">at</alt-restrict>\n" +
-                           $"\t\t\t<altitude-ft type=\"double\">{point.Altitude * 3.282}</altitude-ft>\n" +
+                           $"\t\t\t<altitude-ft type=\"double\">{altitude}</altitude-ft>\n" +
                            $"\t\t\t<knots type=\"int\">{normalSpeed}</knots>\n" +
                            $"\t\t\t<ident type=\"string\">WP-USER-{wpindex}</ident>\n" +
                            $"\t\t\t<lon type=\"double\">{point.Longitude}</lon>\n" +

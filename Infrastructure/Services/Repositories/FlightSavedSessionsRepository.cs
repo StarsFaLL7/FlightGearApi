@@ -19,7 +19,7 @@ internal class FlightSavedSessionsRepository : IFlightSavedSessionsRepository
         {
             _dbContext.FlightSessions.Add(session);
         }
-
+        
         await _dbContext.SaveChangesAsync();
     }
 
