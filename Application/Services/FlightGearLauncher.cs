@@ -66,9 +66,11 @@ internal class FlightGearLauncher : IFlightGearLauncher
     public async Task InitializeWithFlightPlanAsync(FlightPlan flightPlan)
     {
         _isStartFromAirport = flightPlan.DepartureRunwayId is not null;
-        var airportRepository = _serviceProvider.GetRequiredService<IAirportRepository>();
-        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
-        var airportRunwayRepository = _serviceProvider.GetRequiredService<IAirportRunwayRepository>();
+        var scopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        using var scope = scopeFactory.CreateScope();
+        var airportRepository = scope.ServiceProvider.GetRequiredService<IAirportRepository>();
+        var flightPlanRepository = scope.ServiceProvider.GetRequiredService<IFlightPlanRepository>();
+        var airportRunwayRepository = scope.ServiceProvider.GetRequiredService<IAirportRunwayRepository>();
 
         if (_isStartFromAirport)
         {
@@ -83,7 +85,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
             _startHeading = GeographyHelper.GetDirectionDeg(_startRoutePoint.Latitude, _startRoutePoint.Longitude,
                 first2Points[1].Latitude, first2Points[1].Longitude);
         }
-        
+
         _isInitialized = true;
     }
 
@@ -94,7 +96,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
             throw new Exception("First you need to initialize FlightGearLauncher with flightPlan.");
         }
         
-        if (_flightGearProcess != null && _flightGearProcess.HasExited == false)
+        if (_flightGearProcess != null)
         {
             throw new Exception("Simulation hasn't exited.");
         }
@@ -182,6 +184,7 @@ internal class FlightGearLauncher : IFlightGearLauncher
 
         _flightGearProcess?.Kill();
         _flightGearProcess?.Dispose();
+        _flightGearProcess = null;
         _isRunning = false;
         _isInitialized = false;
     }

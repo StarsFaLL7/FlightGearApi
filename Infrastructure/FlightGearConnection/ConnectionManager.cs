@@ -48,7 +48,7 @@ internal class ConnectionManager : IConnectionManager
         var infos = properties.Select(p => p.GetInfo()).ToArray();
         
         var commands = infos.Select(p => $"get {p.Path}").ToArray();
-        var responses = await SendCommandsAsync(commands, true);
+        var responses = SendCommands(commands, true);
         var i = 0;
         foreach (var response in responses)
         {
@@ -106,7 +106,7 @@ internal class ConnectionManager : IConnectionManager
         }
 
         var commands = FlightExportPropertyExtensions.PropertiesInfoDict.Select(pair => $"get {pair.Value.Path}").ToArray();
-        var responses = await SendCommandsAsync(commands, true);
+        var responses = SendCommands(commands, true);
 
         var i = 0;
         foreach (var keyValuePair in FlightExportPropertyExtensions.PropertiesInfoDict)
@@ -126,7 +126,7 @@ internal class ConnectionManager : IConnectionManager
         {
             return 0;
         }
-        var response = await SendCommandAsync($"get {propertyPath}", true);
+        var response = SendCommand($"get {propertyPath}", true);
         var result = ParseDoubleFromResponse(response);
         return result;
     }
@@ -137,7 +137,7 @@ internal class ConnectionManager : IConnectionManager
         {
             return "";
         }
-        var response = await SendCommandAsync($"get {propertyPath}", true);
+        var response = SendCommand($"get {propertyPath}", true);
         return ParseStringFromResponse(response);
     }
 
@@ -153,7 +153,7 @@ internal class ConnectionManager : IConnectionManager
             var propInfo = pair.Key.GetInfo();
             return $"set {propInfo.Path} {pair.Value}";
         }).ToArray();
-        await SendCommandsAsync(commands, false);
+        SendCommands(commands, false);
     }
 
     public async Task SetPropertyAsync(string propertyPath, object value)
@@ -163,28 +163,28 @@ internal class ConnectionManager : IConnectionManager
             return;
         }
 
-        await SendCommandAsync($"set {propertyPath} {value}", false);
+        SendCommand($"set {propertyPath} {value}", true);
     }
 
-    public async Task<string?> SendCommandAsync(string command, bool readLine)
+    public string? SendCommand(string command, bool readLine)
     {
         CreateTcpClientIfNotExist();
         string? response = null;
-        await _tcpClientSemaphore.WaitAsync();
+        _tcpClientSemaphore.Wait();
         try
         {
-            await using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
+            using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
             if (readLine)
             {
                 using var reader = new StreamReader(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
-                await writer.WriteLineAsync(command);
-                await writer.FlushAsync();
-                response = await reader.ReadLineAsync();
+                writer.WriteLine(command);
+                writer.Flush();
+                response = reader.ReadLine();
             }
             else
             {
-                await writer.WriteLineAsync(command);
-                await writer.FlushAsync();
+                writer.WriteLine(command);
+                writer.Flush();
             }
         }
         catch (Exception e)
@@ -199,22 +199,22 @@ internal class ConnectionManager : IConnectionManager
         return response;
     }
     
-    private async Task<List<(string Command, string? Response)>> SendCommandsAsync(string[] commands, bool readLines)
+    private List<(string Command, string? Response)> SendCommands(string[] commands, bool readLines)
     {
         CreateTcpClientIfNotExist();
         var result = new List<(string Command, string? Response)>();
-        await _tcpClientSemaphore.WaitAsync();
+        _tcpClientSemaphore.Wait();
         try
         {
-            await using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
+            using var writer = new StreamWriter(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
             using var reader = new StreamReader(_networkTcpStream, Encoding.ASCII, leaveOpen: true);
             foreach (var command in commands)
             {
-                await writer.WriteLineAsync(command);
-                await writer.FlushAsync();
+                writer.WriteLine(command);
+                writer.Flush();
                 if (readLines)
                 {
-                    var response = await reader.ReadLineAsync();
+                    var response = reader.ReadLine();
                     result.Add((command, response));
                 }
             }

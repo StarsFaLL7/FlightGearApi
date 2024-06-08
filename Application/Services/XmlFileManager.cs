@@ -77,7 +77,9 @@ public class XmlFileManager : IXmlFileManager
 
         builder.Append("\t<route>\n");
         var wpindex = 0;
-        var runwayService = _serviceProvider.GetRequiredService<IRunwayService>();
+        var scopeFactory = _serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        using var scope = scopeFactory.CreateScope();
+        var runwayService = scope.ServiceProvider.GetRequiredService<IRunwayService>();
         if (startFromAirport)
         {
             var runway = await runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
@@ -86,7 +88,7 @@ public class XmlFileManager : IXmlFileManager
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                                "\t\t\t<type type=\"string\">basic</type>\n" +
                                "\t\t\t<alt-restrict type=\"string\">at</alt-restrict>\n" +
-                               $"\t\t\t<altitude-ft type=\"double\">{point.Altitude}</altitude-ft>\n" +
+                               $"\t\t\t<altitude-ft type=\"double\">{point.Altitude * 3.282}</altitude-ft>\n" +
                                $"\t\t\t<knots type=\"int\">{point.Speed}</knots>\n" +
                                $"\t\t\t<ident type=\"string\">STARTF-{wpindex}</ident>\n" +
                                $"\t\t\t<lon type=\"double\">{point.Longitude}</lon>\n" +
@@ -124,11 +126,11 @@ public class XmlFileManager : IXmlFileManager
                     wpindex++;
                 }
             }*/
-            
+            var altitude = point.Altitude * 3.282;
             builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                            "\t\t\t<type type=\"string\">basic</type>\n" +
                            "\t\t\t<alt-restrict type=\"string\">at</alt-restrict>\n" +
-                           $"\t\t\t<altitude-ft type=\"double\">{point.Altitude}</altitude-ft>\n" +
+                           $"\t\t\t<altitude-ft type=\"double\">{altitude}</altitude-ft>\n" +
                            $"\t\t\t<knots type=\"int\">{normalSpeed}</knots>\n" +
                            $"\t\t\t<ident type=\"string\">WP-USER-{wpindex}</ident>\n" +
                            $"\t\t\t<lon type=\"double\">{point.Longitude}</lon>\n" +
@@ -146,7 +148,7 @@ public class XmlFileManager : IXmlFileManager
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +
                                "\t\t\t<type type=\"string\">basic</type>\n" +
                                "\t\t\t<alt-restrict type=\"string\">at</alt-restrict>\n" +
-                               $"\t\t\t<altitude-ft type=\"double\">{point.Altitude}</altitude-ft>\n" +
+                               $"\t\t\t<altitude-ft type=\"double\">{point.Altitude * 3.282}</altitude-ft>\n" +
                                $"\t\t\t<knots type=\"int\">{point.Speed}</knots>\n" +
                                $"\t\t\t<ident type=\"string\">ENDF-{wpindex}</ident>\n" +
                                $"\t\t\t<lon type=\"double\">{point.Longitude}</lon>\n" +

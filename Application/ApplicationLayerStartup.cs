@@ -12,8 +12,6 @@ public static class ApplicationLayerStartup
 {
     public static IServiceCollection TryAddApplicationLayer(this IServiceCollection services)
     {
-        services.TryAddSingleton<IUserAnalyticsMasterService, UserAnalyticsMasterService>();
-        services.TryAddSingleton<IUserSimulationMasterService, UserSimulationMasterService>();
         
         services.TryAddScoped<IFlightPlanService, FlightPlanService>();
         services.TryAddScoped<IRunwayService, RunwayService>();
