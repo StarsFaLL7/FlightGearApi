@@ -1,19 +1,20 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import styles from './PointItem.css';
 import minus from '../../../assets/img/Decrease.png';
 import { handleClickDeletePoint } from '../../../api-methods/api-methods';
 import "../../../../node_modules/bootstrap/dist/css/bootstrap.css"
 import NavHeader from '../NavItem/NavItem';
+import { PointContext } from '../context/main-context';
 
 
 const PointItem = (props) => {
     //console.log(props)
     //const flight
-    useEffect(() => { return () => { }; }, []);
-
+    //useEffect(() => { return () => { }; }, []);
+    const {fetchPoints, currentFlight} = useContext(PointContext);
     const handleDelete = async () => {
-        await handleClickDeletePoint(props);
-        props.onRemoveData();
+        await handleClickDeletePoint(currentFlight, props);
+        fetchPoints();
     };
 
     return (
@@ -23,7 +24,6 @@ const PointItem = (props) => {
                     <td className={styles.table_element_item_2}>{props.longitude}</td>
                     <td className={styles.table_element_item_2}>{props.latitude}</td>
                     <td className={styles.table_element_item_2}>{props.title}</td>
-                    <td className={styles.table_element_item_3}>{props.speed}</td>
                     <td className={styles.table_element_item_4}>{props.altitude}</td>
                     <td>
                         <button className='btn' type='button' onClick={handleDelete}>
