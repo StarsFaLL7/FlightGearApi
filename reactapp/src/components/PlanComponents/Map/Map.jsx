@@ -1,35 +1,25 @@
-import React, { useRef, useEffect, useState } from 'react';
-import maplibregl, { LngLat } from 'maplibre-gl';
+import React, { useRef, useEffect, useState, useContext } from 'react';
+import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '../Map/Map.css';
-import MapboxDraw from "@mapbox/mapbox-gl-draw";
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css'
-import * as turf from '@turf/turf'
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+import * as turf from '@turf/turf';
 import { getPlanData } from "../../../api-methods/api-methods";
 import { handlerAddPoint } from "../../../utils/common";
 import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
-import FlightItem from '../FlightItem/FlightItem';
-import { getPointsData } from '../../../api-methods/api-methods';
-import NavHeader from '../NavItem/NavItem';
+import { PointContext } from '../context/main-context';
+import { putPointsData } from '../../../api-methods/api-methods';
 
-//import {addMarker, mapUtils, addControlPanel, getMousePosition} from './map-functions';
-//shadow-lg
-//rounded-4
 const MainMap = () => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng] = useState(0);
   const [lat] = useState(0);
   const [zoom] = useState(0);
-  //const [API_KEY] = useState('YOUR_MAPTILER_API_KEY_HERE');
-  let markersArr = [];
 
-  const [flights, setFlights] = useState([]);
-  const [points, setPoints] = useState([]);
   const [sendingPointData, setSendingPointData] = useState([]);
-
-  useEffect(() => {},[points])
+  const { points, addPoint, setPoints, currentFlight, changePointData, fetchPoints } = useContext(PointContext);
 
   useEffect(() => {
     if (map.current) return;
@@ -44,114 +34,137 @@ const MainMap = () => {
 
     addControlPanel(map.current);
     getMousePosition(map.current);
-    addMarker(map.current);
 
-  }, [ lng, lat, zoom]);
+  }, [lng, lat, zoom]);
+
+  useEffect(() => {
+    if (map.current && currentFlight) {
+      addMarker(map.current);
+      clearMarkersAndLines(map.current);
+      loadMarkersToMap(map.current);
+    }
+  }, [currentFlight, points]);
+
+  function clearMarkersAndLines(map) {
+    const markers = document.getElementsByClassName('maplibregl-marker');
+    while (markers.length) {
+      markers[0].remove();
+    }
+
+    if (map.getLayer('line')) {
+      map.removeLayer('line');
+    }
+    if (map.getSource('line')) {
+      map.removeSource('line');
+    }
+  }
+
+  async function addMarker(map) {
+    map.off('contextmenu');
+
+    map.on('contextmenu', (e) => {
+      if (!currentFlight) { return; }
+
+      let lngLat = Object.values(e.lngLat);
+      const marker = createMarker(lngLat, map);
+      let popup = createPopup(e, map, marker);
+      marker.setPopup(popup);
+
+      const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
+      marker.getPopup().remove();
+      addPoint(formData, sendingPointData, setSendingPointData, currentFlight);
+    });
+    updateLine(map.current, points.routePoints);
+  }
+
+  async function loadMarkersToMap(map) {
+    //console.log(currentFlight)
+    //console.log(points)
+    if (points && points.routePoints) {
+      points.routePoints.forEach(point => {
+        const marker = new maplibregl.Marker({ draggable: true, color: "#0d6efd" })
+          .setLngLat([point.longitude, point.latitude])
+          .addTo(map);
+        let popup = createPopup(point, map, marker);
+        marker.setPopup(popup);
+
+        marker.on('dragend', () => {
+          let newLngLat = Object.values(marker.getLngLat());
+          const index = points.routePoints.findIndex(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
+          if (index !== -1) {
+            points.routePoints[index] = { ...points.routePoints[index], longitude: newLngLat[0], latitude: newLngLat[1] };
+            setPoints({ routePoints: [...points.routePoints] });
+          }
+          updateLine(map, points.routePoints);
+        });
+      });
+      updateLine(map, points.routePoints);
+    }
+  }
 
   function addControlPanel(map) {
     map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
   }
 
-  function addMarker(map) {
-    map.on('contextmenu', (e) => {
-
-        let lngLat = Object.values(e.lngLat);
-        markersArr.push(lngLat);
-        const marker = createMarker(lngLat, map);
-        let popup = createPopup(e, map, marker, markersArr);
-        marker.setPopup(popup);
-
-        marker.on('dragend', () => {
-
-            let newLngLat = Object.values(marker.getLngLat());
-            e.lngLat = marker.getLngLat();
-            let index = markersArr.indexOf(lngLat);
-            markersArr[index] = newLngLat;
-            lngLat = newLngLat;
-
-            updateLine(map, markersArr);
-            popup = createPopup(e, map, marker, markersArr);
-            marker.setPopup(popup);
-            const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
-            marker.getPopup().remove();
-            handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
-        });
-        //console.log(markersArr)
-        updateLine(map, markersArr);
-        const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
-        marker.getPopup().remove();
-        handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
-        
-    });
-}
-
   function updateLine(map, coordinates) {
-      if (map.getSource('line')) {
-          map.getSource('line').setData({
-              type: 'Feature',
-              geometry: {
-                  type: 'LineString',
-                  coordinates: coordinates
-              }
-          });
-      } else {
-          // Если источник данных линии не существует, добавляем его
-          map.addSource('line', {
-              type: 'geojson',
-              data: {
-                  type: 'Feature',
-                  geometry: {
-                      type: 'LineString',
-                      coordinates: coordinates
-                  }
-              }
-          });
+    const coords = coordinates.map(coord => [coord.longitude, coord.latitude]);
+    if (map.getSource('line')) {
+      map.getSource('line').setData({
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: coords,
+        },
+      });
+    } else {
+      map.addSource('line', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: coords,
+          },
+        },
+      });
 
-          // Добавляем слой линии на карту
-          map.addLayer({
-              id: 'line',
-              type: 'line',
-              source: 'line',
-              layout: {
-                  'line-join': 'round',
-                  'line-cap': 'round',
-              },
-              paint: {
-                  'line-color': '#0000FF',
-                  'line-width': 5,
-                  'line-opacity': 0.5,
-              }
-          });
-
-      }   
+      map.addLayer({
+        id: 'line',
+        type: 'line',
+        source: 'line',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round',
+        },
+        paint: {
+          'line-color': '#0000FF',
+          'line-width': 5,
+          'line-opacity': 0.5,
+        },
+      });
+    }
   }
 
   function createMarker(lngLat, map) {
-      return new maplibregl.Marker({draggable: true, color: "#0d6efd" })
-          .setLngLat(lngLat)
-          .addTo(map);
+    return new maplibregl.Marker({ draggable: true, color: "#0d6efd" })
+      .setLngLat(lngLat)
+      .addTo(map);
   }
 
-  function createPopup(data, map, marker, markersArr) {
-
-    let markArr = markersArr;
+  function createPopup(data, map, marker) {
     let popupContent = document.createElement('div');
 
     popupContent.innerHTML = `
       <form class='bg-light rounded-4' id="form" method='POST' enctype="application/json">
         <ul class='list-unstyled justify-items-center'>
           <li class='popover-item justify-self-center px-2'>
-            <p class='fs-6 form-control'>Longitude: ${data.lngLat.lng}</p>
-            <input class='hidden form-control ms-auto' value='${data.lngLat.lng}' type="number" name="longitude" required/>
+            <p class='fs-6 form-control'>Longitude: ${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}</p>
+            <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}' type="number" name="longitude" required/>
           </li>
           <li class='popover-item d-flex align-items-center px-2'>
-            <p class='fs-6 form-control'>Latitude: ${data.lngLat.lat}</p>
-            <input class='hidden form-control ms-auto' value='${data.lngLat.lat}' type="number" name="latitude" required/>
+            <p class='fs-6 form-control'>Latitude: ${data.lngLat !== undefined ? data.lngLat.lat : data.latitude}</p>
+            <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lat : data.latitude}' type="number" name="latitude" required/>
           </li>
-          <li class='popover-item form-control d-flex align-items-center mb-3'>
-            <p class='fs-6 pb-0 mb-0'>Speed(m/s):</p>
-            <input class='form-control ms-auto' type="number" step="0.01" name="speed" value="0" required/>
-          </li> 
           <li class='popover-item form-control d-flex align-items-center mb-3'>
             <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
             <input class='form-control ms-auto' type="number" name="altitude" value="0" required/>
@@ -164,54 +177,55 @@ const MainMap = () => {
             <button class="btn save-popup btn-primary text-light" type="submit">
               save
             </button>
-            <button class="btn delete-popup btn-secondary text-light" type="submit">
+            <button class="btn delete-popup btn-secondary text-light" type="button">
               delete
             </button>
           </li>
         </ul> 
       </form>`;
 
-      const saveButton = popupContent.querySelector('.save-popup');
-      const deleteButton = popupContent.querySelector('.delete-popup');
+    const saveButton = popupContent.querySelector('.save-popup');
+    const deleteButton = popupContent.querySelector('.delete-popup');
 
-      deleteButton.onclick = function(evt) {
-          evt.preventDefault();
-          marker.remove();
-          for(let i = 0; i < markArr.length; i++) {
-              if(markArr[i].toString() === marker.getLngLat().toArray().toString()){
-                markersArr.splice(i, 1);;
-              }
-          }
-          updateLine(map, markersArr);
-      };
+    deleteButton.onclick = function (evt) {
+      evt.preventDefault();
+      marker.remove();
+      setPoints(prevPoints => {
+        const updatedPoints = { ...prevPoints };
+        const index = updatedPoints.routePoints.findIndex(coord => coord.longitude === (data.lngLat !== undefined ? data.lngLat.lng : data.longitude) && coord.latitude === (data.lngLat !== undefined ? data.lngLat.lat : data.latitude));
+        if (index !== -1) {
+          updatedPoints.routePoints.splice(index, 1);
+        }
+        updateLine(map, updatedPoints.routePoints);
+        return updatedPoints;
+      });
+    };
 
-      saveButton.onclick = function(evt) {
-        evt.preventDefault();
-        const formData = getData(document.getElementById('form'));
-        console.log(formData)
-        handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData); 
-      };
+    saveButton.onclick = function (evt) {
+      evt.preventDefault();
+      const formData = getData(popupContent.querySelector('form'));
+      console.log(formData);
+      // handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
+    };
 
-      let popup = new maplibregl.Popup().setLngLat([data.lngLat.lng, data.lngLat.lat]).setDOMContent(popupContent);
-      return popup;
+    let popup = new maplibregl.Popup().setLngLat([data.lngLat !== undefined ? data.lngLat.lng : data.longitude, data.lngLat !== undefined ? data.lngLat.lat : data.latitude]).setDOMContent(popupContent);
+    return popup;
   }
 
   function getMousePosition(map) {
-      map.on('mousemove', (e) => {
-          document.getElementById('info').innerHTML = 
-          `<p>Lng: ${e.lngLat.lng}</p>
-          <p>Lat: ${e.lngLat.lat}</p>`;
-      });
-  }    
+    map.on('mousemove', (e) => {
+      document.getElementById('info').innerHTML = 
+        `<p>Lng: ${e.lngLat.lng}</p>
+         <p>Lat: ${e.lngLat.lat}</p>`;
+    });
+  }
 
   return (
     <div className={`map-wrap bg-light`}>
-      <NavHeader/>
-      <div ref={mapContainer} className={`map bg-light`}/>
+      <div ref={mapContainer} className={`map bg-light`} />
       <div id={`info`}></div>
       <div id={`calculated-area`}></div>
     </div>
-  
   );
 }
 

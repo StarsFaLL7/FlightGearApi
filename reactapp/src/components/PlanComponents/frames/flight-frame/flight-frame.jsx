@@ -1,23 +1,26 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useContext} from "react";
 import { getPlanData, getFlightData } from "../../../../api-methods/api-methods";
 import FlightItem from "../../FlightItem/FlightItem";
+import { PointContext } from "../../context/main-context";
 
 const PlanPoints = () => {
 
-  const [flight, setFlight] = useState([]);
-  const [openFlightId, setOpenFlightId] = useState(null);
+  //const [flights, setFlights] = useState({});
+  //const [openFlightId, setOpenFlightId] = useState(null);
+  const {flights, setFlights, setCurrentFlight, currentFlight, fetchFlights} = useContext(PointContext);
 
-  useEffect(() => { getPlanData(setFlight); }, []);
-  const handleFormToggle = (id) => {
+  useEffect(() => { fetchFlights(); },[]);
+  /* const handleFormToggle = (id) => {
     setOpenFlightId(prevId => (prevId === id ? null : id));
-  };
+    console.log(id)
+  }; */
 
-  const onRemoveData = async () => { await getPlanData(setFlight); }
+  const onRemoveData = async () => { await fetchFlights(); }
   return (
     <>
       <div className={`row`}>
         <div className={`scrollspy-example`}>
-          {flight.flightPlans && flight.flightPlans.map((element, index) =>
+          {flights.flightPlans && flights.flightPlans.map((element, index) =>
             <FlightItem
               key={element.key}
               index={index}
@@ -28,13 +31,11 @@ const PlanPoints = () => {
               departureRunwayId={element.departureRunwayId}
               arrivalRunwayId={element.arrivalRunwayId}
               onRemoveData={onRemoveData}
-              openFlightId={openFlightId}
-              handleFormToggle={handleFormToggle}/>   
+              //openFlightId={openFlightId}
+              //handleFormToggle={handleFormToggle}
+              />   
           )}
         </div>
-        {/* <div className={`hidden`}>
-          <MainMap flight={flight.flightPlans}/>
-        </div> */}
       </div>     
     </>
   ) 
