@@ -38,20 +38,6 @@ const FlightPoints = () => {
                         altitude={element.altitude}
                         onRemoveData={fetchPoints}
                     />))
-                    /* :
-                    points.flightPlan.routePoints.map((element, index) => (
-                        <PointItem
-                            key={element.id}
-                            index={index}
-                            id={element.id}
-                            order={element.order}
-                            isEditable={element.isEditable}
-                            latitude={element.latitude}
-                            longitude={element.longitude}
-                            remarks={element.remarks}
-                            altitude={element.altitude}
-                            onRemoveData={fetchPoints}
-                        />)) */
                 }
             </div>
         </>

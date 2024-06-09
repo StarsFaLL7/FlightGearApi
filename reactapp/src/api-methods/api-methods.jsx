@@ -3,6 +3,7 @@ import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT } from '../cons
 
 export const startFlight = async (flight) => {
   flight = {title: flight.title, flightPlanId: flight.id, readsPerSecond: 10}
+  console.log(flight)
   try {
     const response = await axios.post(`${START_FLIGHT}`, flight);
     return response;

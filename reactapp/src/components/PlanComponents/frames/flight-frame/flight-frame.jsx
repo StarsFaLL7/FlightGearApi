@@ -22,7 +22,7 @@ const PlanPoints = () => {
         <div className={`scrollspy-example`}>
           {flights.flightPlans && flights.flightPlans.map((element, index) =>
             <FlightItem
-              key={element.key}
+              key={element.id}
               index={index}
               id={element.id}
               title={element.title}

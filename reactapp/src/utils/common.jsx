@@ -12,11 +12,11 @@ const clearForm = () => {
     form.querySelector('textarea[name=remarks]').value = '';
 }
 // sendingData, setSendingData
-export const handlerAddPoint = async (formData, point, setPoint, sendingPointData, setSendingPointData, currentFlight) => {
+export const handlerAddPoint = async (formData, points, setPoint, sendingPointData, setSendingPointData, currentFlight) => {
   console.log(currentFlight)
     if (!formData.longitude || !formData.latitude || !formData.altitude) { return; }
-    const newPoint = { order: point.length, ...formData };
-
+    const newPoint = { order: points.routePoints.length, ...formData };
+    console.log(newPoint)
     /* setPoint((prevPoints) => {
       console.log(prevPoints) 
       const updatePoints = [...prevPoints.routePoints, newPoint];

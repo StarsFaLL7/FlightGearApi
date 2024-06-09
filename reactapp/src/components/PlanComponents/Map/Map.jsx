@@ -38,11 +38,32 @@ const MainMap = () => {
   }, [lng, lat, zoom]);
 
   useEffect(() => {
-    if (map.current && currentFlight) {
-      addMarker(map.current);
-      clearMarkersAndLines(map.current);
-      loadMarkersToMap(map.current);
-    }
+    if (!map.current || !currentFlight) return;
+
+    clearMarkersAndLines(map.current);
+    loadMarkersToMap(map.current);
+
+    // Ensure the event listener is added only once
+    const handleContextMenu = (e) => {
+      if (!currentFlight) return;
+
+      let lngLat = Object.values(e.lngLat);
+      const marker = createMarker(lngLat, map.current);
+      let popup = createPopup(e, map.current, marker);
+      marker.setPopup(popup);
+
+      let formData = getData(marker.getPopup().addTo(map.current).getElement().querySelector('form'));
+      formData = {...formData, altitude: Number(formData.altitude), longitude: Number(formData.longitude), latitude: Number(formData.latitude)}
+      marker.getPopup().remove();
+      addPoint(formData, sendingPointData, setSendingPointData, currentFlight);
+    };
+
+    map.current.on('contextmenu', handleContextMenu);
+
+    return () => {
+      map.current.off('contextmenu', handleContextMenu);
+    };
+
   }, [currentFlight, points]);
 
   function clearMarkersAndLines(map) {
@@ -59,27 +80,7 @@ const MainMap = () => {
     }
   }
 
-  async function addMarker(map) {
-    map.off('contextmenu');
-
-    map.on('contextmenu', (e) => {
-      if (!currentFlight) { return; }
-
-      let lngLat = Object.values(e.lngLat);
-      const marker = createMarker(lngLat, map);
-      let popup = createPopup(e, map, marker);
-      marker.setPopup(popup);
-
-      const formData = getData(marker.getPopup().addTo(map).getElement().querySelector('form'));
-      marker.getPopup().remove();
-      addPoint(formData, sendingPointData, setSendingPointData, currentFlight);
-    });
-    updateLine(map.current, points.routePoints);
-  }
-
-  async function loadMarkersToMap(map) {
-    //console.log(currentFlight)
-    //console.log(points)
+  function loadMarkersToMap(map) {
     if (points && points.routePoints) {
       points.routePoints.forEach(point => {
         const marker = new maplibregl.Marker({ draggable: true, color: "#0d6efd" })
@@ -167,11 +168,11 @@ const MainMap = () => {
           </li>
           <li class='popover-item form-control d-flex align-items-center mb-3'>
             <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
-            <input class='form-control ms-auto' type="number" name="altitude" value="0" required/>
+            <input class='form-control ms-auto' type="number" name="altitude" value="${data.altitude !== undefined ? Number(data.altitude) : 500}" required/>
           </li>
           <li class='popover-item form-control d-flex align-items-center mb-3'>
             <p class='fs-6 pb-0 mb-0'>Remarks:</p>
-            <textarea class='form-control ms-auto' type="text" name="remarks"></textarea>
+            <textarea class='form-control ms-auto' type="text" name="remarks">${data.remarks !== undefined ? data.remarks : ""}</textarea>
           </li> 
           <li>
             <button class="btn save-popup btn-primary text-light" type="submit">
