@@ -168,8 +168,8 @@ public class RunwayController : Controller
                 Id = Guid.NewGuid()
             }).ToArray()
         };
-        await _functionService.SaveFunctionPointRange(arrivalFunc.FunctionPoints.ToArray());
         await _functionService.SaveFunction(arrivalFunc);
+        await _functionService.SaveFunctionPointRange(arrivalFunc.FunctionPoints.ToArray());
         runway.ArrivalFunctionId = funcId;
         await _runwayService.SaveRunwayAsync(runway);
         

@@ -142,7 +142,7 @@ public class XmlFileManager : IXmlFileManager
         
         if (endOnAirport)
         {
-            var runway = await runwayService.GetAggregatedRunwayByIdAsync(flightPlan.DepartureRunway.Id);
+            var runway = await runwayService.GetAggregatedRunwayByIdAsync(flightPlan.ArrivalRunway.Id);
             foreach (var point in runway.ArrivalFunction.FunctionPoints.OrderBy(p => p.Order))
             {
                 builder.Append($"\t\t<wp n=\"{wpindex}\">\n" +

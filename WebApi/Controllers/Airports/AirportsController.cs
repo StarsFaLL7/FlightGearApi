@@ -30,12 +30,12 @@ public class AirportsController : Controller
         
         var res = new GetAllAirportsResponse
         {
-            Airports = airports.Select(a => new AirportBasicInfoResponse
+            Airports = airports.Select(airport => new AirportBasicInfoResponse
             {
-                Id = a.Id,
-                Title = a.Title,
-                Code = a.Code,
-                City = a.City
+                Id = airport.Id,
+                Title = airport.Title,
+                Code = airport.Code,
+                City = airport.City
             }).ToArray()
         };
         return Ok(res);
