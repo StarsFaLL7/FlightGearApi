@@ -37,7 +37,7 @@ public interface IFlightPlanService
     /// <summary>
     /// Обновляет существующую точку плана полёта.
     /// </summary>
-    Task UpdateRoutePointAsync(Guid flightPlanId, int pointOrder, 
+    Task UpdateRoutePointAsync(Guid flightPlanId, Guid pointId, 
         double longitude, double latitude, double altitude, string? remarks);
     
     /// <summary>
@@ -48,7 +48,7 @@ public interface IFlightPlanService
     /// <summary>
     /// Удаление точки маршрута у существующего плана полета
     /// </summary>
-    Task RemoveRoutePointAsync(Guid flightPlanId, int pointOrder);
+    Task RemoveRoutePointAsync(Guid flightPlanId, Guid pointId);
 
     Task RemoveDepartureRunwayFromFlightPlansByRunwayId(Guid runwayId);
     

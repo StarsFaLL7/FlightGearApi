@@ -44,12 +44,13 @@ public class AirportsController : Controller
     /// <summary>
     /// Получение полной информации об аэропорте, по его уникальному идентификатору
     /// </summary>
-    [HttpGet("{id:guid}")]
+    /// <param name="airportId">Уникальный идентификатор аэропорта.</param>
+    [HttpGet("{airportId:guid}")]
     [ProducesResponseType(typeof(AirportResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAirportInfo([FromRoute] Guid id)
+    public async Task<IActionResult> GetAirportInfo([FromRoute] Guid airportId)
     {
-        var airport = await _airportService.GetAirportAggregatedAsync(id);
+        var airport = await _airportService.GetAirportAggregatedAsync(airportId);
 
         var res = DtoConverter.ConvertAggregatedAirportToAirportResponse(airport);
         return Ok(res);
@@ -78,12 +79,13 @@ public class AirportsController : Controller
     /// <summary>
     /// Удаление аэропорта со всеми взлетными полосами
     /// </summary>
-    [HttpDelete("{id:guid}")]
+    /// <param name="airportId">Уникальный идентификатор аэропорта.</param>
+    [HttpDelete("{airportId:guid}")]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteAirport([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteAirport([FromRoute] Guid airportId)
     {
-        await _airportService.DeleteAirportAsync(id);
+        await _airportService.DeleteAirportAsync(airportId);
         return Ok(new BasicStatusResponse
         {
             Status = BasicStatusEnum.Success.ToString(),
@@ -94,12 +96,13 @@ public class AirportsController : Controller
     /// <summary>
     /// Обновление данных аэропорта
     /// </summary>
-    [HttpPut("{id:guid}")]
+    /// <param name="airportId">Уникальный идентификатор аэропорта.</param>
+    [HttpPut("{airportId:guid}")]
     [ProducesResponseType(typeof(AirportResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateAirport([FromRoute] Guid id, [FromBody] UpdateAirportRequest dto)
+    public async Task<IActionResult> UpdateAirport([FromRoute] Guid airportId, [FromBody] UpdateAirportRequest dto)
     {
-        var airport = await _airportService.GetAirportAggregatedAsync(id);
+        var airport = await _airportService.GetAirportAggregatedAsync(airportId);
         airport.City = dto.City;
         airport.Code = dto.Code;
         airport.Title = dto.Title;

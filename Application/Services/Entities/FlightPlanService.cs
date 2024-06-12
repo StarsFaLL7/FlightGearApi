@@ -120,16 +120,19 @@ internal class FlightPlanService : IFlightPlanService
         await flightPlanRepository.RemoveByIdAsync(flightPlanId);
     }
 
-    public async Task UpdateRoutePointAsync(Guid flightPlanId, int pointOrder, double longitude, double latitude, double altitude,
+    public async Task UpdateRoutePointAsync(Guid flightPlanId, Guid pointId, double longitude, double latitude, double altitude,
         string? remarks)
     {
-        var flightPlan = await GetAggregatedFlightPlanAsync(flightPlanId);
-        if (pointOrder < 0 || pointOrder > flightPlan.RoutePoints.Count - 1)
+        if (pointId == Guid.Empty)
         {
-            throw new ArgumentException(
-                $"Указано некорректное значение порядкового номера точки маршрута. Кол-во точек в маршруте: {flightPlan.RoutePoints.Count}");
+            throw new Exception("Данную точку нельзя редактировать.");
         }
-        var point = flightPlan.RoutePoints[pointOrder];
+        var flightPlan = await GetAggregatedFlightPlanAsync(flightPlanId);
+        var point = flightPlan.RoutePoints.FirstOrDefault(p => p.Id == pointId);
+        if (point == null)
+        {
+            throw new Exception("Точки маршрута с указанным id нет в данном плане полёта.");
+        }
         point.Longitude = longitude;
         point.Latitude = latitude;
         point.Altitude = altitude;
@@ -143,23 +146,28 @@ internal class FlightPlanService : IFlightPlanService
         await routePointRepository.SaveAsync(routePoint);
     }
 
-    public async Task RemoveRoutePointAsync(Guid flightPlanId, int pointOrder)
+    public async Task RemoveRoutePointAsync(Guid flightPlanId, Guid pointId)
     {
+        if (pointId == Guid.Empty)
+        {
+            throw new Exception("Данную точку нельзя редактировать.");
+        }
         var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
         var routePointRepository = _serviceProvider.GetRequiredService<IRoutePointRepository>();
         
         var flightPlan = await GetAggregatedFlightPlanAsync(flightPlanId);
-        if (pointOrder < 0 || pointOrder > flightPlan.RoutePoints.Count - 1)
+        var point = flightPlan.RoutePoints.FirstOrDefault(p => p.Id == pointId);
+        if (point == null)
         {
-            throw new ArgumentException(
-                $"Указано некорректное значение порядкового номера точки маршрута. Кол-во точек в маршруте: {flightPlan.RoutePoints.Count}");
+            throw new Exception("Точки маршрута с указанным id нет в данном плане полёта.");
         }
-        var point = flightPlan.RoutePoints[pointOrder];
-        flightPlan.RoutePoints.RemoveAt(pointOrder);
-        for (var i = pointOrder; i < flightPlan.RoutePoints.Count; i++)
+        flightPlan.RoutePoints.Remove(point);
+        var order = 0;
+        foreach (var planPoint in flightPlan.RoutePoints)
         {
-            flightPlan.RoutePoints[i].Order -= 1;
-            await routePointRepository.SaveAsync(flightPlan.RoutePoints[i]);
+            planPoint.Order = order;
+            order++;
+            await routePointRepository.SaveAsync(planPoint);
         }
         await flightPlanRepository.SaveAsync(flightPlan);
         

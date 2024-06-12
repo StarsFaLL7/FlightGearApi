@@ -9,7 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flight Gear API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "YFlight Gear API",
+        Description = "Flight Gear simulation WebAPI."
+    });
+    var filePath = Path.Combine(AppContext.BaseDirectory, "WebApi.xml");
+    c.IncludeXmlComments(filePath);
 });
 
 builder.Services.AddControllers();

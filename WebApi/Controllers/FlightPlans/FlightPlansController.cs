@@ -35,13 +35,13 @@ public class FlightPlansController : Controller
     /// <summary>
     /// Получение полной информации о сохраненненном плане полета по идентификатору
     /// </summary>
-    /// <param name="id">Уникальный идентификатор плана полета.</param>
-    [HttpGet("{id:guid}")]
+    /// <param name="flightPlanId">Уникальный идентификатор плана полета.</param>
+    [HttpGet("{flightPlanId:guid}")]
     [ProducesResponseType(typeof(FlightPlanResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetFlightPlanInfo([FromRoute] Guid id)
+    public async Task<IActionResult> GetFlightPlanInfo([FromRoute] Guid flightPlanId)
     {
-        var flightPlan = await _flightPlanService.GetFlightPlanWithConvertedPointsAsync(id);
+        var flightPlan = await _flightPlanService.GetFlightPlanWithConvertedPointsAsync(flightPlanId);
         var res = DtoConverter.ConvertAggregatedFlightPlanToResponse(flightPlan);
         return Ok(res);
     }
@@ -49,13 +49,13 @@ public class FlightPlansController : Controller
     /// <summary>
     /// Удаление плана полета по уникальному идентификатору
     /// </summary>
-    /// <param name="id">Уникальный идентификатор плана полет</param>
-    [HttpDelete("{id:guid}")]
+    /// <param name="flightPlanId">Уникальный идентификатор плана полет</param>
+    [HttpDelete("{flightPlanId:guid}")]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteFlightPlan([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteFlightPlan([FromRoute] Guid flightPlanId)
     {
-        await _flightPlanService.RemoveFlightPlanAsync(id);
+        await _flightPlanService.RemoveFlightPlanAsync(flightPlanId);
         return Ok(new BasicStatusResponse
         {
             Status = BasicStatusEnum.Success.ToString(),
@@ -93,14 +93,14 @@ public class FlightPlansController : Controller
     /// <summary>
     /// Обновление информации в плана полета
     /// </summary>
-    /// <param name="id">Уникальный идентификатор плана полет</param>
+    /// <param name="flightPlanId">Уникальный идентификатор плана полет</param>
     /// <param name="dto">Модель с обновленными данными</param>
-    [HttpPut("{id:guid}")]
+    [HttpPut("{flightPlanId:guid}")]
     [ProducesResponseType(typeof(FlightPlanWithStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteFlightPlan([FromRoute] Guid id, [FromBody] UpdateFlightPlanRequest dto)
+    public async Task<IActionResult> DeleteFlightPlan([FromRoute] Guid flightPlanId, [FromBody] UpdateFlightPlanRequest dto)
     {
-        var flightPlan = await _flightPlanService.GetAggregatedFlightPlanAsync(id);
+        var flightPlan = await _flightPlanService.GetAggregatedFlightPlanAsync(flightPlanId);
         flightPlan.Title = dto.Title;
         flightPlan.Remarks = dto.Remarks;
         flightPlan.DepartureRunwayId = dto.DepartureRunwayId;
@@ -167,13 +167,13 @@ public class FlightPlansController : Controller
     /// Удаление точки маршрута у плана полета
     /// </summary>
     /// <param name="flightPlanId">Уникальный идентификатор плана полет</param>
-    /// <param name="pointOrder">Порядковый номер точки маршрута, которую нужно удалить. Отсчет идет с нуля.</param>
-    [HttpDelete("{flightPlanId:guid}/points/{pointOrder:int}")]
+    /// <param name="pointId">Уникальный идентификатор точки маршрута, которую нужно удалить.</param>
+    [HttpDelete("{flightPlanId:guid}/points/{pointId:guid}")]
     [ProducesResponseType(typeof(FlightPlanWithStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteRoutePointFromFlightPlan([FromRoute] Guid flightPlanId, [FromRoute] int pointOrder)
+    public async Task<IActionResult> DeleteRoutePointFromFlightPlan([FromRoute] Guid flightPlanId, [FromRoute] Guid pointId)
     {
-        await _flightPlanService.RemoveRoutePointAsync(flightPlanId, pointOrder);
+        await _flightPlanService.RemoveRoutePointAsync(flightPlanId, pointId);
         
         var flightPlanUpdated = await _flightPlanService.GetFlightPlanWithConvertedPointsAsync(flightPlanId);
         var res = DtoConverter.ConvertAggregatedFlightPlanToResponse(flightPlanUpdated);
@@ -189,15 +189,15 @@ public class FlightPlansController : Controller
     /// Обновление точки маршрута у существующего плана полета
     /// </summary>
     /// <param name="flightPlanId">Уникальный идентификатор плана полет.</param>
-    /// <param name="pointOrder">Порядковый номер точки маршрута, которую нужно обновить. Отсчет идет с нуля.</param>
+    /// <param name="pointId">Уникальный идентификатор точки маршрута, которую нужно обновить.</param>
     /// <param name="dto">Модель с новыми значениями для точки маршрута.</param>
-    [HttpPut("{flightPlanId:guid}/points/{pointOrder:int}")]
+    [HttpPut("{flightPlanId:guid}/points/{pointId:guid}")]
     [ProducesResponseType(typeof(FlightPlanWithStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateRoutePointInFlightPlan([FromRoute] Guid flightPlanId, [FromRoute] int pointOrder,
+    public async Task<IActionResult> UpdateRoutePointInFlightPlan([FromRoute] Guid flightPlanId, [FromRoute] Guid pointId,
         [FromBody] UpdateRoutePointRequest dto)
     {
-        await _flightPlanService.UpdateRoutePointAsync(flightPlanId, pointOrder, dto.Longitude, dto.Latitude, dto.Altitude, dto.Remarks);
+        await _flightPlanService.UpdateRoutePointAsync(flightPlanId, pointId, dto.Longitude, dto.Latitude, dto.Altitude, dto.Remarks);
         
         var flightPlanUpdated = await _flightPlanService.GetFlightPlanWithConvertedPointsAsync(flightPlanId);
         var res = DtoConverter.ConvertAggregatedFlightPlanToResponse(flightPlanUpdated);
