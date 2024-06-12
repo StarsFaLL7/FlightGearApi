@@ -211,7 +211,7 @@ const MainMap = () => {
       console.log(evt)
       const formData = getData(popupContent.querySelector('form'));
       console.log(formData);
-      changePointData()
+      changePointData(formData, data)
       // handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
     };
 

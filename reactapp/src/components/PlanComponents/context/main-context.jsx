@@ -49,8 +49,8 @@ export const PointsContext = ({children}) => {
     const addPoint = async (formData, sendingPointData, setSendingPointData, currentFlight) => {
         await handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData, currentFlight);
     };
-    const changePointData = async (data) => {
-        await putPointsData(currentFlight, data, setPoints);
+    const changePointData = async (formData, point) => {
+        await putPointsData(currentFlight,formData, point, setPoints);
     };
 
     return (

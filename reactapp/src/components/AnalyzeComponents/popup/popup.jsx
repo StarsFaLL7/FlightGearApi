@@ -18,7 +18,6 @@ const PopupLoad = () => {
     }, []);
 
     async function fetchData() {
-        // You can await here
         const result =  await axios(ROUTE);
         console.log("Result.Data = ", result.data);
         setSessionList(result.data.sessions);
