@@ -18,13 +18,15 @@
 }
 
 .minus{
-    border: 1px solid #000;
+    /* border: 1px solid #000;
     border-radius: 30px;
     margin-left: auto;
     margin-right: auto;
     width: 36px;
     height: 36px;
-    background: #2a65a1;
+    background: #2a65a1; */
+    border: none;
+    background-color: transparent;
 }
 
 .sessionList {

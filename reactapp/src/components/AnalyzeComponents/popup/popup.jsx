@@ -9,7 +9,7 @@ const PopupLoad = () => {
     const [sessionList, setSessionList] = useState([]);
     console.log(sessionList);
     const dispatch = useDispatch();
-    const ROUTE = "https://localhost:7110/api/analytics/sessions/"
+    const ROUTE = "https://localhost:7229/api/analytics/sessions/"
 
     
     useEffect(() => {
@@ -17,7 +17,7 @@ const PopupLoad = () => {
             // You can await here
             const result =  await axios(ROUTE);
             console.log("Result.Data = ", result.data);
-            setSessionList(result.data);
+            setSessionList(result.data.sessions);
         }
         fetchData();
     }, []);
@@ -38,7 +38,7 @@ const PopupLoad = () => {
             <div className={`ms-auto`}><button className={styles.minus} type='button' onClick={() => onClickHandlerClose()}><img src={minus} alt='Decrease'></img></button></div>
         </div>
         <div className={`${styles.sessionList}`}>
-            {sessionList.map((s) => <button key={s.id} onClick={() => onClickHandler(s.id)}>Сессия {s.title} ({s.id})</button>)}
+            {sessionList.map((s) => <button key={s.id} onClick={() => onClickHandler(s.id)}>Сессия {s.title}</button>)}
         </div>
     </div>
 };

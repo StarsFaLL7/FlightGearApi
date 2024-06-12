@@ -61,3 +61,7 @@
 .popover-item p {
   width: 100%;
 }
+textarea {
+  min-width: 150px;
+  max-height: 150px;
+}

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT } from '../const/const';
+import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT, ANALYTICS } from '../const/const';
 
 export const startFlight = async (flight) => {
   flight = {title: flight.title, flightPlanId: flight.id, readsPerSecond: 10}
@@ -9,6 +9,25 @@ export const startFlight = async (flight) => {
     return response;
   } catch (err) {
     console.error('There was an error updating the flight data:', err);
+  }
+};
+
+export const getAnalytics = async (setAnalytics) => {
+  try {
+    const response = await axios.get(`${ANALYTICS}`);
+    setAnalytics(response.data);
+    //return response.data;
+  } catch (err) {
+    console.error('There was an error getting analytics:', err);
+  }
+};
+export const getFlightAnalytics = async (analytics) => {
+  try {
+    const response = await axios.get(`${ANALYTICS}/${analytics.id}`);
+    console.log(response.data)
+    //return response;
+  } catch (err) {
+    console.error('There was an error getting the flight data analytics:', err);
   }
 };
 
@@ -65,7 +84,7 @@ export const getPointsData = async (setPoints, flight) => {
     try {
       await axios
         .get(`${ALL_FLIGHTS_URL}/${flight.id}/points`)
-        .then((response) => {console.log(response);setPoints(response.data)})
+        .then((response) => {setPoints({routePoints: response.data.routePoints.sort((a, b) => a < b)})})
     } catch (err) {
       console.error('There was an error fetching the data:', err)
     } 
@@ -105,7 +124,8 @@ export const postFlightPointToFlight = async (flight, point, setPoint) => {
 
     if (response.status === 200) {
       const responseData = response.data;
-      setPoint({routePoints: responseData.flightPlan.routePoints});
+      console.log(responseData)
+      setPoint({routePoints: responseData.flightPlan.routePoints.sort((a, b) => a < b)});
       return responseData.flightPlan;
     } else {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -157,6 +177,17 @@ export const getAirports = async (setAirports) => {
   } catch (err) {
     console.error('There was an error updating the flight data:', err);
     setAirports(null);
+  }
+};
+
+export const getAirportData = async (currentAirport, setCurrentAirport) => {
+  try {
+    const response = await axios.get(`${AIRPORTS_URL}/${currentAirport.id}`);
+    console.log(response.data)
+    setCurrentAirport(response.data);
+  } catch (err) {
+    console.error('There was an error setting current airport:', err);
+    setCurrentAirport(null);
   }
 };
 

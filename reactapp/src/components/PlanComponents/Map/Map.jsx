@@ -10,6 +10,7 @@ import { getData } from "../../../utils/common";
 import { handleClickDeleteItem } from '../../../api-methods/api-methods';
 import { PointContext } from '../context/main-context';
 import { putPointsData } from '../../../api-methods/api-methods';
+import PopupLoad from '../../AnalyzeComponents/popup/popup'
 
 const MainMap = () => {
   const mapContainer = useRef(null);
@@ -83,7 +84,12 @@ const MainMap = () => {
   function loadMarkersToMap(map) {
     if (points && points.routePoints) {
       points.routePoints.forEach(point => {
-        const marker = new maplibregl.Marker({ draggable: true, color: "#0d6efd" })
+        const markerOptions = {
+          color: "#0d6efd",
+          draggable: point.isEditable || false
+        };
+
+        const marker = new maplibregl.Marker(markerOptions)
           .setLngLat([point.longitude, point.latitude])
           .addTo(map);
         let popup = createPopup(point, map, marker);
@@ -156,34 +162,34 @@ const MainMap = () => {
     let popupContent = document.createElement('div');
 
     popupContent.innerHTML = `
-      <form class='bg-light rounded-4' id="form" method='POST' enctype="application/json">
-        <ul class='list-unstyled justify-items-center'>
-          <li class='popover-item justify-self-center px-2'>
-            <p class='fs-6 form-control'>Longitude: ${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}</p>
-            <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}' type="number" name="longitude" required/>
-          </li>
-          <li class='popover-item d-flex align-items-center px-2'>
-            <p class='fs-6 form-control'>Latitude: ${data.lngLat !== undefined ? data.lngLat.lat : data.latitude}</p>
-            <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lat : data.latitude}' type="number" name="latitude" required/>
-          </li>
-          <li class='popover-item form-control d-flex align-items-center mb-3'>
-            <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
-            <input class='form-control ms-auto' type="number" name="altitude" value="${data.altitude !== undefined ? Number(data.altitude) : 500}" required/>
-          </li>
-          <li class='popover-item form-control d-flex align-items-center mb-3'>
-            <p class='fs-6 pb-0 mb-0'>Remarks:</p>
-            <textarea class='form-control ms-auto' type="text" name="remarks">${data.remarks !== undefined ? data.remarks : ""}</textarea>
-          </li> 
-          <li>
-            <button class="btn save-popup btn-primary text-light" type="submit">
-              save
-            </button>
-            <button class="btn delete-popup btn-secondary text-light" type="button">
-              delete
-            </button>
-          </li>
-        </ul> 
-      </form>`;
+    <form class='w-100 bg-light rounded-4' id="form" method='POST' enctype="application/json">
+      <ul class='w-100 list-unstyled justify-items-center'>
+        <li class='popover-item justify-self-center px-2'>
+          <p class='fs-6 form-control'>Longitude: ${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}</p>
+          <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}' type="number" name="longitude" required/>
+        </li>
+        <li class='popover-item d-flex align-items-center px-2'>
+          <p class='fs-6 form-control'>Latitude: ${data.lngLat !== undefined ? data.lngLat.lat : data.latitude}</p>
+          <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lat : data.latitude}' type="number" name="latitude" required/>
+        </li>
+        <li class='popover-item form-control d-flex align-items-center mb-3'>
+          <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
+          <input class='form-control ms-auto' type="number" name="altitude" ${data.isEditable ? '' : 'readonly'} value="${data.altitude !== undefined ? Number(data.altitude) : 500}" required/>
+        </li>
+        <li class='popover-item form-control d-flex align-items-center mb-3'>
+          <p class='fs-6 pb-0 mb-0'>Remarks:</p>
+          <textarea class='form-control ms-auto' type="text" ${data.isEditable ? '' : 'readonly'} name="remarks">${data.remarks !== undefined ? data.remarks : ""}</textarea>
+        </li> 
+        <li>
+          <button class="btn save-popup btn-primary text-light" type="submit">
+            Save
+          </button>
+          <button class="btn delete-popup btn-secondary text-light" type="button">
+            Delete
+          </button>
+        </li>
+      </ul> 
+    </form>`;
 
     const saveButton = popupContent.querySelector('.save-popup');
     const deleteButton = popupContent.querySelector('.delete-popup');
@@ -204,8 +210,10 @@ const MainMap = () => {
 
     saveButton.onclick = function (evt) {
       evt.preventDefault();
+      console.log(evt)
       const formData = getData(popupContent.querySelector('form'));
       console.log(formData);
+      changePointData()
       // handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
     };
 

@@ -32,27 +32,6 @@ export const handlerAddPoint = async (formData, points, setPoint, sendingPointDa
     //clearForm();
 };
 
-export const handlerSetCurrentFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData) => {
-  /* console.log(formData)
-  if (!formData.title) { return; }
-  if(formData.departureRunwayId === "") { formData.departureRunwayId = null; }
-  if(formData.arrivalRunwayId === "") { formData.arrivalRunwayId = null; }
-  const newFlight = { ...formData };
-
-  try {
-    const response = await postFlightPointToFlight(newFlight, sendingFlightData, setSendingFlightData);
-
-    setFlight((prevPoint) => { 
-      prevPoint = response.data;
-      console.log(prevPoint)
-    });
-    return response;
-  } catch (error) {
-    console.error('There was an error sending the data to the server:', error);
-  }
-  clearForm(); */
-};
-
 export const handlerAddFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData, airports) => {
   if (!formData.title) { return; }
   if(formData.departureRunwayId === '') { formData.departureRunwayId = null; }

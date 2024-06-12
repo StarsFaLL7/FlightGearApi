@@ -9,7 +9,7 @@ import axios from "axios";
 function Table() {
     const [dataParams, setDataParams] = useState([]);
     const currentSession = useSelector((state) => state.chart.currentSession);
-    const route = `https://localhost:7110/api/analytics/sessions/${currentSession}`;
+    const route = `https://localhost:7229/api/analytics/sessions/${currentSession}`;
     console.log(route);
     
     useEffect(() => {
@@ -24,7 +24,7 @@ function Table() {
 
     //Test
     // const dataTable = currentSession===1 ? dataTable1: dataTable2;
-    
+    console.log(dataParams.properties)
     return <table>
         <thead>
             <tr>
@@ -32,7 +32,7 @@ function Table() {
             </tr>
         </thead>
         <tbody>
-        {dataParams.map((par) => <Item name={par.name} count={par.count}/>)
+        {dataParams.properties && dataParams.properties.map((par) => <Item name={par.name} count={par.data.length}/>)
         }
         {/* {dataParams} */}
         </tbody>

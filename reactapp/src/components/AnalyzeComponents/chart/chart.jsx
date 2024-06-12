@@ -13,14 +13,14 @@ const ChartComponent = () => {
 
 
   const filteredDataChart = data.filter((s) => datasChart.includes(s.name));
-  const route = `https://localhost:7110/api/analytics/sessions/${currentSession}/values`;
+  const route = `https://localhost:7229/api/analytics/sessions/${currentSession}`;
   // Загрузка данных из API
   useEffect(() => {
     async function fetchData() {
       // You can await here
       const result =  await axios(route);
-      console.log("Chart result.Data = ", result.data);
-      setData(result.data);
+      console.log("Chart result.Data = ", result.data.properties);
+      setData(result.data.properties);
     }
     fetchData();
   }, [isReloading, route]);
@@ -49,7 +49,7 @@ const ChartComponent = () => {
      let rand = min + Math.random() * (max + 1 - min);
      return Math.floor(rand);
   }
- 
+ console.log(data)
   // Отрисовка
   return <>
        <ResponsiveContainer width="100%" height="100%">
