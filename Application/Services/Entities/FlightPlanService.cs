@@ -61,7 +61,7 @@ internal class FlightPlanService : IFlightPlanService
                     Latitude = functionPoint.Latitude,
                     Remarks = functionPoint.Remarks,
                     Altitude = functionPoint.Altitude,
-                    Id = Guid.Empty,
+                    Id = functionPoint.Id,
                     IsEditable = false
                 });
             }
@@ -98,7 +98,7 @@ internal class FlightPlanService : IFlightPlanService
                     Latitude = functionPoint.Latitude,
                     Altitude = functionPoint.Altitude,
                     Remarks = functionPoint.Remarks,
-                    Id = Guid.Empty,
+                    Id = functionPoint.Id,
                     IsEditable = false
                 });
             }
