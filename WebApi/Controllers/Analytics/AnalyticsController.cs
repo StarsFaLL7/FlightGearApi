@@ -42,6 +42,7 @@ public class AnalyticsController : Controller
     /// <summary>
     /// Получить значения, записанные в течение сессии с указанным уникальный идентификатором
     /// </summary>
+    /// <param name="sessionId">Уникальный идентификатор сессии.</param>
     [HttpGet("sessions/{sessionId:guid}")]
     [ProducesResponseType(typeof(SessionFullResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSessionInfo([FromRoute] Guid sessionId)
@@ -63,6 +64,7 @@ public class AnalyticsController : Controller
     /// <summary>
     /// Удалить сессию с указанным уникальный идентификатором
     /// </summary>
+    /// <param name="sessionId">Уникальный идентификатор сессии.</param>
     [HttpDelete("sessions/{sessionId:guid}")]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteSession([FromRoute] Guid sessionId)

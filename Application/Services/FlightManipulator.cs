@@ -37,19 +37,34 @@ public class FlightManipulator : IFlightManipulator
                 await ExitSimulationWithPropertySaveAsync();
                 break;
             }
-
-            await Task.Delay(100);
-            var currentHeading = await _connectionManager.GetPropertyDoubleValueAsync("orientation/true-heading-deg");
-            if (currentHeading > 180)
+            var currentWpId = await _connectionManager.GetPropertyStringValueAsync("autopilot/route-manager/wp/id");
+            var goalSpeed = 600d;
+            if (currentWpId != null && currentWpId.StartsWith("ENDF"))
             {
-                currentHeading = 360 - currentHeading;
+                goalSpeed = 300;
+                var totalpointCount = (int)await _connectionManager.GetPropertyDoubleValueAsync("autopilot/route-manager/route/num");
+                var lastPointId = await _connectionManager.GetPropertyStringValueAsync($"autopilot/route-manager/route/wp[{totalpointCount-1}]/id");
+                if (currentWpId == lastPointId)
+                {
+                    goalSpeed = 20;
+                }
             }
-            var goalHeading = await _connectionManager.GetPropertyDoubleValueAsync("autopilot/route-manager/wp/true-bearing-deg");
-            if (goalHeading > 180)
+            else
             {
-                goalHeading = 360 - goalHeading;
+                var currentHeading = await _connectionManager.GetPropertyDoubleValueAsync("orientation/true-heading-deg");
+            
+                if (currentHeading > 180)
+                {
+                    currentHeading = 360 - currentHeading;
+                }
+                var goalHeading = await _connectionManager.GetPropertyDoubleValueAsync("autopilot/route-manager/wp/true-bearing-deg");
+                if (goalHeading > 180)
+                {
+                    goalHeading = 360 - goalHeading;
+                }
+                goalSpeed = Math.Max(200, 600 - Math.Abs(currentHeading - goalHeading) / 90 * 600);
             }
-            var goalSpeed = Math.Max(200, 600 - Math.Abs(currentHeading - goalHeading) / 90 * 600);
+            
             await _connectionManager.SetPropertyAsync("autopilot/settings/target-speed-kt", goalSpeed);
             if (flightPlan.DepartureRunwayId != null && currentWp < 4)
             {

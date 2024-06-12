@@ -26,6 +26,7 @@ public class RunwayController : Controller
     /// <summary>
     /// Получение всех взлетных полос по уникальному идентификатору аэропорта
     /// </summary>
+    /// <param name="airportId">Уникальный идентификатор аэропорта</param>
     [HttpGet]
     [ProducesResponseType(typeof(AirportResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
@@ -48,12 +49,13 @@ public class RunwayController : Controller
     /// <summary>
     /// Получение полной информации о взлетной полосе по уникальному идентификатору
     /// </summary>
-    [HttpGet("{id:guid}")]
+    /// <param name="runwayId">Уникальный идентификатор взлётной полосы</param>
+    [HttpGet("{runwayId:guid}")]
     [ProducesResponseType(typeof(RunwayFullResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetRunwayById([FromRoute] Guid id)
+    public async Task<IActionResult> GetRunwayById([FromRoute] Guid runwayId)
     {
-        var runway = await _runwayService.GetAggregatedRunwayByIdAsync(id);
+        var runway = await _runwayService.GetAggregatedRunwayByIdAsync(runwayId);
         var res = DtoConverter.ConvertAggregatedRunwayToFullResponse(runway);
         return Ok(res);
     }
@@ -85,12 +87,13 @@ public class RunwayController : Controller
     /// <summary>
     /// Удаление взлетной полосы по уникальному идентификатору
     /// </summary>
-    [HttpDelete("{id:guid}")]
+    /// <param name="runwayId">Уникальный идентификатор взлётной полосы</param>
+    [HttpDelete("{runwayId:guid}")]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteRunwayById([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteRunwayById([FromRoute] Guid runwayId)
     {
-        await _runwayService.RemoveRunwayByIdAsync(id);
+        await _runwayService.RemoveRunwayByIdAsync(runwayId);
         return Ok(new BasicStatusResponse
         {
             Status = BasicStatusEnum.Success.ToString(),
@@ -101,6 +104,7 @@ public class RunwayController : Controller
     /// <summary>
     /// Добавление функции взлета для взлетной полосы
     /// </summary>
+    /// <param name="runwayId">Уникальный идентификатор взлётной полосы</param>
     [HttpPost("{runwayId:guid}/departure")]
     [ProducesResponseType(typeof(RunwayFullResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
@@ -140,6 +144,7 @@ public class RunwayController : Controller
     /// <summary>
     /// Добавление функции посадки для взлетной полосы
     /// </summary>
+    /// <param name="runwayId">Уникальный идентификатор взлётной полосы</param>
     [HttpPost("{runwayId:guid}/arrival")]
     [ProducesResponseType(typeof(RunwayFullResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
@@ -168,8 +173,8 @@ public class RunwayController : Controller
                 Id = Guid.NewGuid()
             }).ToArray()
         };
-        await _functionService.SaveFunctionPointRange(arrivalFunc.FunctionPoints.ToArray());
         await _functionService.SaveFunction(arrivalFunc);
+        await _functionService.SaveFunctionPointRange(arrivalFunc.FunctionPoints.ToArray());
         runway.ArrivalFunctionId = funcId;
         await _runwayService.SaveRunwayAsync(runway);
         
@@ -181,6 +186,7 @@ public class RunwayController : Controller
     /// <summary>
     /// Удаление функции взлета у взлетной полосы
     /// </summary>
+    /// <param name="runwayId">Уникальный идентификатор взлётной полосы</param>
     [HttpDelete("{runwayId:guid}/departure")]
     [ProducesResponseType(typeof(RunwayFullResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
@@ -208,6 +214,7 @@ public class RunwayController : Controller
     /// <summary>
     /// Удаление функции посадки у взлетной полосы
     /// </summary>
+    /// <param name="runwayId">Уникальный идентификатор взлётной полосы</param>
     [HttpDelete("{runwayId:guid}/arrival")]
     [ProducesResponseType(typeof(RunwayFullResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
