@@ -39,12 +39,10 @@ const MainMap = () => {
   }, [lng, lat, zoom]);
 
   useEffect(() => {
-    if (!map.current || !currentFlight) return;
-
     clearMarkersAndLines(map.current);
+    if (!map.current || !currentFlight) return;
     loadMarkersToMap(map.current);
 
-    // Ensure the event listener is added only once
     const handleContextMenu = (e) => {
       if (!currentFlight) return;
 

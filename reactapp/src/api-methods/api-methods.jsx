@@ -31,12 +31,13 @@ export const getFlightAnalytics = async (analytics) => {
   }
 };
 
-export const handleClickDeleteItem = async (props) => {  
+export const handleClickDeleteItem = async (props, setCurrentFlight) => {  
   await axios
     .delete(`${ALL_FLIGHTS_URL}/${props.id}`)
     .then((response) => {
       if (response.status === 200) {
         props.onRemoveData();
+        setCurrentFlight(null)
       } else {
         console.error('Failed to delete the plan item with id:');
       }
@@ -46,7 +47,7 @@ export const handleClickDeleteItem = async (props) => {
 
 export const handleClickDeletePoint = async (flight, props) => {
   await axios
-    .delete(`${ALL_FLIGHTS_URL}/${flight.id}/points/${props.order}`)
+    .delete(`${ALL_FLIGHTS_URL}/${flight.id}/points/${props.id}`)
     .then((response) => {
       if (response.status === 200) {
         props.onRemoveData();

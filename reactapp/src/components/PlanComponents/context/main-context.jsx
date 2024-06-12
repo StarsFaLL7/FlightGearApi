@@ -14,8 +14,6 @@ export const PointsContext = ({children}) => {
 
     const fetchPoints = async () => {
         await getPointsData(setPoints, currentFlight);
-        points.routePoints.sort((a, b) => a < b);
-
     };
 
     const fetchFlights = async () => {
@@ -27,13 +25,11 @@ export const PointsContext = ({children}) => {
     };
 
     const fetchCurrentFlight = async (id) => {
-        //console.log(id)
         await getFlightData(id, setCurrentFlight);
     };
 
     const getCurrentFlightById = async (id) => {
         await fetchCurrentFlight(id);
-        //setCurrentFlight(id);
     };
 
     const fetchAnalytics = async () => {
@@ -44,7 +40,6 @@ export const PointsContext = ({children}) => {
         fetchAnalytics();
         fetchFlights();
         fetchAirports();
-        points.sort((a, b) => a.order < b.order);
     }, []);
 
     const addFlight = (formData, sendingPointData, setSendingPointData) => {

@@ -149,7 +149,7 @@ const FlightItem = (props) => {
                                 <button className="m-1 btn save-flight btn-primary text-light" type="button" onClick={saveFlight}>Save</button>
                                 <button className="m-1 btn delete-flight btn-primary text-light" type="button" onClick={startFlightSimulation}>Start</button>
                                 {/* <button className="m-1 btn delete-flight btn-primary text-light" type="button" onClick={handleGetAnalytics}>Get analytics</button> */}
-                                <button className="m-1 btn delete-flight btn-secondary text-light" type="button" onClick={() => handleClickDeleteItem(props)}>Delete</button>
+                                <button className="m-1 btn delete-flight btn-secondary text-light" type="button" onClick={() =>{handleClickDeleteItem(props, setCurrentFlight);}}>Delete</button>
                             </div>
                             <button className='btn' type='button' onClick={() => setCurrentFlight(null)}>
                                 <img className='arrow arrow-down' src={arrow} alt='Arrow' />
