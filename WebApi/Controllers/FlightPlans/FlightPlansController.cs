@@ -144,7 +144,7 @@ public class FlightPlansController : Controller
         var flightPlan = await _flightPlanService.GetAggregatedFlightPlanAsync(flightPlanId);
         var routePoint = new RoutePoint
         {
-            Order = dto.Order,
+            Order = flightPlan.RoutePoints.Count,
             Longitude = dto.Longitude,
             Latitude = dto.Latitude,
             Altitude = dto.Altitude,

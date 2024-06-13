@@ -7,12 +7,15 @@ import { PointContext } from '../context/main-context';
 
 const PointItem = (props) => {
   const { fetchPoints, currentFlight } = useContext(PointContext);
+
   const handleDelete = async () => {
     await handleClickDeletePoint(currentFlight, props);
     fetchPoints();
   };
+
   const isAirportPoint = props.isEditable;
   const isAirportPointColor = props.isEditable ? 'bg-not-light' : 'bg-airport-point';
+  
   return (
     <div className={`point-item d-flex`} id={props.id}>
     <div className={`${isAirportPointColor} rounded-3 m-1 d-flex ${styles.table_element} align-items-center justify-content-between`}>

@@ -74,7 +74,7 @@ export const getPointsData = async (setPoints, flight) => {
     try {
       await axios
         .get(`${ALL_FLIGHTS_URL}/${flight.id}/points`)
-        .then((response) => {setPoints({routePoints: response.data.routePoints.sort((a, b) => a < b)})})
+        .then((response) => {setPoints({routePoints: response.data.routePoints})})
     } catch (err) {
       console.error('There was an error fetching the data:', err)
     } 

@@ -20,8 +20,8 @@ export const handlerAddPoint = async (formData, points, setPoint, sendingPointDa
     return;
   }
 
-  let newPoint = { order: points.routePoints.length, ...formData };
-  if(currentFlight.departureRunway && !currentFlight.arrivalRunway) {
+  let newPoint = { ...formData };
+  /*if(currentFlight.departureRunway && !currentFlight.arrivalRunway) {
     newPoint = { order: points.routePoints.length, ...formData }
   } else if(currentFlight.arrivalRunway && !currentFlight.departureRunway){
     let order = points.routePoints.filter((point) => !point.isEditable).length;
@@ -30,9 +30,9 @@ export const handlerAddPoint = async (formData, points, setPoint, sendingPointDa
     newPoint = { order: points.routePoints.length, ...formData };
   } else {
     newPoint = { order: points.routePoints.length, ...formData };
-  }
+  } */
 
-  console.log(newPoint);
+  //console.log(newPoint);
 
   try {
     return await postFlightPointToFlight(currentFlight, newPoint, setPoint);
