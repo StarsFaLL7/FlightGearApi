@@ -81,3 +81,13 @@ p {
     z-index: 1000;
     white-space: nowrap;
 }
+.point-container::-webkit-scrollbar {
+    display: none;
+}
+th {
+    font-size: 15px;
+}
+thead {
+    border: transparent;
+    max-width: 457px;
+}

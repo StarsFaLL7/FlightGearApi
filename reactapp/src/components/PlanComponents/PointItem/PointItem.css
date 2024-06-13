@@ -50,3 +50,15 @@
 .bg-airport-point {
     background-color: #ececec;
 }
+.point-item {
+    min-height: 46px;
+}
+.longitude {
+    width: 160px;
+}
+.latitude {
+    width: 160px;
+}
+.altitude {
+    width: 36px;
+}

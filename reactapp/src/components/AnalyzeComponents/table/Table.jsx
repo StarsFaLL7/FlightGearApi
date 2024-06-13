@@ -1,8 +1,6 @@
 import './Table.module.css';
 import React, { useState, useEffect } from 'react';
 import Item from '../tableItem/item';
-// import dataTable1 from '../../../assets/response1';
-// import dataTable2 from '../../../assets/response2';
 import { useSelector } from 'react-redux';
 import axios from "axios";
 
@@ -22,8 +20,6 @@ function Table() {
         fetchData();
     }, [route, currentSession]);
 
-    //Test
-    // const dataTable = currentSession===1 ? dataTable1: dataTable2;
     console.log(dataParams.properties)
     return <table>
         <thead>
@@ -32,9 +28,7 @@ function Table() {
             </tr>
         </thead>
         <tbody>
-        {dataParams.properties && dataParams.properties.map((par) => <Item name={par.name} count={par.data.length}/>)
-        }
-        {/* {dataParams} */}
+            {dataParams.properties && dataParams.properties.map((par) => <Item name={par.name} count={par.data.length}/>)}
         </tbody>
     </table>
 };

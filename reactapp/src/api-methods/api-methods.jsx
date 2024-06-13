@@ -58,11 +58,12 @@ export const handleClickDeletePoint = async (flight, props) => {
     .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
 };
 
-export const putPointsData = async (flight, formData, point, setPoints) => {
-  console.log(point)
+export const putPointsData = async (flight, formData, point, setPoints, setCurrentFlight) => {
   try {
     const response = await axios.put(`${ALL_FLIGHTS_URL}/${flight.id}/points/${point.id}`, formData);
     console.log({routePoints: response.data.flightPlan.routePoints})
+    point.onRemoveData();
+    setCurrentFlight(response.data.flightPlan)
     setPoints({routePoints: response.data.flightPlan.routePoints});
   } catch (err) {
     console.error('There was an error updating the flight data:', err);

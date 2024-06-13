@@ -16,7 +16,6 @@ const FlightItem = (props) => {
 
     const { airports, currentFlight, setCurrentFlight, getCurrentFlightById, fetchFlights, analytics } = useContext(PointContext);
     const isOpen = currentFlight && currentFlight.id === props.id;
-    console.log(currentFlight);
 
     useEffect(() => {
         if (isOpen && currentFlight) {
@@ -45,7 +44,10 @@ const FlightItem = (props) => {
 
     const saveFlight = async (evt) => {
         evt.preventDefault();
-        const formData = getData(document.getElementById('form-current-flight'));
+        let formData = getData(document.getElementById('form-current-flight'));
+        const departureRunwayId = selectedStartAirport && selectedStartAirport.runways.find((way) => way.title === formData.departureRunwayId).id;
+        const arrivalRunwayId = selectedStartAirport && selectedStartAirport.runways.find((way) => way.title === formData.arrivalRunwayId).id;
+        formData = {...formData, departureRunwayId: departureRunwayId, arrivalRunwayId: arrivalRunwayId}
         try {
             await changeFlightData(currentFlight.id, formData, setCurrentFlight);
             fetchFlights();
@@ -105,8 +107,8 @@ const FlightItem = (props) => {
                                     <p className={`m-0 align-self-center`}>Departure runway:</p>
                                     <input className='form-control ms-auto' list="runway-list-1" defaultValue={currentFlight.departureRunway && currentFlight.departureRunway.title} name={`departureRunwayId`}/>
                                     <datalist id="runway-list-1">
-                                        {selectedStartAirport.runways && selectedStartAirport.runways.map((el, index) => (
-                                            <option key={index} value={el.id}>{el.title}</option>
+                                        {selectedStartAirport.runways && selectedStartAirport.runways.map((el) => (
+                                            <option key={el.id} value={el.title}>{el.title}</option>
                                         ))}
                                     </datalist>
                                 </li> 
@@ -130,15 +132,25 @@ const FlightItem = (props) => {
                                     <datalist id="runway-list-2">
                                         {selectedEndAirport.runways && selectedEndAirport.runways
                                             .filter(runway => runway.canBeArrival)
-                                            .map((el, index) => (
-                                                <option key={index} value={el.id}>{`${el.title}`}</option>
+                                            .map((el) => (
+                                                <option key={el.id} value={el.title}>{`${el.title}`}</option>
                                             ))}
                                     </datalist>
                                 </li>
                             )}
 
-                            <li className='d-inline points m-1'>
+                            <li className='d-inline points mt-1'>
                                 <p className={`border-bottom border-secondary m-0 mx-auto align-self-center`}>Points:</p>
+                                <table className="table mb-0 mt-1">
+                                    <thead className={`m-auto`}>
+                                        <tr>
+                                            <th className="text-center align-middle rounded-3 m-0 p-2">#</th>
+                                            <th className="text-center align-middle rounded-3 m-0 p-2">Longitude</th>
+                                            <th className="text-center align-middle rounded-3 m-0 p-2">Latitude</th>
+                                            <th className="text-center align-middle rounded-3 m-0 p-2">Altitude</th>
+                                        </tr>
+                                    </thead>
+                                </table>
                                 <div className='point-container form-control m-1 w-auto'>
                                     <FlightPoints />
                                 </div>

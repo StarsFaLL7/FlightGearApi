@@ -4,13 +4,11 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import '../Map/Map.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import * as turf from '@turf/turf';
-import { getPlanData } from "../../../api-methods/api-methods";
-import { handlerAddPoint } from "../../../utils/common";
 import { getData } from "../../../utils/common";
-import { handleClickDeleteItem } from '../../../api-methods/api-methods';
 import { PointContext } from '../context/main-context';
-import { putPointsData } from '../../../api-methods/api-methods';
-import PopupLoad from '../../AnalyzeComponents/popup/popup'
+import markerIcon from '../../../imgs/direction_continue.png';
+import arrowIcon from '../../../imgs/direction_continue.png';
+import { handleClickDeletePoint } from '../../../api-methods/api-methods';
 
 const MainMap = () => {
   const mapContainer = useRef(null);
@@ -83,7 +81,7 @@ const MainMap = () => {
     if (points && points.routePoints) {
       points.routePoints.forEach(point => {
         const markerOptions = {
-          color: "#0d6efd",
+          color: point.isEditable && "#0d6efd",
           draggable: point.isEditable || false
         };
 
@@ -93,7 +91,7 @@ const MainMap = () => {
         let popup = createPopup(point, map, marker);
         marker.setPopup(popup);
 
-        marker.on('dragend', () => {
+        /* marker.on('dragend', () => {
           let newLngLat = Object.values(marker.getLngLat());
           const index = points.routePoints.findIndex(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
           if (index !== -1) {
@@ -101,7 +99,7 @@ const MainMap = () => {
             setPoints({ routePoints: [...points.routePoints] });
           }
           updateLine(map, points.routePoints);
-        });
+        }); */
       });
       updateLine(map, points.routePoints);
     }
@@ -113,6 +111,16 @@ const MainMap = () => {
 
   function updateLine(map, coordinates) {
     const coords = coordinates.map(coord => [coord.longitude, coord.latitude]);
+  
+    // Calculate midpoints between each pair of consecutive coordinates
+    const midpoints = [];
+    for (let i = 0; i < coordinates.length - 1; i++) {
+      const start = coordinates[i];
+      const end = coordinates[i + 1];
+      const midpoint = [(start.longitude + end.longitude) / 2, (start.latitude + end.latitude) / 2];
+      midpoints.push(midpoint);
+    }
+
     if (map.getSource('line')) {
       map.getSource('line').setData({
         type: 'Feature',
@@ -132,7 +140,7 @@ const MainMap = () => {
           },
         },
       });
-
+  
       map.addLayer({
         id: 'line',
         type: 'line',
@@ -142,10 +150,64 @@ const MainMap = () => {
           'line-cap': 'round',
         },
         paint: {
-          'line-color': '#0000FF',
+          'line-color': '#0d6efd',
           'line-width': 5,
-          'line-opacity': 0.5,
+          'line-opacity': 0.7,
         },
+      });
+  
+      // Load arrow image
+      map.loadImage(arrowIcon, function(error, arrowImage) {
+        if (error) throw error;
+        
+        // Add arrow image to map's style
+        map.addImage('arrow-icon', arrowImage);
+    
+        // Add symbol layer for arrows at midpoints
+        map.addLayer({
+          id: 'arrow-layer',
+          type: 'symbol',
+          source: 'line',
+          layout: {
+            'symbol-placement': 'point',
+            'icon-image': 'arrow-icon',
+            'icon-size': 0.5,
+            'icon-rotate': ['get', 'rotation'],
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap': true, // Allow symbols to overlap
+          },
+          paint: {
+            'icon-opacity': 0.8
+          },
+          // Filter to show only at midpoints
+          filter: ['in', '$type', 'Point']
+        });
+      });
+  
+      // Load marker image
+      map.loadImage(markerIcon, function(error, markerImage) {
+        if (error) throw error;
+        
+        // Add marker image to map's style
+        map.addImage('marker-icon', markerImage);
+    
+        // Add symbol layer for markers at midpoints
+        map.addLayer({
+          id: 'marker-layer',
+          type: 'symbol',
+          source: 'line',
+          layout: {
+            'symbol-placement': 'point',
+            'icon-image': 'marker-icon',
+            'icon-size': 1.0,
+            'icon-allow-overlap': true, // Allow symbols to overlap
+          },
+          paint: {
+            'icon-opacity': 1.0
+          },
+          // Filter to show only at midpoints
+          filter: ['in', '$type', 'Point']
+        });
       });
     }
   }
@@ -158,7 +220,6 @@ const MainMap = () => {
 
   function createPopup(data, map, marker) {
     let popupContent = document.createElement('div');
-
     popupContent.innerHTML = `
     <form class='w-100 bg-light rounded-4' id="form" method='POST' enctype="application/json">
       <ul class='w-100 list-unstyled justify-items-center'>
@@ -172,17 +233,17 @@ const MainMap = () => {
         </li>
         <li class='popover-item form-control d-flex align-items-center mb-3'>
           <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
-          <input class='form-control ms-auto' type="number" name="altitude" ${data.isEditable ? '' : 'readonly'} value="${data.altitude !== undefined ? Number(data.altitude) : 500}" required/>
+          <input class='form-control ms-auto' type="number" name="altitude" ${data.isEditable ? '' : 'readonly'} value="${data.altitude !== undefined ? data.altitude : 500}" required/>
         </li>
         <li class='popover-item form-control d-flex align-items-center mb-3'>
           <p class='fs-6 pb-0 mb-0'>Remarks:</p>
           <textarea class='form-control ms-auto' type="text" ${data.isEditable ? '' : 'readonly'} name="remarks">${data.remarks !== undefined ? data.remarks : ""}</textarea>
         </li> 
         <li>
-          <button class="btn save-popup btn-primary text-light" type="submit">
+          <button class="btn save-popup btn-primary text-light ${data.isEditable ? '': 'hidden'}" type="submit">
             Save
           </button>
-          <button class="btn delete-popup btn-secondary text-light" type="button">
+          <button class="btn delete-popup btn-secondary text-light ${data.isEditable ? '': 'hidden'}" type="button">
             Delete
           </button>
         </li>
@@ -195,6 +256,7 @@ const MainMap = () => {
     deleteButton.onclick = function (evt) {
       evt.preventDefault();
       marker.remove();
+      handleClickDeletePoint(currentFlight, {...data, onRemoveData: fetchPoints})
       setPoints(prevPoints => {
         const updatedPoints = { ...prevPoints };
         const index = updatedPoints.routePoints.findIndex(coord => coord.longitude === (data.lngLat !== undefined ? data.lngLat.lng : data.longitude) && coord.latitude === (data.lngLat !== undefined ? data.lngLat.lat : data.latitude));
@@ -210,9 +272,7 @@ const MainMap = () => {
       evt.preventDefault();
       console.log(evt)
       const formData = getData(popupContent.querySelector('form'));
-      console.log(formData);
-      changePointData(formData, data)
-      // handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData);
+      changePointData(formData, {...data, onRemoveData: fetchPoints})
     };
 
     let popup = new maplibregl.Popup().setLngLat([data.lngLat !== undefined ? data.lngLat.lng : data.longitude, data.lngLat !== undefined ? data.lngLat.lat : data.latitude]).setDOMContent(popupContent);
@@ -221,16 +281,17 @@ const MainMap = () => {
 
   function getMousePosition(map) {
     map.on('mousemove', (e) => {
-      document.getElementById('info').innerHTML = 
-        `<p>Lng: ${e.lngLat.lng}</p>
-         <p>Lat: ${e.lngLat.lat}</p>`;
+      const infoElement = document.getElementById('info');
+      infoElement.innerHTML = `
+        <p>Lng: ${e.lngLat.lng}</p>
+        <p>Lat: ${e.lngLat.lat}</p>`;
     });
   }
 
   return (
     <div className={`map-wrap bg-light`}>
       <div ref={mapContainer} className={`map bg-light`} />
-      <div id={`info`}></div>
+      <div className={`rounded-5`} id={`info`}></div>
       <div id={`calculated-area`}></div>
     </div>
   );

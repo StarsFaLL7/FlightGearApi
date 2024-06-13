@@ -45,6 +45,8 @@
   text-align: center;
   color: #222;
   background: transparent;
+  backdrop-filter: blur(5px);
+  
 }
 
 .maplibregl-popup-close-button{

@@ -8,18 +8,12 @@ const FlightPoints = () => {
     //const [points, setPoints] = useState({});
 
     const {points, fetchPoints, currentFlight} = useContext(PointContext)
-    console.log(points)
     //console.log(points)
-     /* const fetchPoints = async () => {
-        await getPointsData(setPoints);
-
-    };
-
-    const onAddPoint = async () => { await getPointsData(setPoints); } */
 
     useEffect(() => {
         fetchPoints();
-    },[]);
+        console.log(points)
+    },[currentFlight]);
 
     
     return (

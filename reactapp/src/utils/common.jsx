@@ -13,23 +13,32 @@ const clearForm = () => {
 }
 // sendingData, setSendingData
 export const handlerAddPoint = async (formData, points, setPoint, sendingPointData, setSendingPointData, currentFlight) => {
-  console.log(currentFlight)
-    if (!formData.longitude || !formData.latitude || !formData.altitude) { return; }
-    const newPoint = { order: points.routePoints.length, ...formData };
-    console.log(newPoint)
-    /* setPoint((prevPoints) => {
-      console.log(prevPoints) 
-      const updatePoints = [...prevPoints.routePoints, newPoint];
-      return updatePoints;
-    }); */
+  console.log(currentFlight);
+  console.log(points);
 
-    try {
-      return await postFlightPointToFlight(currentFlight, newPoint, setPoint);
-    } catch (error) {
-      // Handle any errors that occur during the fetch
-      console.error('There was an error sending the data to the server:', error);
-    }
-    //clearForm();
+  if (!formData.longitude || !formData.latitude || !formData.altitude) {
+    return;
+  }
+
+  let newPoint = { order: points.routePoints.length, ...formData };
+  if(currentFlight.departureRunway && !currentFlight.arrivalRunway) {
+    newPoint = { order: points.routePoints.length, ...formData }
+  } else if(currentFlight.arrivalRunway && !currentFlight.departureRunway){
+    let order = points.routePoints.filter((point) => !point.isEditable).length;
+    newPoint = { order: order, ...formData };
+  } else if (points.routePoints.length >= 3 && points.routePoints.slice(0, 3).every((point) => point.isEditable === false)) {
+    newPoint = { order: points.routePoints.length, ...formData };
+  } else {
+    newPoint = { order: points.routePoints.length, ...formData };
+  }
+
+  console.log(newPoint);
+
+  try {
+    return await postFlightPointToFlight(currentFlight, newPoint, setPoint);
+  } catch (error) {
+    console.error('There was an error sending the data to the server:', error);
+  }
 };
 
 export const handlerAddFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData, airports) => {
@@ -45,7 +54,6 @@ export const handlerAddFlight = async (formData, flight, setFlight, sendingFligh
   };
   try {
     setFlight((prevFlight) => {
-      console.log(prevFlight)
       const updateFlights = [...(prevFlight.flightPlans ? prevFlight.flightPlans : prevFlight), newFlight];
       return updateFlights;
     });
@@ -62,6 +70,5 @@ export const getData = (form) => {
     for (let [name, value] of dataForm){
       data[name] = value;
     }
-    console.log(data)
     return data;
 };

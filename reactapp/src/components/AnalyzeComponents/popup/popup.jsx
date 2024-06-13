@@ -34,14 +34,15 @@ const PopupLoad = () => {
     }
     const onClickHandlerDelete = async (id, e) => {
         e.stopPropagation();
+        console.log(e)
         await axios.delete(`${ROUTE}${id}`);
         fetchData();
     }
 
     return <div className={`${styles.popup}`}>
-        <div className={`d-flex`}>
-            <div className={``}><h1 className={styles.popup__title}>Выберите сессию</h1></div>
-            <div className={`ms-auto`}><button className={styles.minus} type='button' onClick={() => onClickHandlerClose()}><img src={minus} alt='Decrease'></img></button></div>
+        <div className={`d-flex justify-content-between align-items-start`}>
+            <div className={`w-100`}><h1 className={styles.popup__title}>Выберите сессию</h1></div>
+            <button className={styles.minus} type='button' onClick={() => onClickHandlerClose()}><img src={minus} alt='Decrease'></img></button>
         </div>
         <div className={`${styles.sessionList}`}>
             {sessionList.map((s) => 

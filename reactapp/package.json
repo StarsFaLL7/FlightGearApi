@@ -25,6 +25,7 @@
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.2",
     "react-dom": "^18.2.0",
+    "react-loading": "^2.0.3",
     "react-map-gl": "^7.1.7",
     "react-redux": "^9.0.4",
     "react-router-bootstrap": "^0.26.2",
