@@ -1,14 +1,11 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { getPointsData } from '../../../../api-methods/api-methods';
+import React, { useEffect, useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import PointItem from '../../PointItem/PointItem';
 import { PointContext } from '../../context/main-context';
 
 const FlightPoints = () => {
-    //const [points, setPoints] = useState({});
 
     const {points, fetchPoints, currentFlight} = useContext(PointContext)
-    //console.log(points)
 
     useEffect(() => {
         fetchPoints();

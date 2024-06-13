@@ -10,15 +10,13 @@ import docs from '../NavItem/imgs/docs.png';
 import flightPlans from '../NavItem/imgs/flight-plans.png';
 import flightPoints from '../NavItem/imgs/flight-stages.png';
 
-import { getData, handlerAddFlight } from "../../../utils/common";
+import { getData } from "../../../utils/common";
 import { PointContext } from "../context/main-context";
 
-import PopupLoad from "../../AnalyzeComponents/popup/popup";
 import { getAirportData } from "../../../api-methods/api-methods";
 
 const NavHeader = () => {
   const [showPopoverPoints, setShowPopoverPoints] = useState(false);
-  const [showPopoverPlans, setShowPopoverPlans] = useState(false);
   const [showPopoverCurrentFlight, setShowPopoverCurrentFlight] = useState(false);
   const [selectedStartAirport, setSelectedStartAirport] = useState(null);
   const [selectedEndAirport, setSelectedEndAirport] = useState(null);
@@ -26,7 +24,7 @@ const NavHeader = () => {
   const [sendingFlightData, setSendingFlightData] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
-  const { points, flights, addFlight, airports, currentFlight } = useContext(PointContext);
+  const { addFlight, airports } = useContext(PointContext);
 
   const handleClickAddFlight = (evt) => {
     evt.preventDefault();
@@ -64,7 +62,7 @@ const NavHeader = () => {
 
   const popoverCurrentFlight = (
     <Popover id="popover-basic-current-flight">
-      <Popover.Header as="h1">Current Flight</Popover.Header>
+      <Popover.Header as="h1">Create flight</Popover.Header>
       <Popover.Body>
         {getCurForm()}
       </Popover.Body>

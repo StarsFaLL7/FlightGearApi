@@ -16,9 +16,8 @@
 }
 .popover-header{
     text-align: center;
-    -webkit-text-stroke: 1px #000000;
-    color: #ecf0f1;
-    font-size: 30px;
+    font-weight: 600;
+    font-size: 50px;
 }
 .nav-item:hover,
 .nav-item.active {
