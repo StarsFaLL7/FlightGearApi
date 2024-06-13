@@ -91,15 +91,13 @@ const MainMap = () => {
         let popup = createPopup(point, map, marker);
         marker.setPopup(popup);
 
-        /* marker.on('dragend', () => {
+        marker.on('dragend', () => {
           let newLngLat = Object.values(marker.getLngLat());
-          const index = points.routePoints.findIndex(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
-          if (index !== -1) {
-            points.routePoints[index] = { ...points.routePoints[index], longitude: newLngLat[0], latitude: newLngLat[1] };
-            setPoints({ routePoints: [...points.routePoints] });
-          }
+          const curPoint = points.routePoints.find(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
+          let formData = {...curPoint, longitude: newLngLat[0], latitude: newLngLat[1] };;
+          changePointData(formData, curPoint)
           updateLine(map, points.routePoints);
-        }); */
+        });
       });
       updateLine(map, points.routePoints);
     }

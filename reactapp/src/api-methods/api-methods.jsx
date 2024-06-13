@@ -61,9 +61,9 @@ export const handleClickDeletePoint = async (flight, props) => {
 export const putPointsData = async (flight, formData, point, setPoints, setCurrentFlight) => {
   try {
     const response = await axios.put(`${ALL_FLIGHTS_URL}/${flight.id}/points/${point.id}`, formData);
-    console.log({routePoints: response.data.flightPlan.routePoints})
+    console.log({routePoints: response.data.flightPlan.routePoints});
     point.onRemoveData();
-    setCurrentFlight(response.data.flightPlan)
+    setCurrentFlight(response.data.flightPlan);
     setPoints({routePoints: response.data.flightPlan.routePoints});
   } catch (err) {
     console.error('There was an error updating the flight data:', err);
