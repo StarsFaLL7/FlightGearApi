@@ -137,12 +137,14 @@ internal class FlightPlanService : IFlightPlanService
         point.Latitude = latitude;
         point.Altitude = altitude;
         point.Remarks = remarks;
-        await SaveRoutePointAsync(point);
+        await SaveRoutePointAsync(point, flightPlan);
     }
 
-    public async Task SaveRoutePointAsync(RoutePoint routePoint)
+    public async Task SaveRoutePointAsync(RoutePoint routePoint, FlightPlan flightPlan)
     {
         var routePointRepository = _serviceProvider.GetRequiredService<IRoutePointRepository>();
+        var flightPlanRepository = _serviceProvider.GetRequiredService<IFlightPlanRepository>();
+        await flightPlanRepository.SaveAsync(flightPlan);
         await routePointRepository.SaveAsync(routePoint);
     }
 

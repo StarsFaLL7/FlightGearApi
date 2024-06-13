@@ -43,7 +43,7 @@ public interface IFlightPlanService
     /// <summary>
     /// Обновляет существующую или создаёт новую точку плана полёта, сохраняет её в системе.
     /// </summary>
-    Task SaveRoutePointAsync(RoutePoint routePoint);
+    Task SaveRoutePointAsync(RoutePoint routePoint, FlightPlan flightPlan);
     
     /// <summary>
     /// Удаление точки маршрута у существующего плана полета
