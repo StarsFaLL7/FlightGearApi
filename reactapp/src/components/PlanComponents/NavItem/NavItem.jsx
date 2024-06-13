@@ -183,7 +183,7 @@ const NavHeader = () => {
               </a>
             </li>
             <li className="nav-item mx-2">
-              <a href="#" className="nav-link" alt="Docs" title="Docs">
+              <a href="/docs.pdf" target="_blank" className="nav-link" alt="Docs" title="Docs" >
                 <img src={docs} width="40" alt="Docs" />
               </a>
             </li>
