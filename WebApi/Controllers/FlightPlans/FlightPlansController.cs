@@ -141,6 +141,7 @@ public class FlightPlansController : Controller
     [ProducesResponseType(typeof(BasicStatusResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddRoutePointToFlightPlan([FromRoute] Guid flightPlanId, [FromBody] AddRoutePointRequest dto)
     {
+        var flightPlan = await _flightPlanService.GetAggregatedFlightPlanAsync(flightPlanId);
         var routePoint = new RoutePoint
         {
             Order = dto.Order,
@@ -151,7 +152,7 @@ public class FlightPlansController : Controller
             FlightPlanId = flightPlanId,
             Id = Guid.NewGuid()
         };
-        await _flightPlanService.SaveRoutePointAsync(routePoint);
+        await _flightPlanService.SaveRoutePointAsync(routePoint, flightPlan);
         
         var flightPlanUpdated = await _flightPlanService.GetFlightPlanWithConvertedPointsAsync(flightPlanId);
         var res = DtoConverter.ConvertAggregatedFlightPlanToResponse(flightPlanUpdated);
