@@ -2,7 +2,7 @@
 
 public class AddRoutePointRequest
 {
-    public required int Order { get; set; }
+   /*  public required int Order { get; set; } */
     
     public required double Longitude { get; set; }
     

@@ -94,8 +94,8 @@ const MainMap = () => {
         marker.on('dragend', () => {
           let newLngLat = Object.values(marker.getLngLat());
           const curPoint = points.routePoints.find(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
-          let formData = {...curPoint, longitude: newLngLat[0], latitude: newLngLat[1] };;
-          changePointData(formData, curPoint)
+          let formData = {...curPoint, longitude: newLngLat[0], latitude: newLngLat[1] };
+          changePointData(formData, {...curPoint, onRemoveData: fetchPoints})
           updateLine(map, points.routePoints);
         });
       });
