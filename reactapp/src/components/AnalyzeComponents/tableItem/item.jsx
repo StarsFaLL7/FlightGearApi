@@ -1,6 +1,5 @@
 import React from "react";
 import './item.module.css'
-import Loading from "../../DefaultsComponents/LoadingComponent/loading";
 
 import plus from '../../../assets/img/plus.png'
 import minus from '../../../assets/img/minus.png'
