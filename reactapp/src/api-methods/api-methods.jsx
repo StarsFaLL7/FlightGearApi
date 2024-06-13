@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT } from '../const/const';
+import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT, ANALYTICS } from '../const/const';
 
 export const startFlight = async (flight) => {
   flight = {title: flight.title, flightPlanId: flight.id, readsPerSecond: 10}
+  console.log(flight)
   try {
     const response = await axios.post(`${START_FLIGHT}`, flight);
     return response;
@@ -11,12 +12,32 @@ export const startFlight = async (flight) => {
   }
 };
 
-export const handleClickDeleteItem = async (props) => {  
+export const getAnalytics = async (setAnalytics) => {
+  try {
+    const response = await axios.get(`${ANALYTICS}`);
+    setAnalytics(response.data);
+    //return response.data;
+  } catch (err) {
+    console.error('There was an error getting analytics:', err);
+  }
+};
+export const getFlightAnalytics = async (analytics) => {
+  try {
+    const response = await axios.get(`${ANALYTICS}/${analytics.id}`);
+    console.log(response.data)
+    //return response;
+  } catch (err) {
+    console.error('There was an error getting the flight data analytics:', err);
+  }
+};
+
+export const handleClickDeleteItem = async (props, setCurrentFlight) => {  
   await axios
     .delete(`${ALL_FLIGHTS_URL}/${props.id}`)
     .then((response) => {
       if (response.status === 200) {
         props.onRemoveData();
+        setCurrentFlight(null)
       } else {
         console.error('Failed to delete the plan item with id:');
       }
@@ -26,7 +47,7 @@ export const handleClickDeleteItem = async (props) => {
 
 export const handleClickDeletePoint = async (flight, props) => {
   await axios
-    .delete(`${ALL_FLIGHTS_URL}/${flight.id}/points/${props.order}`)
+    .delete(`${ALL_FLIGHTS_URL}/${flight.id}/points/${props.id}`)
     .then((response) => {
       if (response.status === 200) {
         props.onRemoveData();
@@ -37,34 +58,23 @@ export const handleClickDeletePoint = async (flight, props) => {
     .catch((err) => console.error('Network or server error when attempting to delete plan item:', err))
 };
 
-export const putPointsData = async (flight, props, setPoints) => {
-  console.log(props)
+export const putPointsData = async (flight, formData, point, setPoints, setCurrentFlight) => {
   try {
-    const response = await axios.put(`${ALL_FLIGHTS_URL}/${flight.id}/points/${props.order}`, props);
+    const response = await axios.put(`${ALL_FLIGHTS_URL}/${flight.id}/points/${point.id}`, formData);
     console.log({routePoints: response.data.flightPlan.routePoints})
+    point.onRemoveData();
+    setCurrentFlight(response.data.flightPlan)
     setPoints({routePoints: response.data.flightPlan.routePoints});
   } catch (err) {
     console.error('There was an error updating the flight data:', err);
   }
-  /* await axios
-    .put(`${ALL_FLIGHTS_URL}/${flight.id}/points/${props.order}`, props)
-    .then((response) => {
-      console.log(response)
-      if (response.status === 200) {
-        setPoints({routePoints: response.data.flightPlan.routePoints});
-        //console.log({routePoints: response.data.flightPlan.routePoints})
-      } else {
-        console.error('Failed to delete the plan item with id:');
-      }
-    })
-    .catch((err) => console.error('Network or server error when attempting to delete plan item:', err)) */
 };
 
 export const getPointsData = async (setPoints, flight) => {
     try {
       await axios
         .get(`${ALL_FLIGHTS_URL}/${flight.id}/points`)
-        .then((response) => {console.log(response);setPoints(response.data)})
+        .then((response) => {setPoints({routePoints: response.data.routePoints.sort((a, b) => a < b)})})
     } catch (err) {
       console.error('There was an error fetching the data:', err)
     } 
@@ -104,7 +114,8 @@ export const postFlightPointToFlight = async (flight, point, setPoint) => {
 
     if (response.status === 200) {
       const responseData = response.data;
-      setPoint({routePoints: responseData.flightPlan.routePoints});
+      console.log(responseData)
+      setPoint({routePoints: responseData.flightPlan.routePoints.sort((a, b) => a < b)});
       return responseData.flightPlan;
     } else {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -156,6 +167,17 @@ export const getAirports = async (setAirports) => {
   } catch (err) {
     console.error('There was an error updating the flight data:', err);
     setAirports(null);
+  }
+};
+
+export const getAirportData = async (currentAirport, setCurrentAirport) => {
+  try {
+    const response = await axios.get(`${AIRPORTS_URL}/${currentAirport.id}`);
+    console.log(response.data)
+    setCurrentAirport(response.data);
+  } catch (err) {
+    console.error('There was an error setting current airport:', err);
+    setCurrentAirport(null);
   }
 };
 

@@ -6,27 +6,30 @@ import RefreshButtonComponent from '../../components/AnalyzeComponents/refreshBu
 import ChangeSession from '../../components/AnalyzeComponents/changeSession/changeSession';
 import NavHeader from '../../components/PlanComponents/NavItem/NavItem';
 import "../../../node_modules/bootstrap/dist/css/bootstrap.css";
+import { PointsContext } from '../../components/PlanComponents/context/main-context';
 
 function Analyze() {
   return <>
-  <div className="Analyze">
-    <div className={`header`}>
-      <NavHeader/>
-    </div>
-    <div className='dark__content'>
-      <PopupLoad />
-    </div>
-    <aside>
-      <Table />
-    </aside>
-    <main className='main__analyze'>
-      <div className='buttons'>
-        <ChangeSession />
-        <RefreshButtonComponent />
+  <PointsContext>
+    <div className="Analyze">
+      <div className={`header`}>
+        <NavHeader/>
       </div>
-      <ChartComponent />
-      </main>
-    </div>
+      <div className='dark__content'>
+        <PopupLoad />
+      </div>
+      <aside>
+        <Table />
+      </aside>
+      <main className='main__analyze'>
+        <div className='buttons'>
+          <ChangeSession />
+          <RefreshButtonComponent />
+        </div>
+        <ChartComponent />
+        </main>
+      </div>
+    </PointsContext>
   </>;
 }
 

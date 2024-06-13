@@ -3,17 +3,37 @@
     opacity: 0.9;
     width: 100%;
 }
+
 .bg-not-light {
    background-color: #d4d4d4;
-
 }
-#popover-basic {
+
+#popover-basic-flights {
     min-width: 500px;
 }
-
+#popover-basic-current-flight {
+    min-width: 500px;
+}
 .popover-header{
     text-align: center;
     -webkit-text-stroke: 1px #000000;
     color: #ecf0f1;
     font-size: 30px;
+}
+.nav-item:hover,
+.nav-item.active {
+    transform: translateY(4px);
+}
+.nav-item:active {
+    transform: translateY(4px);
+}
+
+#popover-basic-flights .popover-body {
+    max-height: 720px;
+    overflow: hidden;
+    overflow: scroll;
+    overflow-x:hidden;
+}
+#popover-basic-flights .popover-body::-webkit-scrollbar {
+    display: none;
 }

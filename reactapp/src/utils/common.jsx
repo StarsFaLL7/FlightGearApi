@@ -12,45 +12,33 @@ const clearForm = () => {
     form.querySelector('textarea[name=remarks]').value = '';
 }
 // sendingData, setSendingData
-export const handlerAddPoint = async (formData, point, setPoint, sendingPointData, setSendingPointData, currentFlight) => {
-  console.log(currentFlight)
-    if (!formData.longitude || !formData.latitude || !formData.altitude) { return; }
-    const newPoint = { order: point.length, ...formData };
+export const handlerAddPoint = async (formData, points, setPoint, sendingPointData, setSendingPointData, currentFlight) => {
+  console.log(currentFlight);
+  console.log(points);
 
-    /* setPoint((prevPoints) => {
-      console.log(prevPoints) 
-      const updatePoints = [...prevPoints.routePoints, newPoint];
-      return updatePoints;
-    }); */
+  if (!formData.longitude || !formData.latitude || !formData.altitude) {
+    return;
+  }
 
-    try {
-      return await postFlightPointToFlight(currentFlight, newPoint, setPoint);
-    } catch (error) {
-      // Handle any errors that occur during the fetch
-      console.error('There was an error sending the data to the server:', error);
-    }
-    //clearForm();
-};
+  let newPoint = { order: points.routePoints.length, ...formData };
+  if(currentFlight.departureRunway && !currentFlight.arrivalRunway) {
+    newPoint = { order: points.routePoints.length, ...formData }
+  } else if(currentFlight.arrivalRunway && !currentFlight.departureRunway){
+    let order = points.routePoints.filter((point) => !point.isEditable).length;
+    newPoint = { order: order, ...formData };
+  } else if (points.routePoints.length >= 3 && points.routePoints.slice(0, 3).every((point) => point.isEditable === false)) {
+    newPoint = { order: points.routePoints.length, ...formData };
+  } else {
+    newPoint = { order: points.routePoints.length, ...formData };
+  }
 
-export const handlerSetCurrentFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData) => {
-  /* console.log(formData)
-  if (!formData.title) { return; }
-  if(formData.departureRunwayId === "") { formData.departureRunwayId = null; }
-  if(formData.arrivalRunwayId === "") { formData.arrivalRunwayId = null; }
-  const newFlight = { ...formData };
+  console.log(newPoint);
 
   try {
-    const response = await postFlightPointToFlight(newFlight, sendingFlightData, setSendingFlightData);
-
-    setFlight((prevPoint) => { 
-      prevPoint = response.data;
-      console.log(prevPoint)
-    });
-    return response;
+    return await postFlightPointToFlight(currentFlight, newPoint, setPoint);
   } catch (error) {
     console.error('There was an error sending the data to the server:', error);
   }
-  clearForm(); */
 };
 
 export const handlerAddFlight = async (formData, flight, setFlight, sendingFlightData, setSendingFlightData, airports) => {
@@ -66,7 +54,6 @@ export const handlerAddFlight = async (formData, flight, setFlight, sendingFligh
   };
   try {
     setFlight((prevFlight) => {
-      console.log(prevFlight)
       const updateFlights = [...(prevFlight.flightPlans ? prevFlight.flightPlans : prevFlight), newFlight];
       return updateFlights;
     });
@@ -83,6 +70,5 @@ export const getData = (form) => {
     for (let [name, value] of dataForm){
       data[name] = value;
     }
-    console.log(data)
     return data;
 };

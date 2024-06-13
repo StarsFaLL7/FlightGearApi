@@ -45,6 +45,8 @@
   text-align: center;
   color: #222;
   background: transparent;
+  backdrop-filter: blur(5px);
+  
 }
 
 .maplibregl-popup-close-button{
@@ -60,4 +62,8 @@
 }
 .popover-item p {
   width: 100%;
+}
+textarea {
+  min-width: 150px;
+  max-height: 150px;
 }

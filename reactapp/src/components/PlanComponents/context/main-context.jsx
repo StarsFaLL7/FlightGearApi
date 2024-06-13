@@ -1,5 +1,5 @@
 import React, { useEffect, useState, createContext } from "react"
-import { getFlightData, getPointsData, getPlanData, getAirports, putPointsData } from "../../../api-methods/api-methods";
+import { getFlightData, getPointsData, getPlanData, getAirports, putPointsData, getAnalytics } from "../../../api-methods/api-methods";
 import { handlerAddFlight, handlerAddPoint } from "../../../utils/common";
 
 export const PointContext = createContext();
@@ -10,9 +10,9 @@ export const PointsContext = ({children}) => {
     const [flights, setFlights] = useState([]);
     const [airports, setAirports] = useState([]);
     const [currentFlight, setCurrentFlight] = useState(null);
+    const [analytics, setAnalytics] = useState(null)
 
     const fetchPoints = async () => {
-        //console.log(currentFlight)
         await getPointsData(setPoints, currentFlight);
     };
 
@@ -25,16 +25,19 @@ export const PointsContext = ({children}) => {
     };
 
     const fetchCurrentFlight = async (id) => {
-        //console.log(id)
         await getFlightData(id, setCurrentFlight);
     };
 
     const getCurrentFlightById = async (id) => {
         await fetchCurrentFlight(id);
-        //setCurrentFlight(id);
+    };
+
+    const fetchAnalytics = async () => {
+        await getAnalytics(setAnalytics);
     };
 
     useEffect(() => {
+        fetchAnalytics();
         fetchFlights();
         fetchAirports();
     }, []);
@@ -46,8 +49,8 @@ export const PointsContext = ({children}) => {
     const addPoint = async (formData, sendingPointData, setSendingPointData, currentFlight) => {
         await handlerAddPoint(formData, points, setPoints, sendingPointData, setSendingPointData, currentFlight);
     };
-    const changePointData = async(data) => {
-        await putPointsData(currentFlight, data, setPoints);
+    const changePointData = async (formData, point) => {
+        await putPointsData(currentFlight, formData, point, setPoints, setCurrentFlight);
     };
 
     return (
@@ -55,7 +58,8 @@ export const PointsContext = ({children}) => {
             points, 
             airports, 
             currentFlight,
-            flights, 
+            flights,
+            analytics, 
             setCurrentFlight, 
             addPoint, 
             fetchPoints, 
