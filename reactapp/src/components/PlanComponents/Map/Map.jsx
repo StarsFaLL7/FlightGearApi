@@ -93,6 +93,11 @@ const MainMap = () => {
 
         marker.on('dragend', () => {
           let newLngLat = Object.values(marker.getLngLat());
+          const index = points.routePoints.findIndex(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
+          if (index !== -1) {
+            points.routePoints[index] = { ...points.routePoints[index], longitude: newLngLat[0], latitude: newLngLat[1] };
+            setPoints({ routePoints: [...points.routePoints] });
+          }
           const curPoint = points.routePoints.find(coord => coord.longitude === point.longitude && coord.latitude === point.latitude);
           let formData = {...curPoint, longitude: newLngLat[0], latitude: newLngLat[1] };;
           changePointData(formData, curPoint)
