@@ -67,7 +67,7 @@ internal class FlightPlanService : IFlightPlanService
             }
         }
 
-        foreach (var userPoint in flightPlan.RoutePoints)
+        foreach (var userPoint in flightPlan.RoutePoints.OrderBy(p => p.Order))
         {
             result.RoutePoints.Add(new RoutePointWithIsEditableProperty
             {
@@ -163,16 +163,13 @@ internal class FlightPlanService : IFlightPlanService
         {
             throw new Exception("Точки маршрута с указанным id нет в данном плане полёта.");
         }
-        flightPlan.RoutePoints.Remove(point);
-        var order = 0;
-        foreach (var planPoint in flightPlan.RoutePoints)
+        foreach (var planPoint in flightPlan.RoutePoints.Where(p => p.Order > point.Order))
         {
-            planPoint.Order = order;
-            order++;
+            planPoint.Order -= 1;
             await routePointRepository.SaveAsync(planPoint);
         }
+        flightPlan.RoutePoints.Remove(point);
         await flightPlanRepository.SaveAsync(flightPlan);
-        
     }
 
     public async Task RemoveDepartureRunwayFromFlightPlansByRunwayId(Guid runwayId)
