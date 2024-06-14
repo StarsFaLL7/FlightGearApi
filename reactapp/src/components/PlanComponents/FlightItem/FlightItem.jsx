@@ -20,6 +20,7 @@ const FlightItem = (props) => {
     const [selectedStartAirport, setSelectedStartAirport] = useState(null);
     const [selectedEndAirport, setSelectedEndAirport] = useState(null);
     const [status, setStatus] = useState(null);
+    const [startButtonText, setStartButtonText] = useState('Start');
 
     const { airports, currentFlight, setCurrentFlight, getCurrentFlightById, fetchFlights } = useContext(PointContext);
     const isOpen = currentFlight && currentFlight.id === props.id;
@@ -66,12 +67,14 @@ const FlightItem = (props) => {
 
     const startFlightSimulation = async (evt) => {
         evt.preventDefault();
+        setStartButtonText('Starting...');
         try {
             await startFlight(currentFlight);
             setError(null);
             setStatus({ status: 'In Progress' });
         } catch (err) {
             setError('Failed to start flight simulation.');
+            setStartButtonText('Start');
         }
     };
 
@@ -92,7 +95,7 @@ const FlightItem = (props) => {
                 getFlightStatus(setStatus);
             }, 500);
         }
-        return () => clearInterval(timer);
+        return () => { clearInterval(timer); setStartButtonText('Start'); };
     }, [status]);
 
     const isButtonDisabled = status !== null;
@@ -179,8 +182,8 @@ const FlightItem = (props) => {
                         <div className={`d-flex block-btns`}>
                             <div>
                                 <button className="m-1 btn save-flight btn-primary text-light" type="button" onClick={saveFlight}>Save</button>
-                                <button className={`m-1 btn delete-flight btn-primary text-light ${isButtonDisabled ? 'disabled' : ''}`} type="button" onClick={startFlightSimulation}>{status ? `${status.status}...` : 'Start'}</button>
-                                {status && <button className={`m-1 btn delete-flight btn-danger text-light`} type="button" onClick={() => endFlight(setStatus)}>Exit</button>}
+                                <button className={`m-1 btn delete-flight btn-primary text-light ${isButtonDisabled || startButtonText === 'Starting...' ? 'disabled' : ''}`} type="button" onClick={startFlightSimulation}>{status ? `${status.status}...` : startButtonText}</button>
+                                {status && <button className={`m-1 btn delete-flight btn-danger text-light`} type="button" onClick={() => endFlight(setStatus, setStartButtonText)}>Exit</button>}
                                 <button className="m-1 btn delete-flight btn-secondary text-light" type="button" onClick={() => { handleClickDeleteItem(props, setCurrentFlight); }}>Delete</button>
                             </div>
                             <button className='btn' type='button' onClick={() => setCurrentFlight(null)}>
