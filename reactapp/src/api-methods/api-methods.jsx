@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT, ANALYTICS } from '../const/const';
+import { SERVER_URL, ALL_FLIGHTS_URL, AIRPORTS_URL, START_FLIGHT, ANALYTICS, STATUS, EXIT_FLIGHT } from '../const/const';
 
 export const startFlight = async (flight) => {
   flight = {title: flight.title, flightPlanId: flight.id, readsPerSecond: 10}
@@ -12,11 +12,32 @@ export const startFlight = async (flight) => {
   }
 };
 
+export const endFlight = async (setStatus) => {
+  try {
+    const response = await axios.post(`${EXIT_FLIGHT}`);
+    setStatus(response.data)
+    console.log(response);
+  } catch (err) {
+    console.error('There is no any started session:', err);
+  }
+};
+
+export const getFlightStatus = async (setStatus) => {
+  try{
+    const response = await axios.get(STATUS);
+    setStatus(response.data);
+    console.log(response.data);
+  } catch {
+    setStatus(null);
+  }
+}
+
+
+
 export const getAnalytics = async (setAnalytics) => {
   try {
     const response = await axios.get(`${ANALYTICS}`);
     setAnalytics(response.data);
-    //return response.data;
   } catch (err) {
     console.error('There was an error getting analytics:', err);
   }
@@ -25,7 +46,6 @@ export const getFlightAnalytics = async (analytics) => {
   try {
     const response = await axios.get(`${ANALYTICS}/${analytics.id}`);
     console.log(response.data)
-    //return response;
   } catch (err) {
     console.error('There was an error getting the flight data analytics:', err);
   }
@@ -37,7 +57,6 @@ export const handleClickDeleteItem = async (props, setCurrentFlight) => {
     .then((response) => {
       if (response.status === 200) {
         props.onRemoveData();
-        setCurrentFlight(null)
       } else {
         console.error('Failed to delete the plan item with id:');
       }
@@ -103,12 +122,11 @@ export const sendFlightDataToServer = async (body, sendingData, setSendingData) 
     }
   } catch (error) {
     console.error('There was an error sending the data to the server:', error);
-    throw error; // Выбрасываем ошибку, чтобы вызывающий код мог обработать ее
+    throw error;
   }
 };
 
 export const postFlightPointToFlight = async (flight, point, setPoint) => {
-  //console.log(flight)
   try {
     const response = await axios.post(`${ALL_FLIGHTS_URL}/${flight.id}/points`, point);
 
@@ -125,17 +143,6 @@ export const postFlightPointToFlight = async (flight, point, setPoint) => {
     throw error;
   }
 };
-
-
-/* export const getAllflightsData = async (setPlan) => {
-  try {
-    await axios
-      .get(ALL_FLIGHTS_URL)
-      .then((response) => {setPlan(response.data); console.log(setPlan(response.data))})
-  } catch (err) {
-    console.error('There was an error fetching the data:', err)
-  }
-}; */
 
 export const getFlightData = async (flight, setCurFlight) => {
   try {

@@ -1,21 +1,15 @@
-import React, {useState, useEffect, useContext} from "react";
-import { getPlanData, getFlightData } from "../../../../api-methods/api-methods";
+import React, { useEffect, useContext } from "react";
 import FlightItem from "../../FlightItem/FlightItem";
 import { PointContext } from "../../context/main-context";
 
 const PlanPoints = () => {
 
-  //const [flights, setFlights] = useState({});
-  //const [openFlightId, setOpenFlightId] = useState(null);
-  const {flights, setFlights, setCurrentFlight, currentFlight, fetchFlights} = useContext(PointContext);
+  const { flights, fetchFlights } = useContext(PointContext);
 
   useEffect(() => { fetchFlights(); },[]);
-  /* const handleFormToggle = (id) => {
-    setOpenFlightId(prevId => (prevId === id ? null : id));
-    console.log(id)
-  }; */
 
   const onRemoveData = async () => { await fetchFlights(); }
+  
   return (
     <>
       <div className={`row`}>
@@ -31,8 +25,6 @@ const PlanPoints = () => {
               departureRunwayId={element.departureRunwayId}
               arrivalRunwayId={element.arrivalRunwayId}
               onRemoveData={onRemoveData}
-              //openFlightId={openFlightId}
-              //handleFormToggle={handleFormToggle}
               />   
           )}
         </div>

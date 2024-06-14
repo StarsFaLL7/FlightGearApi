@@ -3,11 +3,8 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '../Map/Map.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import * as turf from '@turf/turf';
 import { getData } from "../../../utils/common";
 import { PointContext } from '../context/main-context';
-import markerIcon from '../../../imgs/direction_continue.png';
-import arrowIcon from '../../../imgs/direction_continue.png';
 import { handleClickDeletePoint } from '../../../api-methods/api-methods';
 
 const MainMap = () => {
@@ -109,16 +106,6 @@ const MainMap = () => {
 
   function updateLine(map, coordinates) {
     const coords = coordinates.map(coord => [coord.longitude, coord.latitude]);
-  
-    // Calculate midpoints between each pair of consecutive coordinates
-    const midpoints = [];
-    for (let i = 0; i < coordinates.length - 1; i++) {
-      const start = coordinates[i];
-      const end = coordinates[i + 1];
-      const midpoint = [(start.longitude + end.longitude) / 2, (start.latitude + end.latitude) / 2];
-      midpoints.push(midpoint);
-    }
-
     if (map.getSource('line')) {
       map.getSource('line').setData({
         type: 'Feature',
@@ -138,7 +125,7 @@ const MainMap = () => {
           },
         },
       });
-  
+
       map.addLayer({
         id: 'line',
         type: 'line',
@@ -153,60 +140,6 @@ const MainMap = () => {
           'line-opacity': 0.7,
         },
       });
-  
-      // Load arrow image
-      map.loadImage(arrowIcon, function(error, arrowImage) {
-        if (error) throw error;
-        
-        // Add arrow image to map's style
-        map.addImage('arrow-icon', arrowImage);
-    
-        // Add symbol layer for arrows at midpoints
-        map.addLayer({
-          id: 'arrow-layer',
-          type: 'symbol',
-          source: 'line',
-          layout: {
-            'symbol-placement': 'point',
-            'icon-image': 'arrow-icon',
-            'icon-size': 0.5,
-            'icon-rotate': ['get', 'rotation'],
-            'icon-rotation-alignment': 'map',
-            'icon-allow-overlap': true, // Allow symbols to overlap
-          },
-          paint: {
-            'icon-opacity': 0.8
-          },
-          // Filter to show only at midpoints
-          filter: ['in', '$type', 'Point']
-        });
-      });
-  
-      // Load marker image
-      map.loadImage(markerIcon, function(error, markerImage) {
-        if (error) throw error;
-        
-        // Add marker image to map's style
-        map.addImage('marker-icon', markerImage);
-    
-        // Add symbol layer for markers at midpoints
-        map.addLayer({
-          id: 'marker-layer',
-          type: 'symbol',
-          source: 'line',
-          layout: {
-            'symbol-placement': 'point',
-            'icon-image': 'marker-icon',
-            'icon-size': 1.0,
-            'icon-allow-overlap': true, // Allow symbols to overlap
-          },
-          paint: {
-            'icon-opacity': 1.0
-          },
-          // Filter to show only at midpoints
-          filter: ['in', '$type', 'Point']
-        });
-      });
     }
   }
 
@@ -219,8 +152,11 @@ const MainMap = () => {
   function createPopup(data, map, marker) {
     let popupContent = document.createElement('div');
     popupContent.innerHTML = `
-    <form class='w-100 bg-light rounded-4' id="form" method='POST' enctype="application/json">
+    <form class='w-100 rounded-4' id="form" method='POST' enctype="application/json">
       <ul class='w-100 list-unstyled justify-items-center'>
+        <li class='popover-item popover-item-order m-auto justify-self-center px-2'>
+          <p class='fs-6 w-auto form-control rounded-circle'>${data && data.order}</p>
+        </li>
         <li class='popover-item justify-self-center px-2'>
           <p class='fs-6 form-control'>Longitude: ${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}</p>
           <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}' type="number" name="longitude" required/>
@@ -233,7 +169,7 @@ const MainMap = () => {
           <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
           <input class='form-control ms-auto' type="number" name="altitude" ${data.isEditable ? '' : 'readonly'} value="${data.altitude !== undefined ? data.altitude : 500}" required/>
         </li>
-        <li class='popover-item form-control d-flex align-items-center mb-3'>
+        <li class='popover-item popover-item-remarks form-control d-flex align-items-center mb-3'>
           <p class='fs-6 pb-0 mb-0'>Remarks:</p>
           <textarea class='form-control ms-auto' type="text" ${data.isEditable ? '' : 'readonly'} name="remarks">${data.remarks !== undefined ? data.remarks : ""}</textarea>
         </li> 

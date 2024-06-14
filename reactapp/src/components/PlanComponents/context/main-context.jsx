@@ -10,7 +10,7 @@ export const PointsContext = ({children}) => {
     const [flights, setFlights] = useState([]);
     const [airports, setAirports] = useState([]);
     const [currentFlight, setCurrentFlight] = useState(null);
-    const [analytics, setAnalytics] = useState(null)
+    const [analytics, setAnalytics] = useState(null);
 
     const fetchPoints = async () => {
         await getPointsData(setPoints, currentFlight);
