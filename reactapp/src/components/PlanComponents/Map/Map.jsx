@@ -152,7 +152,7 @@ const MainMap = () => {
   function createPopup(data, map, marker) {
     let popupContent = document.createElement('div');
     popupContent.innerHTML = `
-    <form class='w-100 bg-light rounded-4' id="form" method='POST' enctype="application/json">
+    <form class='w-100 rounded-4' id="form" method='POST' enctype="application/json">
       <ul class='w-100 list-unstyled justify-items-center'>
         <li class='popover-item justify-self-center px-2'>
           <p class='fs-6 form-control'>Longitude: ${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}</p>
@@ -166,7 +166,7 @@ const MainMap = () => {
           <p class='fs-6 pb-0 mb-0'>Altitude(m):</p>
           <input class='form-control ms-auto' type="number" name="altitude" ${data.isEditable ? '' : 'readonly'} value="${data.altitude !== undefined ? data.altitude : 500}" required/>
         </li>
-        <li class='popover-item form-control d-flex align-items-center mb-3'>
+        <li class='popover-item popover-item-remarks form-control d-flex align-items-center mb-3'>
           <p class='fs-6 pb-0 mb-0'>Remarks:</p>
           <textarea class='form-control ms-auto' type="text" ${data.isEditable ? '' : 'readonly'} name="remarks">${data.remarks !== undefined ? data.remarks : ""}</textarea>
         </li> 

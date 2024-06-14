@@ -60,3 +60,6 @@ textarea {
   min-width: 150px;
   max-height: 150px;
 }
+.maplibregl-popup-content {
+  width: 300px;
+}
