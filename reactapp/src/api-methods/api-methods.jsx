@@ -12,11 +12,11 @@ export const startFlight = async (flight) => {
   }
 };
 
-export const endFlight = async (setStatus) => {
+export const endFlight = async (setStatus, setStartButtonText) => {
   try {
     const response = await axios.post(`${EXIT_FLIGHT}`);
     setStatus(response.data)
-    console.log(response);
+    setStartButtonText('Start')
   } catch (err) {
     console.error('There is no any started session:', err);
   }
