@@ -154,6 +154,9 @@ const MainMap = () => {
     popupContent.innerHTML = `
     <form class='w-100 rounded-4' id="form" method='POST' enctype="application/json">
       <ul class='w-100 list-unstyled justify-items-center'>
+        <li class='popover-item popover-item-order m-auto justify-self-center px-2'>
+          <p class='fs-6 w-auto form-control rounded-circle'>${data && data.order}</p>
+        </li>
         <li class='popover-item justify-self-center px-2'>
           <p class='fs-6 form-control'>Longitude: ${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}</p>
           <input class='hidden form-control ms-auto' value='${data.lngLat !== undefined ? data.lngLat.lng : data.longitude}' type="number" name="longitude" required/>

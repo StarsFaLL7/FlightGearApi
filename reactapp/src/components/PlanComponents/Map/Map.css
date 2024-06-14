@@ -63,3 +63,6 @@ textarea {
 .maplibregl-popup-content {
   width: 300px;
 }
+.popover-item-order {
+  width: 54px;
+}

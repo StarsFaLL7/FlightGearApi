@@ -24,7 +24,7 @@ function Table() {
     return <table>
         <thead>
             <tr>
-                <th>Параметры</th>  
+                <th className={`fs-1`}>Параметры</th>  
             </tr>
         </thead>
         <tbody>
