@@ -42,3 +42,7 @@ aside {
 .hidden {
   display: none !important ;
 }
+
+html {
+  background-color: 	rgba(148,193,225);
+}
