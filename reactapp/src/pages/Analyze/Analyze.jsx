@@ -11,23 +11,25 @@ import { PointsContext } from '../../components/PlanComponents/context/main-cont
 function Analyze() {
   return <>
   <PointsContext>
-    <div className="Analyze">
-      <div className={`header`}>
-        <NavHeader/>
-      </div>
-      <div className='dark__content'>
-        <PopupLoad />
-      </div>
-      <aside>
-        <Table />
-      </aside>
-      <main className='main__analyze'>
-        <div className='buttons'>
-          <ChangeSession />
-          <RefreshButtonComponent />
+    <div className={`header`}>
+      <NavHeader/>
+    </div>
+    <div className="Analyze ">
+      <div className='body'>
+        <div className='dark__content'>
+          <PopupLoad />
         </div>
-        <ChartComponent />
-        </main>
+        <aside>
+          <Table />
+        </aside>
+        <main className='main__analyze'>
+          <div className='buttons'>
+            <ChangeSession />
+            <RefreshButtonComponent />
+          </div>
+          <ChartComponent />
+          </main>
+        </div>
       </div>
     </PointsContext>
   </>;

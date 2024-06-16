@@ -5,10 +5,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: url("./assets/img/bg_image.jpg");
   background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
+}
+
+.root {
+  background-color: rgb(119, 119, 241);
 }
 
 code {
